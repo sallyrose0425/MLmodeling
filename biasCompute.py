@@ -1,5 +1,3 @@
-
-
 from numba import njit
 import numpy as np
 
@@ -41,27 +39,5 @@ def aveBias(validPos_List,
     return np.round(result,3)
 
 ###############################################################################
-    
-n = 100
-
-numValid = 200
-numTrain = 800
-
-numPos = 500
-numNeg = numTrain + numValid - numPos
-
-p = 10**2
-validPosList = np.array(range(0,1*p))
-validNegList = np.array(range(1*p,2*p))
-trainPosList = np.array(range(2*p,6*p))
-trainNegList = np.array(range(6*p,10*p))
-    
-distanceMatrix_tmp = np.random.randint(n+1, size=(10*p, 10*p))
-
-
-aveBias(validPosList,
-      validNegList,
-      trainPosList,
-      trainNegList)
         
 
