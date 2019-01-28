@@ -1,17 +1,6 @@
 
-import numpy as np
 from rdkit import Chem 
 from rdkit.Chem import AllChem
-
-from sklearn.base import BaseEstimator, TransformerMixin
-import pandas as pd
-import scipy
-
-from sklearn.metrics import jaccard_similarity_score
-from sklearn.pipeline import make_pipeline, make_union
-
-from sklearn.preprocessing import MinMaxScaler
-min_max_scaler = MinMaxScaler()
 
 ######################################################
 
@@ -27,9 +16,6 @@ class ligand:
             self.mol = Chem.MolFromSmiles(smilesString)
         except:
             raise Exception('Invalid SMILES')
-        # embed molecule in 3D (rdkit recommends adding/removing hydrogens)
-        if self.mol is not None:
-            Chem.AddHs(self.mol)
 
     def fingerprint(self, radius = 2):
         '''Method for computing Morgan fingerprint.
