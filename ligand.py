@@ -1,6 +1,7 @@
 
 from rdkit import Chem 
 from rdkit.Chem import AllChem
+import numpy as np
 
 ######################################################
 
@@ -16,6 +17,9 @@ class ligand:
             self.mol = Chem.MolFromSmiles(smilesString)
         except:
             raise Exception('Invalid SMILES')
+        # embed molecule in 3D (rdkit recommends adding/removing hydrogens)
+        if self.mol is not None:
+            Chem.AddHs(self.mol)
 
     def fingerprint(self, radius = 2):
         '''Method for computing Morgan fingerprint.
@@ -28,5 +32,5 @@ class ligand:
         F = Chem.rdMolDescriptors.GetMorganFingerprintAsBitVect(self.mol,
                                                                 radius)
         # Return list of ints 0/1
-        return [int(f) for f in F.ToBitString()]
+        return tuple([int(f) for f in F.ToBitString()])
         
