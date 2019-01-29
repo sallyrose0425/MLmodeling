@@ -5,15 +5,15 @@ import pandas as pd
 
 ###############################################################################
 # Ligands
-from ligand import *
+import ligand
 
 smilesStrings = pd.read_csv('Smiles.csv',
                             delimiter=',').values.flatten().tolist()
 smilesStrings = [s.replace('\n','') for s in smilesStrings if type(s)==str]
 smilesSeries = pd.Series(smilesStrings, index = smilesStrings)
-ligands = smilesSeries.apply(ligand)
+ligands = smilesSeries.apply(ligand.ligand)
 badSmiles = ligands.apply(lambda x: x.mol is None)
-ligands = ligands.drop(index = L[badSmiles].index)
+ligands = ligands.drop(index = ligands[badSmiles].index)
 
 ###############################################################################
 # Fingerprints
@@ -31,7 +31,7 @@ fingerprintSimilarity = pairwise_distances(fingerprints,
                                            n_jobs=-1)
 
 #Tanimoto
-from tanimoto import *
-feat = similarityFeatures()
+import tanimoto
+feat = tanimoto.similarityFeatures()
 feat.fit(fingerprints.values)
 fingerprintSimilarity = feat.transform(fingerprints.values)
