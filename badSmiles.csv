@@ -1,0 +1,19 @@
+1,0
+"[H][N]1([H])[C@@H]2CCCC[C@H]2[N]([H])([H])[Pt]11OC(=O)C(=O)O1
+
+",Bad SMILES (None-type)
+,Bad SMILES
+"O=C1[O-][Gd+3]234567[O]=C(C[N]2(CC[N]3(CC([O-]4)=O)CC[N]5(CC(=[O]6)NC)CC(=O)[O-]7)C1)NC
+
+",Bad SMILES (None-type)
+,Bad SMILES
+"[H][N]([H])([H])[Pt]1(OCC(=O)O1)[N]([H])([H])[H]
+
+",Bad SMILES (None-type)
+,Bad SMILES
+,Bad SMILES
+,Bad SMILES
+,Bad SMILES
+"OC1=CC=CC(=C1)C-1=C2\CCC(=N2)\C(=C2/N\C(\C=C2)=C(/C2=N/C(/C=C2)=C(\C2=CC=C\-1N2)C1=CC(O)=CC=C1)C1=CC(O)=CC=C1)\C1=CC(O)=CC=C1
+
+",Bad SMILES (None-type)
