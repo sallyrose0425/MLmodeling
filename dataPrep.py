@@ -18,7 +18,7 @@ import dataBias
 #Set parameters
 parallel = True
 sample = True
-timeLimit = 60 #(60) seconds
+timeLimit = 15 #(60) seconds
 sizeBound = 15100
 ratio = 0.8
 
