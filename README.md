@@ -40,7 +40,7 @@ If the distance matrix has already been computed, the script loads it and procee
 
 Example:
 ```
-  $ python dataPrep.py dekois
+  $ python -m scoop dataPrep.py dekois
   Current target: 17betaHSD1 (1 of 81)
   Computing decoy fingerprints...
   Computing active fingerprints...
