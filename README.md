@@ -54,7 +54,7 @@ Example:
 ```
 
 
-'bias_analysis.py'
+### 'bias_analysis.py'
 Some analysis tasks are automated in order to reproduce results presented in the paper.
 Running the script for a data set:
 
@@ -63,12 +63,13 @@ Running the script for a data set:
   - plots the aggregated standardized scores over all targets
   
 Example:
+```
   $ python bias_analysis.py dekois
+```
   
   
-#######################
 
-'modelCorrelation.py'
+### 'modelCorrelation.py'
 We train a random forest regressor for each data split in the sample (produced by dataPrep.py) and record the AUC score.
 We standardize the AUC and VE scores for each target (across all of the splits for that target), and aggregate them.
 
@@ -80,26 +81,24 @@ Running the script for a data set:
   - plots the (aggregated standardized) AUC scores against the VE scores. 
   
 Example:
+```
   $ python modelCorrelation.py dekois
+```
   
-  
-#######################
 
-'genSplitOpt.py'
+
+### 'genSplitOpt.py'
 We use the DEAP evolutionary algorithm package to produce a minimum VE score split for each target in the data set.
 Running the script for a data set:
 
   - 
-  
+
 Example:
+```
   $ python genSplitOpt.py dekois
+```
   
-  
-
-#######################
-The dataBias module:
-#######################
-
+## The dataBias module:
 
 The dataPrep.py script creates a data_set class instance from the data of each target.
 
