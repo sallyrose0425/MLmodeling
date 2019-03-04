@@ -1,30 +1,30 @@
 # MLmodeling
 
-##Assumed File Structure:
+## Assumed File Structure:
 
 
 These scripts assume they are in a folder containing folders named 'MUV', 'dekois', and 'DUDE'.
 They further assume the following:
 
-###MUV
+### MUV
 For each target 'target_id', actives are stored in a file 'target_id_actives.sdf.gz',
 decoys in 'target_id_decoys.sdf.gz'
 
-###dekois
+### dekois
 Actives are stored in a folder named 'ligands', and decoys in a folder named 'decoys'.
 For each target 'target_id', actives are stored in a file 'target_id.sdf.gz',
 decoys in 'target_id__Celling-v1.12_decoyset.sdf.gz'
 
-###DUDE
+### DUDE
 Active and decoys are stored in files named 'target_id'.
 Within each target's folder, the data is stored in '/actives_final.sdf.gz' and '/decoys_final.sdf.gz'.
 
 
-##Usage:
+## Usage:
 
 
 
-###'dataPrep.py'
+### 'dataPrep.py'
 The preliminary computations are performed on a per-dataset basis by the file 'dataPrep.py'. 
 By default, running the script outputs pickle files (into the dataset folder) for each target data set:
 
@@ -39,7 +39,7 @@ By default, running the script outputs pickle files (into the dataset folder) fo
 If the distance matrix has already been computed, the script loads it and proceedes to sampling.
 
 Example:
-'''
+```
   $ python dataPrep.py dekois
   Current target: 17betaHSD1 (1 of 81)
   Computing decoy fingerprints...
@@ -51,7 +51,7 @@ Example:
   Saved: /DataSets/dekois/17betaHSD1_samples.pkl
   Current target: A2A (2 of 81)
   ...
-'''
+```
 
 
 'bias_analysis.py'
