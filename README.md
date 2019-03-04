@@ -7,7 +7,7 @@ Assumed File Structure:
 These scripts assume they are in a folder containing folders named 'MUV', 'dekois', and 'DUDE'.
 They further assume the following:
 
---MUV--\n
+--MUV--
 For each target 'target_id', actives are stored in a file 'target_id_actives.sdf.gz',
 decoys in 'target_id_decoys.sdf.gz'
 
