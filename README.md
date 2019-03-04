@@ -7,17 +7,17 @@ These scripts assume they are in a folder containing folders named 'MUV', 'dekoi
 They further assume the following:
 
 ### MUV
-For each target 'target_id', actives are stored in a file 'target_id_actives.sdf.gz',
-decoys in 'target_id_decoys.sdf.gz'
+For each target 'target_id', actives are stored in a file ```target_id_actives.sdf.gz```,
+decoys in ```target_id_decoys.sdf.gz```
 
 ### dekois
 Actives are stored in a folder named 'ligands', and decoys in a folder named 'decoys'.
-For each target 'target_id', actives are stored in a file 'target_id.sdf.gz',
-decoys in 'target_id__Celling-v1.12_decoyset.sdf.gz'
+For each target 'target_id', actives are stored in a file ```target_id.sdf.gz```,
+decoys in ```target_id__Celling-v1.12_decoyset.sdf.gz```
 
 ### DUDE
 Active and decoys are stored in files named 'target_id'.
-Within each target's folder, the data is stored in '/actives_final.sdf.gz' and '/decoys_final.sdf.gz'.
+Within each target's folder, the data is stored in ```/actives_final.sdf.gz``` and ```/decoys_final.sdf.gz```.
 
 
 ## Usage:
@@ -28,13 +28,13 @@ Within each target's folder, the data is stored in '/actives_final.sdf.gz' and '
 The preliminary computations are performed on a per-dataset basis by the file 'dataPrep.py'. 
 By default, running the script outputs pickle files (into the dataset folder) for each target data set:
 
-  - the similarity matrix 'target_id_distances.pkl'
+  - the similarity matrix ```target_id_distances.pkl```
   
   - a dataframe with the 2048 bit fingerprint of each ligand (active and decoy)
-    and a binary label 'target_id_unsplitDataFrame.pkl'
+    and a binary label ```target_id_unsplitDataFrame.pkl```
     
   - a dataframe containing the VE score, training ratio, and validation equity
-    for a sampling of splits 'target_id_samples.pkl'
+    for a sampling of splits ```target_id_samples.pkl```
     
 If the distance matrix has already been computed, the script loads it and proceedes to sampling.
 
