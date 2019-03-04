@@ -1,20 +1,20 @@
 # MLmodeling
 
-#######################\n
-Assumed File Structure:\n
-#######################\n
+#######################
+Assumed File Structure:
+#######################
 
 These scripts assume they are in a folder containing folders named 'MUV', 'dekois', and 'DUDE'.
-They further assume the following:\n\n
+They further assume the following:
 
 --MUV--\n
 For each target 'target_id', actives are stored in a file 'target_id_actives.sdf.gz',
-decoys in 'target_id_decoys.sdf.gz'\n\n
+decoys in 'target_id_decoys.sdf.gz'
 
---dekois--\n
+--dekois--
 Actives are stored in a folder named 'ligands', and decoys in a folder named 'decoys'.
 For each target 'target_id', actives are stored in a file 'target_id.sdf.gz',
-decoys in 'target_id__Celling-v1.12_decoyset.sdf.gz'\n\n
+decoys in 'target_id__Celling-v1.12_decoyset.sdf.gz'
 
 --DUDE--
 Active and decoys are stored in files named 'target_id'.
