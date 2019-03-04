@@ -6,6 +6,8 @@ import gzip
 import pandas as pd
 import numpy as np
 
+from scoop import futures
+
 from rdkit import Chem
 from rdkit.Chem import AllChem
 
@@ -20,20 +22,20 @@ timeLimit = 60 #(60) seconds
 sizeBound = 15100
 ratio = 0.8
 
-###############################################################################
-#Functions
-
 def finger(mol):
     #fPrint = FingerprintMols.FingerprintMol(mol)
     fprint = AllChem.GetMorganFingerprintAsBitVect( mol, 2 )
     return list(fprint)
+
+###############################################################################
 
 def makePrints(s):
     try:
         inf = gzip.open(s)
         gzsuppl = Chem.ForwardSDMolSupplier(inf)
         mols = [x for x in gzsuppl if x is not None]
-        prints = [finger(mol) for mol in mols]
+        prints = futures.map(finger, mols)
+        #prints = [finger(mol) for mol in mols]
         prints = pd.DataFrame(prints).dropna()
         return prints
     except:
