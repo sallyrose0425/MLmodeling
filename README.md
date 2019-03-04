@@ -65,6 +65,28 @@ Running the script for a data set:
 Example:
 ```
   $ python bias_analysis.py dekois
+  
+   Pearson cor. coef. for score / split ratio: 0.036649746524803836
+
+ Score means (over targets): 
+count    81.000000
+mean      0.475438
+std       0.183936
+min       0.152204
+25%       0.333998
+50%       0.469359
+75%       0.600104
+max       0.865593
+
+ Score std (over targets): 
+count    81.000000
+mean      0.055764
+std       0.012451
+min       0.028854
+25%       0.047119
+50%       0.055005
+75%       0.064082
+max       0.090155
 ```
   
   
