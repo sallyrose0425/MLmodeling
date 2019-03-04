@@ -20,11 +20,11 @@ decoys in 'target_id__Celling-v1.12_decoyset.sdf.gz'
 Active and decoys are stored in files named 'target_id'.
 Within each target's folder, the data is stored in '/actives_final.sdf.gz' and '/decoys_final.sdf.gz'.
 
-#######################
+
 #######################
 Usage:
 #######################
-#######################
+
 
 'dataPrep.py'
 The preliminary computations are performed on a per-dataset basis by the file 'dataPrep.py'. 
@@ -96,11 +96,11 @@ Example:
   $ python genSplitOpt.py dekois
   
   
-#######################
+
 #######################
 The dataBias module:
 #######################
-#######################
+
 
 The dataPrep.py script creates a data_set class instance from the data of each target.
 
