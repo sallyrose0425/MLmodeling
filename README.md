@@ -1,8 +1,8 @@
 # MLmodeling
 
-#######################################################################################################
+#######################
 Assumed File Structure:
-#######################################################################################################
+#######################
 
 These scripts assume they are in a folder containing folders named 'MUV', 'dekois', and 'DUDE'.
 They further assume the following:
@@ -20,11 +20,11 @@ decoys in 'target_id__Celling-v1.12_decoyset.sdf.gz'
 Active and decoys are stored in files named 'target_id'.
 Within each target's folder, the data is stored in '/actives_final.sdf.gz' and '/decoys_final.sdf.gz'.
 
-#######################################################################################################
-#######################################################################################################
+#######################
+#######################
 Usage:
-#######################################################################################################
-#######################################################################################################
+#######################
+#######################
 
 'dataPrep.py'
 The preliminary computations are performed on a per-dataset basis by the file 'dataPrep.py'. 
@@ -53,7 +53,7 @@ Example:
   Current target: A2A (2 of 81)
   ...
 
-#######################################################################################################
+#######################
 
 'bias_analysis.py'
 Some analysis tasks are automated in order to reproduce results presented in the paper.
@@ -67,7 +67,7 @@ Example:
   $ python bias_analysis.py dekois
   
   
-#######################################################################################################
+#######################
 
 'modelCorrelation.py'
 We train a random forest regressor for each data split in the sample (produced by dataPrep.py) and record the AUC score.
@@ -84,7 +84,7 @@ Example:
   $ python modelCorrelation.py dekois
   
   
-#######################################################################################################
+#######################
 
 'genSplitOpt.py'
 We use the DEAP evolutionary algorithm package to produce a minimum VE score split for each target in the data set.
@@ -96,11 +96,11 @@ Example:
   $ python genSplitOpt.py dekois
   
   
-#######################################################################################################
-#######################################################################################################
+#######################
+#######################
 The dataBias module:
-#######################################################################################################
-#######################################################################################################
+#######################
+#######################
 
 The dataPrep.py script creates a data_set class instance from the data of each target.
 
