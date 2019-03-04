@@ -4,7 +4,7 @@
 Assumed File Structure:
 #######################################################################################################
 
-These scripts assume they are in a folder containing folders named 'MUV', 'dekois',and 'DUDE'.
+These scripts assume they are in a folder containing folders named 'MUV', 'dekois', and 'DUDE'.
 They further assume the following:
 
 --MUV--
