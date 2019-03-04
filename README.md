@@ -16,7 +16,7 @@ For each target 'target_id', actives are stored in a file ```target_id.sdf.gz```
 decoys in ```target_id__Celling-v1.12_decoyset.sdf.gz```
 
 ### DUDE
-Active and decoys are stored in files named 'target_id'.
+Active and decoys are stored in folders named 'target_id'.
 Within each target's folder, the data is stored in ```/actives_final.sdf.gz``` and ```/decoys_final.sdf.gz```.
 
 
