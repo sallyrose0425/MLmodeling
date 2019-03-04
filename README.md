@@ -110,7 +110,7 @@ Example:
 
 
 ### 'genSplitOpt.py'
-We use the DEAP evolutionary algorithm package to produce a minimum VE score split for each target in the data set.
+We use the [DEAP](https://github.com/DEAP/deap) evolutionary algorithm package to produce a minimum VE score split for each target in the data set.
 Running the script for a data set:
 
   - 
