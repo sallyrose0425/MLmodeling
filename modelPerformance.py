@@ -28,7 +28,7 @@ def main(dataset):
             splitScore = split[-1]
             split = split[:-1].astype(int)
             data.splitData(split)
-            clf = RandomForestClassifier()
+            clf = RandomForestClassifier(n_estimators=100)
             clf.fit(data.trainingFeatures, data.trainingLabels)
             predictions = clf.predict(data.validationFeatures)
             nNeighborPred = data.nearestNeighborPredictions(split)
