@@ -1,6 +1,6 @@
 import numpy as np
+import pandas as pd
 import time
-import scipy.stats as st
 
 from sklearn.metrics.pairwise import pairwise_distances_argmin_min
 
@@ -129,8 +129,8 @@ class data_set:
                     self.score_samples.append(score)
                     s += 1
         self.comp_time += time.time() - t0
-		
-		
+
+        
     def nearestNeighborPredictions(self, split):
         trainingLabels = self.labels[split==1].reset_index(drop=True)
         distancesToTraining = pd.DataFrame(self.distanceMatrix[split==0, :][:, split==1])
@@ -138,10 +138,10 @@ class data_set:
         nearestNeighbors = np.array([trainingLabels[x] for x in closest])
         return nearestNeighbors
 
-	
+
     def splitData(self, split):
         self.trainingFeatures = self.fingerprints[split==1]
         self.validationFeatures = self.fingerprints[split==0]
         self.trainingLabels = self.labels[split==1]
-        self.validationLabels = self.labels[split==0]                       
- 
+        self.validationLabels = self.labels[split==0]                     
+
