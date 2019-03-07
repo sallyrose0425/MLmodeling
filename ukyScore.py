@@ -7,20 +7,11 @@ from sklearn.metrics.pairwise import pairwise_distances_argmin_min
 ''' A module for storing useful functions for analyzing split score.'''
 
 ###############################################################################
-'''
-#Performance metric
-
-def performance(min_score, mean, std, num_samples):
-    cdf = st.norm.cdf(min_score,
-                      loc=mean,
-                      scale=std)
-    return -np.log(num_samples*cdf)
-'''
-###############################################################################
 
 class data_set:
     '''A class for a labeled data set which allows
     easy computation of the split score.'''
+	
     def __init__(self, distance_matrix, fPrints):
         self.fingerprints = fPrints.drop('Labels', axis=1)
         self.distanceMatrix = distance_matrix.values
@@ -36,6 +27,7 @@ class data_set:
         else:
             self.isTooBig = False
         
+		
     def computeScore(self, split):
         if self.isTooBig == True:
             validActive = self.fingerprints[(split==0) & (self.labels==1)]
@@ -115,7 +107,7 @@ class data_set:
         balanceError = np.abs(trueValidationBalance - balance)
         return (balanceError < balanceTol) and (ratioError < ratioTol)
     
-
+	
     def sample(self,
                numSamples,
                targetRatio=0.8,
@@ -137,7 +129,19 @@ class data_set:
                     self.score_samples.append(score)
                     s += 1
         self.comp_time += time.time() - t0
-                        
-###############################################################################
+		
+		
+    def nearestNeighborPredictions(self, split):
+        trainingLabels = self.labels[split==1].reset_index(drop=True)
+        distancesToTraining = pd.DataFrame(self.distanceMatrix[split==0, :][:, split==1])
+        closest = distancesToTraining.idxmin(axis=1)
+        nearestNeighbors = np.array([trainingLabels[x] for x in closest])
+        return nearestNeighbors
 
-    
+	
+    def splitData(self, split):
+        self.trainingFeatures = self.fingerprints[split==1]
+        self.validationFeatures = self.fingerprints[split==0]
+        self.trainingLabels = self.labels[split==1]
+        self.validationLabels = self.labels[split==0]                       
+ 
