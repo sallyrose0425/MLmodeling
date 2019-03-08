@@ -65,7 +65,7 @@ class data_set:
             minPosPosDist = np.amin(
                     self.distanceMatrix[(split==0) & (self.labels == 1), :]\
                                            [:, (split == 1) & (self.labels == 1)],
-                                           axis = 1
+                                           axis=1
                                     )
             minPosNegDist = np.amin(
                     self.distanceMatrix[(split==0) & (self.labels==1),:]\
