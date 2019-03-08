@@ -1,0 +1,18 @@
+# !/bin/bash
+python singleTargetProcess.py MUV aid858 & \ 
+python singleTargetProcess.py MUV aid832 & \ 
+python singleTargetProcess.py MUV aid689 & \ 
+python singleTargetProcess.py MUV aid692 & \ 
+python singleTargetProcess.py MUV aid548 & \ 
+python singleTargetProcess.py MUV aid652 & \ 
+python singleTargetProcess.py MUV aid846 & \ 
+python singleTargetProcess.py MUV aid852 & \ 
+python singleTargetProcess.py MUV aid810 & \ 
+python singleTargetProcess.py MUV aid713 & \ 
+python singleTargetProcess.py MUV aid733 & \ 
+python singleTargetProcess.py MUV aid859 & \ 
+python singleTargetProcess.py MUV aid466 & \ 
+python singleTargetProcess.py MUV aid737 & \ 
+python singleTargetProcess.py MUV aid644 & \ 
+python singleTargetProcess.py MUV aid600 & \ 
+python singleTargetProcess.py MUV aid712 & \ 
