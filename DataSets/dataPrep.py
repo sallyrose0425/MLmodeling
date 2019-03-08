@@ -76,7 +76,7 @@ def main(dataset):
     t = 0
     skipFiles = glob.glob(dataset + '/*distances*')
 
-    for target_id in targets[1]:
+    for target_id in targets:
         t += 1
         print('Current target: {} ({} of {})'.format(target_id, t, toCompute))
         prefix = os.getcwd() + '/' + dataset + '/'
