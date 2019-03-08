@@ -8,9 +8,12 @@ from sklearn.metrics.pairwise import pairwise_distances_argmin_min
 
 ###############################################################################
 
+
 class data_set:
-    '''A class for a labeled data set which allows
-    easy computation of the split score.'''
+    """
+    A class for a labeled data set which allows
+    easy computation of the split score.
+    """
 
     def __init__(self, distance_matrix, fPrints):
         self.fingerprints = fPrints.drop('Labels', axis=1)
@@ -54,21 +57,15 @@ class data_set:
             actActDistances = pairwise_distances_argmin_min(validActive, trainActive, metric='jaccard')
             actDecoyDistances = pairwise_distances_argmin_min(validActive, trainDecoy, metric='jaccard')
             activeMeanDistance = np.mean(actDecoyDistances[1] - actActDistances[1])
-            decoyActDistances = pairwise_distances_argmin_min(validDecoy,
-                                                   trainActive,
-                                                   metric='jaccard')
-            decoyDecoyDistances = pairwise_distances_argmin_min(validDecoy,
-                                                   trainDecoy,
-                                                   metric='jaccard')
-            decoyMeanDistance = np.mean(decoyActDistances[1]
-                                        - decoyDecoyDistances[1]
-                                        )
+            decoyActDistances = pairwise_distances_argmin_min(validDecoy, trainActive, metric='jaccard')
+            decoyDecoyDistances = pairwise_distances_argmin_min(validDecoy, trainDecoy, metric='jaccard')
+            decoyMeanDistance = np.mean(decoyActDistances[1] - decoyDecoyDistances[1])
             return activeMeanDistance + decoyMeanDistance
         else:
             minPosPosDist = np.amin(
-                    self.distanceMatrix[(split==0) & (self.labels==1),:]\
-                                           [:,(split==1) & (self.labels==1)],
-                                           axis=1
+                    self.distanceMatrix[(split==0) & (self.labels == 1), :]\
+                                           [:, (split == 1) & (self.labels == 1)],
+                                           axis = 1
                                     )
             minPosNegDist = np.amin(
                     self.distanceMatrix[(split==0) & (self.labels==1),:]\
