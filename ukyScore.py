@@ -63,10 +63,8 @@ class data_set:
             return activeMeanDistance + decoyMeanDistance
         else:
             minPosPosDist = np.amin(
-                    self.distanceMatrix[(split==0) & (self.labels == 1), :]\
-                                           [:, (split == 1) & (self.labels == 1)],
-                                           axis=1
-                                    )
+                    self.distanceMatrix[(split==0) & (self.labels == 1), :][:, (split == 1) & (self.labels == 1)], axis=1)
+
             minPosNegDist = np.amin(
                     self.distanceMatrix[(split==0) & (self.labels==1),:]\
                                        [:,(split==1) & (self.labels==0)],
@@ -83,10 +81,8 @@ class data_set:
                                        [:,(split==1) & (self.labels==0)],
                                        axis=1
                                     )
-            score = np.mean(minPosNegDist) + np.mean(minNegPosDist) \
-                    - np.mean(minPosPosDist) - np.mean(minNegNegDist)
+            score = np.mean(minPosNegDist) + np.mean(minNegPosDist) - np.mean(minPosPosDist) - np.mean(minNegNegDist)
             return score
-
 
     def randSplit(self, q=0.8):
         '''Produce a random training / validation split of the data
