@@ -13,7 +13,7 @@ from rdkit.Chem import AllChem
 
 from sklearn.metrics.pairwise import pairwise_distances
 
-from ukyScore import data_set
+from DataSets.ukyScore import data_set
 ###############################################################################
 # Set parameters
 parallel = True

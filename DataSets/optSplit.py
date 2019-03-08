@@ -12,7 +12,8 @@ from deap import base
 from deap import creator
 from deap import tools
 
-import ukyScore
+from DataSets import ukyScore
+
 ###############################################################################
 #Parameters
 NUMGENS = 1000 #(100) Number of generations (unless stop criterion)
