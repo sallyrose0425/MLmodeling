@@ -3,39 +3,45 @@ import sys
 import warnings
 import glob
 import gzip
+import psutil
+
 import pandas as pd
 import numpy as np
-
-from scoop import futures
 
 from rdkit import Chem
 from rdkit.Chem import AllChem
 
 from sklearn.metrics.pairwise import pairwise_distances
 
-import dataBias
+from ukyScore import data_set
 ###############################################################################
 #Set parameters
 parallel = True
 sample = True
-timeLimit = 15 #(60) seconds
-sizeBound = 15100
+timeLimit = 30 #(60) seconds
 ratio = 0.8
+
+
+mem = psutil.virtual_memory()
+safetyFactor = 3 #(3)
+sizeBound = int(np.sqrt(mem.available / 8)/safetyFactor)
+'''sizeBound: max size of dataset that reliably
+ fits distance matrix in user's computer's memory.'''
+
+###############################################################################
+#Functions
 
 def finger(mol):
     #fPrint = FingerprintMols.FingerprintMol(mol)
     fprint = AllChem.GetMorganFingerprintAsBitVect( mol, 2 )
     return list(fprint)
 
-###############################################################################
-
 def makePrints(s):
     try:
         inf = gzip.open(s)
         gzsuppl = Chem.ForwardSDMolSupplier(inf)
         mols = [x for x in gzsuppl if x is not None]
-        prints = futures.map(finger, mols)
-        #prints = [finger(mol) for mol in mols]
+        prints = [finger(mol) for mol in mols]
         prints = pd.DataFrame(prints).dropna()
         return prints
     except:
@@ -122,7 +128,7 @@ def main(s):
                                             fingerprints.drop('Labels', axis=1),
                                             metric='jaccard')
                     pd.DataFrame(distanceMatrix).to_pickle(pickleDistName)
-                    print('Saved' + pickleDistName)
+                    print('Saved: ' + pickleDistName)
             except:
                 pass
         else:
@@ -132,7 +138,7 @@ def main(s):
 
         if sample == True:
             pickleSamplesName = prefix + target_id + '_samples.pkl'
-            data = dataBias.data_set(distanceMatrix,
+            data = data_set(distanceMatrix,
                                      fingerprints['Labels'])
             print('Sampling...')
             with warnings.catch_warnings():
