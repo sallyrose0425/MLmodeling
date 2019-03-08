@@ -11,7 +11,7 @@ from sklearn.metrics.pairwise import pairwise_distances_argmin_min
 class data_set:
     '''A class for a labeled data set which allows
     easy computation of the split score.'''
-	
+
     def __init__(self, distance_matrix, fPrints):
         self.fingerprints = fPrints.drop('Labels', axis=1)
         self.distanceMatrix = distance_matrix.values
@@ -26,23 +26,35 @@ class data_set:
             self.isTooBig = True
         else:
             self.isTooBig = False
-        
-		
+
+    def validSplit(self, split, targetRatio=0.8, ratioTol=0.01, balanceTol=0.05):
+        """
+        Return True if the split has the proper training/validation ratio
+        for both actives and decoys
+        :type balanceTol: float
+        """
+        numTraining = np.sum(split)
+        trueRatio = float(numTraining) / self.size
+        ratioError = np.abs(targetRatio - trueRatio)
+        numActives = np.sum(self.labels)
+        balance = float(numActives)/self.size
+        numActiveTraining = np.sum(split & self.labels)
+        numActiveValidation = numActives - numActiveTraining
+        trueValidationBalance = float(numActiveValidation) / (self.size - numTraining)
+        balanceError = np.abs(trueValidationBalance - balance)
+        return (balanceError < balanceTol) and (ratioError < ratioTol)
+
     def computeScore(self, split):
-        if self.isTooBig == True:
-            validActive = self.fingerprints[(split==0) & (self.labels==1)]
-            validDecoy = self.fingerprints[(split==0) & (self.labels==0)]
-            trainActive = self.fingerprints[(split==1) & (self.labels==1)]
-            trainDecoy = self.fingerprints[(split==1) & (self.labels==0)]
-            actActDistances = pairwise_distances_argmin_min(validActive,
-                                                   trainActive,
-                                                   metric='jaccard')
-            actDecoyDistances = pairwise_distances_argmin_min(validActive,
-                                                   trainDecoy,
-                                                   metric='jaccard')
-            activeMeanDistance = np.mean(actDecoyDistances[1]
-                                        - actActDistances[1]
-                                        )
+        if not self.validSplit(split):
+            return 2
+        if self.isTooBig:
+            validActive = self.fingerprints[(split == 0) & (self.labels == 1)]
+            validDecoy = self.fingerprints[(split == 0) & (self.labels == 0)]
+            trainActive = self.fingerprints[(split == 1) & (self.labels == 1)]
+            trainDecoy = self.fingerprints[(split == 1) & (self.labels == 0)]
+            actActDistances = pairwise_distances_argmin_min(validActive, trainActive, metric='jaccard')
+            actDecoyDistances = pairwise_distances_argmin_min(validActive, trainDecoy, metric='jaccard')
+            activeMeanDistance = np.mean(actDecoyDistances[1] - actActDistances[1])
             decoyActDistances = pairwise_distances_argmin_min(validDecoy,
                                                    trainActive,
                                                    metric='jaccard')
@@ -87,25 +99,7 @@ class data_set:
         return split
 
 
-    def validSplit(self,
-                   split,
-                   targetRatio=0.8,
-                   ratioTol = 0.01,
-                   balanceTol = 0.05
-                   ):
-        '''return True if the split has the proper training/validation ratio
-        for both actives and decoys
-        '''
-        numTraining = np.sum(split)
-        trueRatio = float(numTraining) / self.size
-        ratioError = np.abs(targetRatio - trueRatio)
-        numActives = np.sum(self.labels)
-        balance = float(numActives)/self.size
-        numActiveTraining = np.sum(split & self.labels)
-        numActiveValidation = numActives - numActiveTraining
-        trueValidationBalance = float(numActiveValidation) / (self.size - numTraining)
-        balanceError = np.abs(trueValidationBalance - balance)
-        return (balanceError < balanceTol) and (ratioError < ratioTol)
+
     
 	
     def sample(self,
