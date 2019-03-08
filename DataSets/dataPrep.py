@@ -12,8 +12,6 @@ from rdkit import Chem
 from rdkit.Chem import AllChem
 
 from sklearn.metrics.pairwise import pairwise_distances
-
-from ukyScore import data_set
 ###############################################################################
 # Set parameters
 parallel = True
@@ -126,7 +124,7 @@ def main(s):
                 with warnings.catch_warnings():
                     #Suppress warning from distance matrix computation (int->bool)
                     warnings.simplefilter("ignore")
-                    if parallel == True:
+                    if parallel:
                         distanceMatrix = pairwise_distances(
                                             fingerprints.drop('Labels', axis=1),
                                             metric='jaccard',
