@@ -48,7 +48,7 @@ class data_set:
 
     def computeScore(self, split):
         if not self.validSplit(split):
-            return 2
+            return 2.0  # The largest score mathematically possible
         if self.isTooBig:
             validActive = self.fingerprints[(split == 0) & (self.labels == 1)]
             validDecoy = self.fingerprints[(split == 0) & (self.labels == 0)]
@@ -63,7 +63,7 @@ class data_set:
             return activeMeanDistance + decoyMeanDistance
         else:
             minPosPosDist = np.amin(
-                    self.distanceMatrix[(split==0) & (self.labels == 1), :][:, (split == 1) & (self.labels == 1)], axis=1)
+                    self.distanceMatrix[(split == 0) & (self.labels == 1), :][:, (split == 1) & (self.labels == 1)], axis=1)
 
             minPosNegDist = np.amin(
                     self.distanceMatrix[(split==0) & (self.labels==1),:]\
@@ -85,27 +85,21 @@ class data_set:
             return score
 
     def randSplit(self, q=0.8):
-        '''Produce a random training / validation split of the data
-        with the probability of training being q'''
-        split =  np.random.choice( 2, size=self.size, p=[1-q , q] )
+        """
+        Produce a random training / validation split of the data
+        with the probability of training being q
+        """
+        split = np.random.choice(2, size=self.size, p=[1-q, q])
         return split
 
-
-
-    
-	
-    def sample(self,
-               numSamples,
-               targetRatio=0.8,
-               ratioTol = 0.1,
-               balanceTol = 0.1,
-               q=0.8
-               ):
-        '''Produce an array of sampled biases
+    def sample(self, numSamples, targetRatio=0.8, ratioTol=0.1, balanceTol=0.1, q=0.8):
+        """
+        Produce an array of sampled biases
         together with the times required to compute them.
-        Initializes the standard deviation, mean, compTimes.'''
+        Initializes the standard deviation, mean, compTimes.
+        """
         t0 = time.time()
-        s=0
+        s = 0
         while s < numSamples:
             split = self.randSplit(q)
             if self.validSplit(split, targetRatio, ratioTol, balanceTol):
@@ -116,18 +110,16 @@ class data_set:
                     s += 1
         self.comp_time += time.time() - t0
 
-        
     def nearestNeighborPredictions(self, split):
-        trainingLabels = self.labels[split==1].reset_index(drop=True)
-        distancesToTraining = pd.DataFrame(self.distanceMatrix[split==0, :][:, split==1])
+        trainingLabels = self.labels[split == 1].reset_index(drop=True)
+        distancesToTraining = pd.DataFrame(self.distanceMatrix[split == 0, :][:, split == 1])
         closest = distancesToTraining.idxmin(axis=1)
         nearestNeighbors = np.array([trainingLabels[x] for x in closest])
         return nearestNeighbors
 
-
     def splitData(self, split):
-        self.trainingFeatures = self.fingerprints[split==1]
-        self.validationFeatures = self.fingerprints[split==0]
-        self.trainingLabels = self.labels[split==1]
-        self.validationLabels = self.labels[split==0]                     
+        self.trainingFeatures = self.fingerprints[split == 1]
+        self.validationFeatures = self.fingerprints[split == 0]
+        self.trainingLabels = self.labels[split == 1]
+        self.validationLabels = self.labels[split == 0]
 
