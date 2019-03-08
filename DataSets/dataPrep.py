@@ -138,7 +138,7 @@ def main(dataset):
             except:
                 pass
 
-        if sample:
+        """if sample:
             pickleSamplesName = prefix + target_id + '_samples.pkl'
             data = data_set(distanceMatrix, fingerprints['Labels'])
             print('Sampling...')
@@ -157,6 +157,7 @@ def main(dataset):
             exp.columns = ['bias', 'training ratio', 'validation pos equity']
             pd.DataFrame(exp).to_pickle(pickleSamplesName)
             print('Saved: ' + pickleSamplesName)
+            """
 
 
 if __name__ == '__main__':

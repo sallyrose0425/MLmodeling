@@ -16,6 +16,13 @@ from sklearn.metrics.pairwise import pairwise_distances
 
 
 def main(dataset, target_id):
+    # TODO create fingerprints
+    # TODO attempt distance matrix
+    # TODO create data_set
+    # TODO run optimizer
+    # TODO compute score
+    # TODO train model
+    # TODO collect stats on model performance
 
 
 if __name__ == '__main__':
