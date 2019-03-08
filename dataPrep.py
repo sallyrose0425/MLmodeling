@@ -86,7 +86,11 @@ def main(s):
         pickleDistName = prefix + target_id + '_distances.pkl'
         distanceFileName = dataset + '/' + target_id + '_distances.pkl'
 
-        if distanceFileName not in skipFiles:
+        if distanceFileName in skipFiles:
+            print('Reading data...')
+            fingerprints = pd.read_pickle(picklePrintName)
+            distanceMatrix = pd.read_pickle(pickleDistName).values
+        else:
             try:
                 if dataset == 'MUV':
                     print('Computing decoy fingerprints...')
@@ -116,6 +120,7 @@ def main(s):
                 fingerprints = activePrints.append(decoyPrints, ignore_index=True)
                 fingerprints.to_pickle(picklePrintName)
                 print('Saved: ' + picklePrintName)
+
                 print('Computing distance matrix...')
                 #Compute distance matrix (Jaccard)
                 with warnings.catch_warnings():
@@ -134,10 +139,6 @@ def main(s):
                     print('Saved: ' + pickleDistName)
             except:
                 pass
-        else:
-            print('Reading data...')
-            fingerprints = pd.read_pickle(picklePrintName)
-            distanceMatrix = pd.read_pickle(pickleDistName).values
 
         if sample:
             pickleSamplesName = prefix + target_id + '_samples.pkl'
