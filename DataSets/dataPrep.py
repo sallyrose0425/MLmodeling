@@ -15,7 +15,7 @@ from sklearn.metrics.pairwise import pairwise_distances
 ###############################################################################
 # Set parameters
 parallel = True
-sample = True
+sample = False
 timeLimit = 30  # (60) seconds
 ratio = 0.8
 
@@ -51,8 +51,8 @@ def makePrints(s):
 ###############################################################################
 
 
-def main(s):
-    dataset = s
+def main(dataset):
+
     if dataset == 'dekois':
         active_suffix = '.sdf.gz'
         decoys_suffix = '_Celling-v1.12_decoyset.sdf.gz'
@@ -76,7 +76,7 @@ def main(s):
     t = 0
     skipFiles = glob.glob(dataset + '/*distances*')
 
-    for target_id in targets[1:]:
+    for target_id in targets[1]:
         t += 1
         print('Current target: {} ({} of {})'.format(target_id, t, toCompute))
         prefix = os.getcwd() + '/' + dataset + '/'
