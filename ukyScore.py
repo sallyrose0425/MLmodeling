@@ -48,7 +48,7 @@ class data_set:
 
     def computeScore(self, split):
         if not self.validSplit(split):
-            return 2.0  # The largest score mathematically possible
+            return 2.0
         if self.isTooBig:
             validActive = self.fingerprints[(split == 0) & (self.labels == 1)]
             validDecoy = self.fingerprints[(split == 0) & (self.labels == 0)]
@@ -63,8 +63,10 @@ class data_set:
             return activeMeanDistance + decoyMeanDistance
         else:
             minPosPosDist = np.amin(
-                    self.distanceMatrix[(split == 0) & (self.labels == 1), :][:, (split == 1) & (self.labels == 1)], axis=1)
-
+                    self.distanceMatrix[(split==0) & (self.labels == 1), :]\
+                                           [:, (split == 1) & (self.labels == 1)],
+                                           axis=1
+                                    )
             minPosNegDist = np.amin(
                     self.distanceMatrix[(split==0) & (self.labels==1),:]\
                                        [:,(split==1) & (self.labels==0)],
