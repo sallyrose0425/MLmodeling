@@ -1,0 +1,25 @@
+import os
+import sys
+import warnings
+import glob
+import gzip
+import psutil
+
+import pandas as pd
+import numpy as np
+
+from rdkit import Chem
+from rdkit.Chem import AllChem
+
+from sklearn.metrics.pairwise import pairwise_distances
+#######################################################
+
+
+def main(dataset, target_id):
+
+
+if __name__ == '__main__':
+    if len(sys.argv) > 2:
+        main(sys.argv[1], sys.argv[1])
+    else:
+        print("Specify dataset and target...")
