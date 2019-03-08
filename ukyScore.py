@@ -31,7 +31,6 @@ class data_set:
         """
         Return True if the split has the proper training/validation ratio
         for both actives and decoys
-        :type balanceTol: float
         """
         numTraining = np.sum(split)
         trueRatio = float(numTraining) / self.size
