@@ -15,26 +15,28 @@ from sklearn.metrics.pairwise import pairwise_distances
 
 from ukyScore import data_set
 ###############################################################################
-#Set parameters
+# Set parameters
 parallel = True
 sample = True
-timeLimit = 30 #(60) seconds
+timeLimit = 30  # (60) seconds
 ratio = 0.8
 
 
 mem = psutil.virtual_memory()
-safetyFactor = 3 #(3)
+safetyFactor = 3  # (3)
 sizeBound = int(np.sqrt(mem.available / 8)/safetyFactor)
 '''sizeBound: max size of dataset that reliably
  fits distance matrix in user's computer's memory.'''
 
 ###############################################################################
-#Functions
+# Functions
+
 
 def finger(mol):
     #fPrint = FingerprintMols.FingerprintMol(mol)
     fprint = AllChem.GetMorganFingerprintAsBitVect( mol, 2 )
     return list(fprint)
+
 
 def makePrints(s):
     try:
@@ -49,6 +51,7 @@ def makePrints(s):
         return
 
 ###############################################################################
+
 
 def main(s):
     dataset = s
@@ -72,11 +75,11 @@ def main(s):
         return
 
     toCompute = len(targets)
-    t=0
+    t = 0
     skipFiles = glob.glob(dataset + '/*distances*')
 
     for target_id in targets[1:]:
-        t+=1
+        t += 1
         print('Current target: {} ({} of {})'.format(target_id, t, toCompute))
         prefix = os.getcwd() + '/' + dataset + '/'
         picklePrintName = prefix + target_id + '_unsplitDataFrame.pkl'
@@ -136,10 +139,9 @@ def main(s):
             fingerprints = pd.read_pickle(picklePrintName)
             distanceMatrix = pd.read_pickle(pickleDistName).values
 
-        if sample == True:
+        if sample:
             pickleSamplesName = prefix + target_id + '_samples.pkl'
-            data = data_set(distanceMatrix,
-                                     fingerprints['Labels'])
+            data = data_set(distanceMatrix, fingerprints['Labels'])
             print('Sampling...')
             with warnings.catch_warnings():
                     #Suppress warning from undefined bias
@@ -151,14 +153,15 @@ def main(s):
             trainingPosSizes = [np.sum(data.labels & x) for x in data.splits]
             numPos = np.sum(data.labels)
             validationPosSizes = [numPos - x for x in trainingPosSizes]
-            validPosEquity= [(data.size*x)/(numPos*y) for x, y in zip(validationPosSizes, validationSizes)]
+            validPosEquity = [(data.size*x)/(numPos*y) for x, y in zip(validationPosSizes, validationSizes)]
             exp = pd.DataFrame([data.bias_samples, trainingRatios, validPosEquity]).T
             exp.columns = ['bias', 'training ratio', 'validation pos equity']
             pd.DataFrame(exp).to_pickle(pickleSamplesName)
             print('Saved: ' + pickleSamplesName)
 
+
 if __name__ == '__main__':
-    if len(sys.argv)>1:
+    if len(sys.argv) > 1:
         main(sys.argv[1])
     else:
         print('No data set specified...')
