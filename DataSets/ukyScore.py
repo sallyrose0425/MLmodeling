@@ -141,7 +141,7 @@ class data_set:
         self.trainingLabels = self.labels[split == 1]
         self.validationLabels = self.labels[split == 0]
 
-    def geneticOptimizer(self, numGens, POPSIZE=1000, TOURNSIZE=3, CXPB=0.5, MUTPB=0.4, INDPB=0.075):
+    def geneticOptimizer(self, numGens, POPSIZE=250, TOURNSIZE=3, CXPB=0.5, MUTPB=0.4, INDPB=0.075):
         """
         A method for the genetic optimizer.
 
