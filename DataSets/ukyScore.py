@@ -184,7 +184,7 @@ class geneticOptimizer():
 
     def evolvePOP(self):
         # Select the next generation individuals
-        offspring = toolbox.select(self.pop, len(pop))
+        offspring = toolbox.select(self.pop, len(self.pop))
         # Clone the selected individuals
         offspring = list(map(toolbox.clone, offspring))
         # Apply crossover and mutation on the offspring
