@@ -2,6 +2,7 @@ import numpy as np
 import pandas as pd
 import random
 import time
+import warnings
 
 from sklearn.metrics.pairwise import pairwise_distances_argmin_min
 
@@ -162,20 +163,22 @@ class geneticOptimizer():
         self.CXPB = CXPB
         self.MUTPB = MUTPB
         self.INDPB = INDPB
-        creator.create("FitnessMin", base.Fitness, weights=(-1.0,))
-        creator.create("Individual", np.ndarray, fitness=creator.FitnessMin)
-        toolbox = base.Toolbox()
-        toolbox.register("attr_bool", np.random.choice,
-                         2, p=[1 - data.targetRatio, data.targetRatio])
-        toolbox.register("individual", tools.initRepeat, creator.Individual,
-                         toolbox.attr_bool, data.size)
-        toolbox.register("population", tools.initRepeat, list, toolbox.individual)
-        toolbox.register("evaluate", data.computeScore)
-        toolbox.register("mate", tools.cxOnePoint)
-        toolbox.register("mutate", tools.mutFlipBit, indpb=self.INDPB)
-        toolbox.register("select", tools.selTournament, tournsize=self.TOURNSIZE)
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore")
+            creator.create("FitnessMin", base.Fitness, weights=(-1.0,))
+            creator.create("Individual", np.ndarray, fitness=creator.FitnessMin)
+            toolbox = base.Toolbox()
+            toolbox.register("attr_bool", np.random.choice,
+                             2, p=[1 - data.targetRatio, data.targetRatio])
+            toolbox.register("individual", tools.initRepeat, creator.Individual,
+                             toolbox.attr_bool, data.size)
+            toolbox.register("population", tools.initRepeat, list, toolbox.individual)
+            toolbox.register("evaluate", data.computeScore)
+            toolbox.register("mate", tools.cxOnePoint)
+            toolbox.register("mutate", tools.mutFlipBit, indpb=self.INDPB)
+            toolbox.register("select", tools.selTournament, tournsize=self.TOURNSIZE)
         self.pop = toolbox.population(n=self.POPSIZE)
-        self.fitnesses = list(map(toolbox.evaluate, pop))
+        self.fitnesses = list(map(toolbox.evaluate, self.pop))
         for ind, fit in zip(self.pop, self.fitnesses):
             ind.fitness.values = fit
 
