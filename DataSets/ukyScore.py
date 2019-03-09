@@ -141,28 +141,18 @@ class data_set:
         self.trainingLabels = self.labels[split == 1]
         self.validationLabels = self.labels[split == 0]
 
+    def geneticOptimizer(self, numGens, POPSIZE=1000, TOURNSIZE=3, CXPB=0.5, MUTPB=0.4, INDPB=0.075):
+        """
+        A method for the genetic optimizer.
 
-class geneticOptimizer():
-    """
-    A class for the optimizer.
+        Parameters:
+            POPSIZE = 1000 #(250) Number of active individuals in a generation
+            INDPB = 0.075 #(0.05) Percent of individual bits randomly flipped
+            TOURNSIZE = 3 #(3) Size of selection tournaments
+            CXPB = 0.5 #(0.5) Probability with which two individuals are crossed
+            MUTPB = 0.4 #(0.2) Probability for mutating an individual
+        """
 
-    Input:
-        A data_set: data
-
-    Parameters:
-        POPSIZE = 1000 #(250) Number of active individuals in a generation
-        INDPB = 0.075 #(0.05) Percent of individual bits randomly flipped
-        TOURNSIZE = 3 #(3) Size of selection tournaments
-        CXPB = 0.5 #(0.5) Probability with which two individuals are crossed
-        MUTPB = 0.4 #(0.2) Probability for mutating an individual
-    """
-
-    def __init__(self, data, POPSIZE=1000, TOURNSIZE=3, CXPB=0.5, MUTPB=0.4, INDPB=0.075):
-        self.POPSIZE = POPSIZE
-        self.TOURNSIZE = TOURNSIZE
-        self.CXPB = CXPB
-        self.MUTPB = MUTPB
-        self.INDPB = INDPB
         with warnings.catch_warnings():
             warnings.simplefilter("ignore")
             creator.create("FitnessMin", base.Fitness, weights=(-1.0,))
@@ -175,31 +165,32 @@ class geneticOptimizer():
             toolbox.register("population", tools.initRepeat, list, toolbox.individual)
             toolbox.register("evaluate", data.computeScore)
             toolbox.register("mate", tools.cxOnePoint)
-            toolbox.register("mutate", tools.mutFlipBit, indpb=self.INDPB)
-            toolbox.register("select", tools.selTournament, tournsize=self.TOURNSIZE)
-        self.pop = toolbox.population(n=self.POPSIZE)
-        self.fitnesses = list(map(toolbox.evaluate, self.pop))
-        for ind, fit in zip(self.pop, self.fitnesses):
+            toolbox.register("mutate", tools.mutFlipBit, indpb=INDPB)
+            toolbox.register("select", tools.selTournament, tournsize=TOURNSIZE)
+        pop = toolbox.population(n=POPSIZE)
+        fitnesses = list(map(toolbox.evaluate, pop))
+        for ind, fit in zip(pop, fitnesses):
             ind.fitness.values = fit
-
-    def evolvePOP(self):
-        # Select the next generation individuals
-        offspring = toolbox.select(self.pop, len(self.pop))
-        # Clone the selected individuals
-        offspring = list(map(toolbox.clone, offspring))
-        # Apply crossover and mutation on the offspring
-        for child1, child2 in zip(offspring[::2], offspring[1::2]):
-            if random.random() < self.CXPB:
-                toolbox.mate(child1, child2)
-                del child1.fitness.values
-                del child2.fitness.values
-        for mutant in offspring:
-            if random.random() < self.MUTPB:
-                toolbox.mutate(mutant)
-                del mutant.fitness.values
-        # Evaluate the individuals with an invalid fitness
-        invalid_ind = [ind for ind in offspring if not ind.fitness.valid]
-        self.fitnesses = map(toolbox.evaluate, invalid_ind)
-        for ind, fit in zip(invalid_ind, self.fitnesses):
-            ind.fitness.values = fit
-        self.pop[:] = offspring
+        gen = 0
+        while gen < numGens:
+            # Select the next generation individuals
+            offspring = toolbox.select(pop, len(pop))
+            # Clone the selected individuals
+            offspring = list(map(toolbox.clone, offspring))
+            # Apply crossover and mutation on the offspring
+            for child1, child2 in zip(offspring[::2], offspring[1::2]):
+                if random.random() < CXPB:
+                    toolbox.mate(child1, child2)
+                    del child1.fitness.values
+                    del child2.fitness.values
+            for mutant in offspring:
+                if random.random() < MUTPB:
+                    toolbox.mutate(mutant)
+                    del mutant.fitness.values
+            # Evaluate the individuals with an invalid fitness
+            invalid_ind = [ind for ind in offspring if not ind.fitness.valid]
+            fitnesses = map(toolbox.evaluate, invalid_ind)
+            for ind, fit in zip(invalid_ind, fitnesses):
+                ind.fitness.values = fit
+            pop[:] = offspring
+        return pop
