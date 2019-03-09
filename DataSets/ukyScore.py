@@ -193,4 +193,5 @@ class data_set:
             for ind, fit in zip(invalid_ind, fitnesses):
                 ind.fitness.values = fit
             pop[:] = offspring
+            gen += 1
         return pop
