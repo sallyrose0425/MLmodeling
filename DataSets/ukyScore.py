@@ -159,11 +159,11 @@ class data_set:
             creator.create("Individual", np.ndarray, fitness=creator.FitnessMin)
             toolbox = base.Toolbox()
             toolbox.register("attr_bool", np.random.choice,
-                             2, p=[1 - data.targetRatio, data.targetRatio])
+                             2, p=[1 - self.targetRatio, self.targetRatio])
             toolbox.register("individual", tools.initRepeat, creator.Individual,
-                             toolbox.attr_bool, data.size)
+                             toolbox.attr_bool, self.size)
             toolbox.register("population", tools.initRepeat, list, toolbox.individual)
-            toolbox.register("evaluate", data.computeScore)
+            toolbox.register("evaluate", self.computeScore)
             toolbox.register("mate", tools.cxOnePoint)
             toolbox.register("mutate", tools.mutFlipBit, indpb=INDPB)
             toolbox.register("select", tools.selTournament, tournsize=TOURNSIZE)
