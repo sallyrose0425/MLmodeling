@@ -11,4 +11,4 @@ distanceMatrix = pd.read_pickle(pickleDistName)
 features = pd.read_pickle(picklePrintName)
 data = ukyScore.data_set(distanceMatrix, features)
 
-splits = data.geneticOptimizer(1)
+splits = data.geneticOptimizer(1, POPSIZE=50)

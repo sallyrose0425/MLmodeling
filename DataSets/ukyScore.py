@@ -12,6 +12,7 @@ from deap import tools
 
 ''' A module for storing useful functions for analyzing split score.'''
 
+
 ###############################################################################
 
 
@@ -55,7 +56,7 @@ class data_set:
         trueRatio = float(numTraining) / self.size
         ratioError = np.abs(self.targetRatio - trueRatio)
         numActives = np.sum(self.labels)
-        balance = float(numActives)/self.size
+        balance = float(numActives) / self.size
         numActiveTraining = np.sum(split & self.labels)
         numActiveValidation = numActives - numActiveTraining
         trueValidationBalance = float(numActiveValidation) / (self.size - numTraining)
@@ -79,26 +80,14 @@ class data_set:
             return activeMeanDistance + decoyMeanDistance
         else:
             minPosPosDist = np.amin(
-                    self.distanceMatrix[(split==0) & (self.labels == 1), :]\
-                                           [:, (split == 1) & (self.labels == 1)],
-                                           axis=1
-                                    )
+                self.distanceMatrix[(split == 0) & (self.labels == 1), :][:, (split == 1) & (self.labels == 1)], axis=1)
             minPosNegDist = np.amin(
-                    self.distanceMatrix[(split==0) & (self.labels==1),:]\
-                                       [:,(split==1) & (self.labels==0)],
-                                       axis=1
-                                    )
-    
+                self.distanceMatrix[(split == 0) & (self.labels == 1), :][:, (split == 1) & (self.labels == 0)], axis=1)
+
             minNegPosDist = np.amin(
-                    self.distanceMatrix[(split==0) & (self.labels==0),:]\
-                                       [:,(split==1) & (self.labels==1)],
-                                       axis=1
-                                    )
+                self.distanceMatrix[(split == 0) & (self.labels == 0), :][:, (split == 1) & (self.labels == 1)], axis=1)
             minNegNegDist = np.amin(
-                    self.distanceMatrix[(split==0) & (self.labels==0),:]\
-                                       [:,(split==1) & (self.labels==0)],
-                                       axis=1
-                                    )
+                self.distanceMatrix[(split == 0) & (self.labels == 0), :][:, (split == 1) & (self.labels == 0)], axis=1)
             score = np.mean(minPosNegDist) + np.mean(minNegPosDist) - np.mean(minPosPosDist) - np.mean(minNegNegDist)
             return score,
 
@@ -107,7 +96,7 @@ class data_set:
         Produce a random training / validation split of the data
         with the probability of training being q
         """
-        split = np.random.choice(2, size=self.size, p=[1-self.targetRatio, self.targetRatio])
+        split = np.random.choice(2, size=self.size, p=[1 - self.targetRatio, self.targetRatio])
         return split
 
     def sample(self, numSamples):
@@ -120,7 +109,7 @@ class data_set:
         s = 0
         while s < numSamples:
             split = self.randSplit()
-            if self.validSplit(split, self.targetRatio, self.ratioTol, self.balanceTol):
+            if self.validSplit(split):
                 score = self.computeScore(split)
                 if not np.isnan(score):
                     self.splits.append(list(split))
@@ -158,10 +147,8 @@ class data_set:
             creator.create("FitnessMin", base.Fitness, weights=(-1.0,))
             creator.create("Individual", np.ndarray, fitness=creator.FitnessMin)
             toolbox = base.Toolbox()
-            toolbox.register("attr_bool", np.random.choice,
-                             2, p=[1 - self.targetRatio, self.targetRatio])
-            toolbox.register("individual", tools.initRepeat, creator.Individual,
-                             toolbox.attr_bool, self.size)
+            toolbox.register("attr_bool", np.random.choice, 2, p=[1 - self.targetRatio, self.targetRatio])
+            toolbox.register("individual", tools.initRepeat, creator.Individual, toolbox.attr_bool, self.size)
             toolbox.register("population", tools.initRepeat, list, toolbox.individual)
             toolbox.register("evaluate", self.computeScore)
             toolbox.register("mate", tools.cxOnePoint)
