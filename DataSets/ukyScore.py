@@ -141,7 +141,7 @@ class data_set:
         self.trainingLabels = self.labels[split == 1]
         self.validationLabels = self.labels[split == 0]
 
-
+'''
 class geneticOptimizer():
     """
     A class for the optimizer.
@@ -203,3 +203,4 @@ class geneticOptimizer():
         for ind, fit in zip(invalid_ind, self.fitnesses):
             ind.fitness.values = fit
         self.pop[:] = offspring
+'''
