@@ -1,4 +1,4 @@
-import ukyScore
+importlib.reload(ukyScore)
 import pandas as pd
 
 picklePrintName = '/home/brian/Desktop/MLmodeling/DataSets/dekois/11betaHSD1_unsplitDataFrame.pkl'
