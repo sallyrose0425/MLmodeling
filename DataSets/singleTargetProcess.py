@@ -22,8 +22,7 @@ sizeBound = int(np.sqrt(mem.available / 8)/safetyFactor)
 
 
 def finger(mol):
-    #fPrint = FingerprintMols.FingerprintMol(mol)
-    fprint = AllChem.GetMorganFingerprintAsBitVect( mol, 2 )
+    fprint = AllChem.GetMorganFingerprintAsBitVect(mol, 2)
     return list(fprint)
 
 
@@ -59,17 +58,16 @@ def main(dataset, target_id):
     else:
         print('Invalid dataset specified. Did you mean MUV, dekois, or DUDE?')
         return
+
     # TODO create fingerprints
     # TODO attempt distance matrix
     # TODO create data_set
     # TODO run optimizer
-    # TODO compute score
-    # TODO train model
-    # TODO collect stats on model performance
+
 
 
 if __name__ == '__main__':
     if len(sys.argv) > 2:
-        main(sys.argv[1], sys.argv[1])
+        main(sys.argv[1], sys.argv[2])
     else:
         print("Specify dataset and target...")
