@@ -2,6 +2,31 @@
 03/2019
 by Brian Davis and Sally Ellingson
 with funds from grant ####.
+
+Example usage:
+
+    from ukySplit import ukyDataSet
+
+    # Making artificial data:
+    X = np.random.sample((100,10))
+    y = np.random.randint(2, size=100)
+    attr_df = pd.DataFrame(np.array([hex(t) for t in range(100)]), columns=['smiles_col'])
+    class Dset:
+        def __init__(self, X, y):
+            self.X = X
+            self.y = y
+    dataset = Dset(X,y)
+
+    # Creating the ukyDataset, running optimizer, and splitting the data set:
+    data = ukyDataSet(dataset.X, dataset.y, ids=attr_df['smiles_col'].values, Metric='jaccard')
+    train_cv, test = data.splitData()
+
+
+Example output:
+
+    -- Generation 0 -- Time (hrs): 0.0002 -- Min score: 0.0 -- Mean score: 0.0
+    -- Unique Valid splits: 14/250 -- Var splits: 0.1574
+
 """
 
 import warnings
@@ -16,7 +41,6 @@ from sklearn.metrics.pairwise import pairwise_distances_argmin_min
 from deap import base
 from deap import creator
 from deap import tools
-
 
 safetyFactor = 3.75  # (3.75) Fraction of avaliable RAM to use for distance matrix computation
 sizeBound = int(np.sqrt(psutil.virtual_memory().available / 8)/safetyFactor)
