@@ -45,8 +45,8 @@ def makePrints(s):
         print('Unable to open...')
         return
 
-# target_id = '11betaHSD1'
-# dataset = 'dekois'
+ target_id = '11betaHSD1'
+ dataset = 'dekois'
 
 
 def main(dataset, target_id):
