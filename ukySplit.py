@@ -127,11 +127,11 @@ class ukyDataSet:
         A method for the genetic optimizer.
 
         Parameters:
-            POPSIZE = 1000 #(250) Number of active individuals in a generation
-            INDPB = 0.075 #(0.05) Percent of individual bits randomly flipped
-            TOURNSIZE = 3 #(3) Size of selection tournaments
-            CXPB = 0.5 #(0.5) Probability with which two individuals are crossed
-            MUTPB = 0.4 #(0.2) Probability for mutating an individual
+            POPSIZE -(250)- Number of active individuals in a generation
+            INDPB -(0.075)- Percent of individual bits randomly flipped
+            TOURNSIZE -(3)- Size of selection tournaments
+            CXPB -(0.5)- Probability with which two individuals are crossed
+            MUTPB -(0.4)- Probability for mutating an individual
         """
 
         t0 = time()
@@ -201,14 +201,15 @@ class ukyDataSet:
                       + ' -- Var splits: {}'.format(np.round(var, 4))
                       )
             gen += 1
-        return pop
+        scores = [self.computeScore(split) for split in pop]
+        return pop[np.argmin(scores)]
 
     def splitData(self):
         bigFrame = pd.DataFrame(self.features)
-        bigFrame.labels = self.labels
+        bigFrame['labels'] = self.labels
         split = self.geneticOptimizer(numGens=100, printFreq=50, POPSIZE=250, TOURNSIZE=3,
                                       CXPB=0.5, MUTPB=0.4, INDPB=0.075, scoreGoal=0.02)
-        bigFrame.split = split
-        bigFrame.ids = self.ids
+        bigFrame['split'] = split
+        bigFrame['ids'] = self.ids
         return bigFrame[split == 1].drop('split', axis=1), bigFrame[split == 0].drop('split', axis=1)
 
