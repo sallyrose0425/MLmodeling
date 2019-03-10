@@ -6,6 +6,8 @@
       <sourceFolder url="file://$MODULE_DIR$/DataSets/MUV" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/DataSets" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/DataSets/dekois" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/DataSets/dekois/decoys" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/DataSets/dekois/ligands" isTestSource="false" />
     </content>
     <orderEntry type="jdk" jdkName="Python 3.6 (MLmodeling)" jdkType="Python SDK" />
     <orderEntry type="sourceFolder" forTests="false" />

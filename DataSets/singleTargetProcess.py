@@ -11,11 +11,12 @@ import numpy as np
 from rdkit import Chem
 from rdkit.Chem import AllChem
 
-from sklearn.metrics.pairwise import pairwise_distances
-#######################################################
+import ukyScore
+
+numGens = 1000  # (1000) Number of generations to run in genetic optimizer
+safetyFactor = 3  # (3) Fraction of avaliable RAM to use for distance matrix computation
 
 mem = psutil.virtual_memory()
-safetyFactor = 3  # (3)
 sizeBound = int(np.sqrt(mem.available / 8)/safetyFactor)
 """sizeBound: max size of dataset that reliably
  fits distance matrix in user's computer's memory."""
@@ -40,29 +41,50 @@ def makePrints(s):
 
 
 def main(dataset, target_id):
+    prefix = os.getcwd() + '/' + dataset + '/'
     if dataset == 'dekois':
-        active_suffix = '.sdf.gz'
-        decoys_suffix = '_Celling-v1.12_decoyset.sdf.gz'
-        files = glob.glob(dataset + '/decoys/*.sdf.gz')
-        targets = sorted(list(set([f.split('_')[0].split('/')[-1] for f in files])))
+        activeFile = prefix + 'ligands/' + target_id + '.sdf.gz'
+        decoyFile = prefix + 'decoys/' + target_id +'_Celling-v1.12_decoyset.sdf.gz'
     elif dataset == 'DUDE':
-        active_suffix = '/actives_final.sdf.gz'
-        decoys_suffix = '/decoys_final.sdf.gz'
-        files = glob.glob(dataset + '/*')
-        targets = sorted(list(set([f.split('/')[1].split('_')[0] for f in files])))
+        activeFile = prefix + target_id + '/actives_final.sdf.gz'
+        decoyFile = prefix+ target_id + '/decoys_final.sdf.gz'
     elif dataset == 'MUV':
-        active_suffix = '_actives.sdf.gz'
-        decoys_suffix = '_decoys.sdf.gz'
-        files = glob.glob(dataset + '/*.sdf.gz')
-        targets = sorted(list(set([f.split('_')[0].split('/')[-1] for f in files])))
+        activeFile = prefix + target_id + '_actives.sdf.gz'
+        decoyFile = prefix+ target_id + '_decoys.sdf.gz'
     else:
         print('Invalid dataset specified. Did you mean MUV, dekois, or DUDE?')
         return
+    decoyPrints = makePrints(decoyFile)
+    activePrints = makePrints(activeFile)
+    activePrints['Labels'] = int(1)
+    decoyPrints['Labels'] = int(0)
 
-    # TODO create fingerprints
-    # TODO attempt distance matrix
-    # TODO create data_set
-    # TODO run optimizer
+    size = decoyPrints.shape[0] + activePrints.shape[0]
+    if size > sizeBound:
+        print('{} dataset too big: {}'.format(target_id, size))
+        continue
+    fingerprints = activePrints.append(decoyPrints, ignore_index=True)
+    fingerprints.to_pickle(picklePrintName)
+    print('Saved: ' + picklePrintName)
+
+    print('Computing distance matrix...')
+    # Compute distance matrix (Jaccard)
+    with warnings.catch_warnings():
+        # Suppress warning from distance matrix computation (int->bool)
+        warnings.simplefilter("ignore")
+        if parallel:
+            distanceMatrix = pairwise_distances(
+                fingerprints.drop('Labels', axis=1),
+                metric='jaccard',
+                n_jobs=-1)
+        else:
+            distanceMatrix = pairwise_distances(
+                fingerprints.drop('Labels', axis=1),
+                metric='jaccard')
+    data = ukyScore.data_set(distanceMatrix, features)
+
+    splits = data.geneticOptimizer(numGens)
+
 
 
 
