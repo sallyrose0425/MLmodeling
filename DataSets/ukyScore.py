@@ -64,7 +64,7 @@ class data_set:
         return (balanceError < self.balanceTol) and (ratioError < self.ratioTol)
 
     def computeScore(self, split, Metric='jaccard'):
-        if not self.validSplit(split):
+        if not self.validSplit(split, self.targetRatio, self.ratioTol, self.balanceTol):
             return 2.0,
         if self.isTooBig:
             validActive = self.fingerprints[(split == 0) & (self.labels == 1)]
