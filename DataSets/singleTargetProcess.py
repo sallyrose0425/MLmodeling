@@ -45,11 +45,10 @@ def makePrints(s):
         print('Unable to open...')
         return
 
- target_id = '11betaHSD1'
- dataset = 'dekois'
 
-
-def main(dataset, target_id):
+def main():
+    target_id = '11betaHSD1'
+    dataset = 'dekois'
     prefix = os.getcwd() + '/DataSets/' + dataset + '/'
     if dataset == 'dekois':
         activeFile = prefix + 'ligands/' + target_id + '.sdf.gz'
@@ -86,7 +85,11 @@ def main(dataset, target_id):
 
 
 if __name__ == '__main__':
+    main()
+"""
+if __name__ == '__main__':
     if len(sys.argv) > 2:
         main(sys.argv[1], sys.argv[2])
     else:
         print("Specify dataset and target...")
+"""
