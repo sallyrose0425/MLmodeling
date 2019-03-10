@@ -46,10 +46,8 @@ def makePrints(s):
         return
 
 
-def main():
-    target_id = '11betaHSD1'
-    dataset = 'dekois'
-    prefix = os.getcwd() + '/DataSets/' + dataset + '/'
+def main(dataset, target_id):
+    prefix = os.getcwd() + '/' + dataset + '/'
     if dataset == 'dekois':
         activeFile = prefix + 'ligands/' + target_id + '.sdf.gz'
         decoyFile = prefix + 'decoys/' + target_id + '_Celling-v1.12_decoyset.sdf.gz'
@@ -85,11 +83,7 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
-"""
-if __name__ == '__main__':
     if len(sys.argv) > 2:
         main(sys.argv[1], sys.argv[2])
     else:
         print("Specify dataset and target...")
-"""
