@@ -1,7 +1,7 @@
 import numpy as np
 import pandas as pd
 import random
-import time
+from time import time
 import warnings
 
 from sklearn.metrics.pairwise import pairwise_distances_argmin_min
@@ -14,6 +14,10 @@ from deap import tools
 
 
 ###############################################################################
+
+
+def approx(array):
+    return np.ceil(50*array)/51
 
 
 class data_set:
@@ -29,7 +33,8 @@ class data_set:
         balanceTol (0.05) Allowable deviation from balance ratio
     """
 
-    def __init__(self, distance_matrix, fPrints, targetRatio=0.8, ratioTol=0.01, balanceTol=0.05):
+    def __init__(self, distance_matrix, fPrints, targetRatio=0.8, ratioTol=0.01,
+                 balanceTol=0.05, atomwise=False, Metric='jaccard'):
         self.fingerprints = fPrints.drop('Labels', axis=1)
         self.distanceMatrix = distance_matrix
         self.labels = fPrints['Labels']
@@ -42,6 +47,8 @@ class data_set:
         self.targetRatio = targetRatio
         self.ratioTol = ratioTol
         self.balanceTol = balanceTol
+        self.atomwise = atomwise
+        self.metric = Metric
         if np.shape(distance_matrix)[0] == 0:
             self.isTooBig = True
         else:
@@ -52,18 +59,22 @@ class data_set:
         Return True if the split has the proper training/validation ratio
         for both actives and decoys
         """
+
         numTraining = np.sum(split)
+        numValidation = self.size - numTraining
         trueRatio = float(numTraining) / self.size
         ratioError = np.abs(self.targetRatio - trueRatio)
         numActives = np.sum(self.labels)
         balance = float(numActives) / self.size
         numActiveTraining = np.sum(split & self.labels)
         numActiveValidation = numActives - numActiveTraining
-        trueValidationBalance = float(numActiveValidation) / (self.size - numTraining)
+        trueValidationBalance = float(numActiveValidation) / numValidation
         balanceError = np.abs(trueValidationBalance - balance)
-        return (balanceError < self.balanceTol) and (ratioError < self.ratioTol)
+        check = (balanceError < self.balanceTol) and (ratioError < self.ratioTol)
+        nonEmpty = bool(numActiveValidation) and bool(numValidation - numActiveValidation)
+        return check and nonEmpty
 
-    def computeScore(self, split, Metric='jaccard'):
+    def computeScore(self, split):
         if not self.validSplit(split):
             return 2.0,
         if self.isTooBig:
@@ -71,12 +82,16 @@ class data_set:
             validDecoy = self.fingerprints[(split == 0) & (self.labels == 0)]
             trainActive = self.fingerprints[(split == 1) & (self.labels == 1)]
             trainDecoy = self.fingerprints[(split == 1) & (self.labels == 0)]
-            actActDistances = pairwise_distances_argmin_min(validActive, trainActive, metric=Metric)
-            actDecoyDistances = pairwise_distances_argmin_min(validActive, trainDecoy, metric=Metric)
-            activeMeanDistance = np.mean(actDecoyDistances[1] - actActDistances[1])
-            decoyActDistances = pairwise_distances_argmin_min(validDecoy, trainActive, metric=Metric)
-            decoyDecoyDistances = pairwise_distances_argmin_min(validDecoy, trainDecoy, metric=Metric)
-            decoyMeanDistance = np.mean(decoyActDistances[1] - decoyDecoyDistances[1])
+            actActDistances = pairwise_distances_argmin_min(validActive, trainActive, metric=self.metric)
+            actDecoyDistances = pairwise_distances_argmin_min(validActive, trainDecoy, metric=self.metric)
+            decoyActDistances = pairwise_distances_argmin_min(validDecoy, trainActive, metric=self.metric)
+            decoyDecoyDistances = pairwise_distances_argmin_min(validDecoy, trainDecoy, metric=self.metric)
+            if self.atomwise:
+                activeMeanDistance = np.mean(approx(actDecoyDistances[1]) - approx(actActDistances[1]))
+                decoyMeanDistance = np.mean(approx(decoyActDistances[1]) - approx(decoyDecoyDistances[1]))
+            else:
+                activeMeanDistance = np.mean(actDecoyDistances[1] - actActDistances[1])
+                decoyMeanDistance = np.mean(decoyActDistances[1] - decoyDecoyDistances[1])
             return activeMeanDistance + decoyMeanDistance
         else:
             minPosPosDist = np.amin(
@@ -88,7 +103,12 @@ class data_set:
                 self.distanceMatrix[(split == 0) & (self.labels == 0), :][:, (split == 1) & (self.labels == 1)], axis=1)
             minNegNegDist = np.amin(
                 self.distanceMatrix[(split == 0) & (self.labels == 0), :][:, (split == 1) & (self.labels == 0)], axis=1)
-            score = np.mean(minPosNegDist) + np.mean(minNegPosDist) - np.mean(minPosPosDist) - np.mean(minNegNegDist)
+            if self.atomwise:
+                score = np.mean(approx(minPosNegDist)) + np.mean(approx(minNegPosDist))\
+                        - np.mean(approx(minPosPosDist)) - np.mean(approx(minNegNegDist))
+            else:
+                score = np.mean(minPosNegDist) + np.mean(minNegPosDist)\
+                        - np.mean(minPosPosDist) - np.mean(minNegNegDist)
             return score,
 
     def randSplit(self):
@@ -96,6 +116,7 @@ class data_set:
         Produce a random training / validation split of the data
         with the probability of training being q
         """
+
         split = np.random.choice(2, size=self.size, p=[1 - self.targetRatio, self.targetRatio])
         return split
 
@@ -105,6 +126,8 @@ class data_set:
         together with the times required to compute them.
         Initializes the standard deviation, mean, compTimes.
         """
+
+        np.random.seed(42)
         t0 = time.time()
         s = 0
         while s < numSamples:
@@ -130,7 +153,8 @@ class data_set:
         self.trainingLabels = self.labels[split == 1]
         self.validationLabels = self.labels[split == 0]
 
-    def geneticOptimizer(self, numGens, POPSIZE=250, TOURNSIZE=3, CXPB=0.5, MUTPB=0.4, INDPB=0.075):
+    def geneticOptimizer(self, numGens, printFreq=100, POPSIZE=250, TOURNSIZE=3,
+                         CXPB=0.5, MUTPB=0.4, INDPB=0.075, scoreGoal=0.02):
         """
         A method for the genetic optimizer.
 
@@ -142,6 +166,7 @@ class data_set:
             MUTPB = 0.4 #(0.2) Probability for mutating an individual
         """
 
+        t0 = time()
         with warnings.catch_warnings():
             warnings.simplefilter("ignore")
             creator.create("FitnessMin", base.Fitness, weights=(-1.0,))
@@ -154,12 +179,14 @@ class data_set:
             toolbox.register("mate", tools.cxOnePoint)
             toolbox.register("mutate", tools.mutFlipBit, indpb=INDPB)
             toolbox.register("select", tools.selTournament, tournsize=TOURNSIZE)
+        np.random.seed(42)
         pop = toolbox.population(n=POPSIZE)
         fitnesses = list(map(toolbox.evaluate, pop))
         for ind, fit in zip(pop, fitnesses):
             ind.fitness.values = fit
         gen = 0
-        while gen < numGens:
+        minScore = 2.0
+        while gen < numGens and scoreGoal < minScore:
             # Select the next generation individuals
             offspring = toolbox.select(pop, len(pop))
             # Clone the selected individuals
@@ -180,5 +207,29 @@ class data_set:
             for ind, fit in zip(invalid_ind, fitnesses):
                 ind.fitness.values = fit
             pop[:] = offspring
+            if gen % printFreq == 0:
+                Pop = pd.DataFrame(pop)
+                validPop = Pop[Pop.apply(lambda x: self.validSplit(x), axis=1)]
+                validPop = validPop.drop_duplicates()
+                numUnique = len(validPop)
+                if numUnique == 0:
+                    meanScore = np.nan
+                    minScore = np.nan
+                    var = np.nan
+                else:
+                    scores = validPop.apply(lambda x: self.computeScore(x)[0], axis=1)
+                    meanScore = np.mean(scores.values)
+                    minScore = np.min(scores.values)
+                    if numUnique == 1:
+                        var = 0.0
+                    else:
+                        var = validPop.var().mean()
+                print('-- Generation {}'.format(gen)
+                      + ' -- Time (hrs): {}'.format(np.round((time() - t0)/3600, 4))
+                      + ' -- Min score: {}'.format(np.round(minScore, 4))
+                      + ' -- Mean score: {}'.format(np.round(meanScore, 4))
+                      + ' -- Unique Valid splits: {}/{}'.format(numUnique, POPSIZE)
+                      + ' -- Var splits: {}'.format(np.round(var, 4))
+                      )
             gen += 1
         return pop

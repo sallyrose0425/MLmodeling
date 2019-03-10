@@ -14,12 +14,18 @@ from sklearn.metrics import pairwise_distances
 
 import ukyScore
 
-numGens = 1  # (1000) Number of generations to run in genetic optimizer
+ATOMWISE = False  # (False) Use the atomwise approximation
+metric = 'jaccard'  # ('jaccard') Metric for use in determining fingerprint distances
+score_goal = 0.02  # (0.02) Early termination of genetic optimizer if goal is reached
+numGens = 1000  # (1000) Number of generations to run in genetic optimizer
+
+print_frequency = 100  # (100) How many generations of optimizer before printing update
 safetyFactor = 3  # (3) Fraction of avaliable RAM to use for distance matrix computation
-Metric = 'jaccard'
+
 targetRatio = 0.8
 ratioTol = 0.01
 balanceTol = 0.05
+
 
 mem = psutil.virtual_memory()
 sizeBound = int(np.sqrt(mem.available / 8)/safetyFactor)
@@ -74,8 +80,9 @@ def main(dataset, target_id):
             # Suppress warning from distance matrix computation (int->bool)
             warnings.simplefilter("ignore")
             distanceMatrix = pairwise_distances(fingerprints.drop('Labels', axis=1), metric=Metric)
-    data = ukyScore.data_set(distanceMatrix, fingerprints, targetRatio, ratioTol, balanceTol)
-    splits = data.geneticOptimizer(numGens)
+    data = ukyScore.data_set(distanceMatrix, fingerprints, targetRatio, ratioTol,
+                             balanceTol, atomwise=ATOMWISE, Metric=metric)
+    splits = data.geneticOptimizer(numGens, printFreq=print_frequency, scoreGoal=score_goal)
     scores = [data.computeScore(split) for split in splits]
     split = splits[np.argmin(scores)]
     fingerprints['split'] = split
