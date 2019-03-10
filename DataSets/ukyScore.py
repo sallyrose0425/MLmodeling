@@ -73,6 +73,7 @@ class data_set:
         decoyPrints['Labels'] = int(0)
         fPrints = activePrints.append(decoyPrints, ignore_index=True)
         self.size = fPrints.shape[0]
+        self.fingerprints = fPrints.drop('Labels', axis=1)
         if self.size > sizeBound:
             self.isTooBig = True
         else:
@@ -80,8 +81,7 @@ class data_set:
             with warnings.catch_warnings():
                 # Suppress warning from distance matrix computation (int->bool)
                 warnings.simplefilter("ignore")
-                self.distanceMatrix = pairwise_distances(fPrints.drop('Labels', axis=1), metric=Metric)
-        self.fingerprints = fPrints.drop('Labels', axis=1)
+                self.distanceMatrix = pairwise_distances(self.fingerprints, metric=Metric)
         self.labels = fPrints['Labels']
         self.bias_samples = []
         self.splits = []
