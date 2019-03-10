@@ -3,6 +3,13 @@ import pandas as pd
 import random
 from time import time
 import warnings
+import gzip
+import psutil
+
+from rdkit import Chem
+from rdkit.Chem import AllChem
+
+from sklearn.metrics import pairwise_distances
 
 from sklearn.metrics.pairwise import pairwise_distances_argmin_min
 
@@ -15,9 +22,34 @@ from deap import tools
 
 ###############################################################################
 
+safetyFactor = 3  # (3) Fraction of avaliable RAM to use for distance matrix computation
+mem = psutil.virtual_memory()
+sizeBound = int(np.sqrt(mem.available / 8)/safetyFactor)
+# sizeBound = 15100
+"""sizeBound: max size of dataset that reliably
+ fits distance matrix in user's computer's memory."""
+
 
 def approx(array):
     return np.ceil(50*array)/51
+
+
+def finger(mol):
+    fprint = AllChem.GetMorganFingerprintAsBitVect(mol, 2)
+    return list(fprint)
+
+
+def makePrints(s):
+    try:
+        inf = gzip.open(s)
+        gzsuppl = Chem.ForwardSDMolSupplier(inf)
+        mols = [x for x in gzsuppl if x is not None]
+        prints = [finger(mol) for mol in mols]
+        prints = pd.DataFrame(prints).dropna()
+        return prints
+    except:
+        print('Unable to open...')
+        return
 
 
 class data_set:
@@ -33,12 +65,24 @@ class data_set:
         balanceTol (0.05) Allowable deviation from balance ratio
     """
 
-    def __init__(self, distance_matrix, fPrints, targetRatio=0.8, ratioTol=0.01,
+    def __init__(self, activeFile, decoyFile, targetRatio=0.8, ratioTol=0.01,
                  balanceTol=0.05, atomwise=False, Metric='jaccard'):
+        decoyPrints = makePrints(decoyFile)
+        activePrints = makePrints(activeFile)
+        activePrints['Labels'] = int(1)
+        decoyPrints['Labels'] = int(0)
+        fPrints = activePrints.append(decoyPrints, ignore_index=True)
+        self.size = fPrints.shape[0]
+        if self.size > sizeBound:
+            self.isTooBig = True
+        else:
+            self.isTooBig = False
+            with warnings.catch_warnings():
+                # Suppress warning from distance matrix computation (int->bool)
+                warnings.simplefilter("ignore")
+                self.distanceMatrix = pairwise_distances(fPrints.drop('Labels', axis=1), metric=Metric)
         self.fingerprints = fPrints.drop('Labels', axis=1)
-        self.distanceMatrix = distance_matrix
         self.labels = fPrints['Labels']
-        self.size = len(self.labels)
         self.bias_samples = []
         self.splits = []
         self.score_samples = []
@@ -49,10 +93,6 @@ class data_set:
         self.balanceTol = balanceTol
         self.atomwise = atomwise
         self.metric = Metric
-        if np.shape(distance_matrix)[0] == 0:
-            self.isTooBig = True
-        else:
-            self.isTooBig = False
 
     def validSplit(self, split):
         """
