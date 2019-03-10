@@ -31,7 +31,7 @@ class data_set:
 
     def __init__(self, distance_matrix, fPrints, targetRatio=0.8, ratioTol=0.01, balanceTol=0.05):
         self.fingerprints = fPrints.drop('Labels', axis=1)
-        self.distanceMatrix = distance_matrix.values
+        self.distanceMatrix = distance_matrix
         self.labels = fPrints['Labels']
         self.size = len(self.labels)
         self.bias_samples = []

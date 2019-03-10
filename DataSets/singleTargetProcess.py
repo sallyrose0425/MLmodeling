@@ -11,13 +11,20 @@ import numpy as np
 from rdkit import Chem
 from rdkit.Chem import AllChem
 
+from sklearn.metrics import pairwise_distances
+
 import ukyScore
 
 numGens = 1  # (1000) Number of generations to run in genetic optimizer
 safetyFactor = 3  # (3) Fraction of avaliable RAM to use for distance matrix computation
+Metric = 'jaccard'
+targetRatio=0.8
+ratioTol=0.01
+balanceTol=0.05
 
 mem = psutil.virtual_memory()
 sizeBound = int(np.sqrt(mem.available / 8)/safetyFactor)
+# sizeBound = 15100
 """sizeBound: max size of dataset that reliably
  fits distance matrix in user's computer's memory."""
 
@@ -43,7 +50,7 @@ target_id = '11betaHSD1'
 dataset = 'dekois'
 
 def main(dataset, target_id):
-    prefix = os.getcwd() + '/' + dataset + '/'
+    prefix = os.getcwd() + '/DataSets/' + dataset + '/'
     if dataset == 'dekois':
         activeFile = prefix + 'ligands/' + target_id + '.sdf.gz'
         decoyFile = prefix + 'decoys/' + target_id +'_Celling-v1.12_decoyset.sdf.gz'
@@ -66,32 +73,18 @@ def main(dataset, target_id):
         print('{} dataset too big: {}'.format(target_id, size))
         continue
     fingerprints = activePrints.append(decoyPrints, ignore_index=True)
-    fingerprints.to_pickle(picklePrintName)
-    print('Saved: ' + picklePrintName)
-
-    print('Computing distance matrix...')
-    # Compute distance matrix (Jaccard)
     with warnings.catch_warnings():
         # Suppress warning from distance matrix computation (int->bool)
         warnings.simplefilter("ignore")
-        if parallel:
-            distanceMatrix = pairwise_distances(
-                fingerprints.drop('Labels', axis=1),
-                metric='jaccard',
-                n_jobs=-1)
-        else:
-            distanceMatrix = pairwise_distances(
-                fingerprints.drop('Labels', axis=1),
-                metric='jaccard')
-    data = ukyScore.data_set(distanceMatrix, features)
-
+        distanceMatrix = pairwise_distances(fingerprints.drop('Labels', axis=1), metric=Metric)
+    data = ukyScore.data_set(distanceMatrix, fingerprints, targetRatio, ratioTol, balanceTol)
     splits = data.geneticOptimizer(numGens)
 
 
 
 
 if __name__ == '__main__':
-    if len(sys.argv) > 2:
+    if len(sys.argv) > 3:
         main(sys.argv[1], sys.argv[2])
     else:
         print("Specify dataset and target...")
