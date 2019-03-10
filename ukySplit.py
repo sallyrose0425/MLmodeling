@@ -6,6 +6,8 @@ with funds from grant ####.
 Example usage:
 
     from ukySplit import ukyDataSet
+    import numpy as np
+    import pandas as pd
 
     # Making artificial data:
     X = np.random.sample((100,10))
@@ -18,14 +20,14 @@ Example usage:
     dataset = Dset(X,y)
 
     # Creating the ukyDataset, running optimizer, and splitting the data set:
-    data = ukyDataSet(dataset.X, dataset.y, ids=attr_df['smiles_col'].values, Metric='jaccard')
+    data = ukyDataSet(dataset.X, dataset.y, ids=attr_df['smiles_col'].values, Metric='euclidean')
     train_cv, test = data.splitData()
 
 
 Example output:
 
-    -- Generation 0 -- Time (hrs): 0.0002 -- Min score: 0.0 -- Mean score: 0.0
-    -- Unique Valid splits: 14/250 -- Var splits: 0.1574
+    -- Generation 0 -- Time (hrs): 0.0002 -- Min score: -0.1299
+    -- Mean score: -0.064 -- Unique Valid splits: 13/250 -- Var splits: 0.1599
 
 """
 
