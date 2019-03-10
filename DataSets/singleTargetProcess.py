@@ -13,7 +13,7 @@ from rdkit.Chem import AllChem
 
 import ukyScore
 
-numGens = 1000  # (1000) Number of generations to run in genetic optimizer
+numGens = 1  # (1000) Number of generations to run in genetic optimizer
 safetyFactor = 3  # (3) Fraction of avaliable RAM to use for distance matrix computation
 
 mem = psutil.virtual_memory()
@@ -39,6 +39,8 @@ def makePrints(s):
         print('Unable to open...')
         return
 
+target_id = '11betaHSD1'
+dataset = 'dekois'
 
 def main(dataset, target_id):
     prefix = os.getcwd() + '/' + dataset + '/'
