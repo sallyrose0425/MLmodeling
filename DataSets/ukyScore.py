@@ -220,6 +220,7 @@ class data_set:
             toolbox.register("mutate", tools.mutFlipBit, indpb=INDPB)
             toolbox.register("select", tools.selTournament, tournsize=TOURNSIZE)
         np.random.seed(42)
+        random.seed(42)
         pop = toolbox.population(n=POPSIZE)
         fitnesses = list(map(toolbox.evaluate, pop))
         for ind, fit in zip(pop, fitnesses):
