@@ -10,6 +10,7 @@ Example usage:
     import pandas as pd
 
     # Making artificial data:
+    np.random.seed(42)
     X = np.random.sample((100,10))
     y = np.random.randint(2, size=100)
     attr_df = pd.DataFrame(np.array([hex(t) for t in range(100)]), columns=['smiles_col'])
