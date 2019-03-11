@@ -62,7 +62,7 @@ class ukyDataSet:
         Feature, label, and id (SMILES) arrays
 
     Parameters:
-        targetRatio -(0.8)- the prefered training/datasetSize ratio.
+        targetRatio -(0.8)- the preferred training/datasetSize ratio.
         ratioTol -(0.01)- the percentage difference allowed between a split ratio and the target ratio.
         balanceTol -(0.05)- the percentage difference allowed between the active/decoy ratio in the total dataset
                             and the same ratio in the validation set.
