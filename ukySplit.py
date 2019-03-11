@@ -20,15 +20,17 @@ Example usage:
             self.y = y
     dataset = Dset(X,y)
 
-    # Creating the ukyDataset, running optimizer, and splitting the data set:
-    data = ukyDataSet(dataset.X, dataset.y, ids=attr_df['smiles_col'].values, Metric='euclidean')
+    # Creating the ukyDataset, running the genetic optimizer, and splitting the data set:
+    data = ukyDataSet(dataset.X, dataset.y, ids=attr_df['smiles_col'].values, atomwise=True, Metric='euclidean')
+    split = data.geneticOptimizer(numGens=100, printFreq=50, POPSIZE=250, TOURNSIZE=3,
+                                  CXPB=0.5, MUTPB=0.4, INDPB=0.075, scoreGoal=0.02)
     train_cv, test = data.splitData()
 
 
 Example output:
 
-    -- Generation 0 -- Time (hrs): 0.0002 -- Min score: -0.1299
-    -- Mean score: -0.064 -- Unique Valid splits: 13/250 -- Var splits: 0.1599
+    -- Generation 0 -- Time (hrs): 0.0002 -- Min score: -0.1018
+    -- Mean score: 0.0134 -- Unique Valid splits: 12/250 -- Var splits: 0.1609
 
 """
 
@@ -231,11 +233,9 @@ class ukyDataSet:
         scores = [self.computeScore(split) for split in pop]
         return pop[np.argmin(scores)]
 
-    def splitData(self):
+    def splitData(self, split):
         bigFrame = pd.DataFrame(self.features)
         bigFrame['labels'] = self.labels
-        split = self.geneticOptimizer(numGens=100, printFreq=50, POPSIZE=250, TOURNSIZE=3,
-                                      CXPB=0.5, MUTPB=0.4, INDPB=0.075, scoreGoal=0.02)
         bigFrame['split'] = split
         bigFrame['ids'] = self.ids
         return bigFrame[split == 1].drop('split', axis=1), bigFrame[split == 0].drop('split', axis=1)
