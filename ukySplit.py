@@ -24,7 +24,7 @@ Example usage:
     data = ukyDataSet(dataset.X, dataset.y, ids=attr_df['smiles_col'].values, atomwise=True, Metric='euclidean')
     split = data.geneticOptimizer(numGens=100, printFreq=50, POPSIZE=250, TOURNSIZE=3,
                                   CXPB=0.5, MUTPB=0.4, INDPB=0.075, scoreGoal=0.02)
-    train_cv, test = data.splitData()
+    train_cv, test = data.splitData(split)
 
 
 Example output:
