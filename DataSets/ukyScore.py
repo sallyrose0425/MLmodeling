@@ -287,7 +287,7 @@ class data_set:
 
         decActDistances = self.distanceMatrix[(split == 0) & (self.labels == 0), :][:, (split == 1) & (self.labels == 1)]
         decDecDistances = self.distanceMatrix[(split == 0) & (self.labels == 0), :][:, (split == 1) & (self.labels == 0)]
-        decWeights = weight((np.amin(decActDistances, axis=1) / np.amin(decDecDistances, axis=1)), a)
+        decWeights = weight(np.amin(decDecDistances, axis=1) / (np.amin(decActDistances, axis=1)), a)
 
         holdWeights = np.zeros(self.size)
         validActiveIndices = np.where((split == 0) & (self.labels == 1))[0]
