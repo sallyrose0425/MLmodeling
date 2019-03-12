@@ -32,7 +32,12 @@ sizeBound = int(np.sqrt(mem.available / 8)/safetyFactor)
 
 def weight(x, a, b):
     a = a**b / (1 - a**b)
+    if not np.isfinite(np.exp(a*(x-1))):
+        return 2.0
     return 2 * np.exp(a*(x-1)) / (np.exp(a*(x-1)) + 1)
+
+
+vWeight = np.vectorize(weight)
 
 
 def approx(array):
@@ -290,11 +295,11 @@ class data_set:
         else:
             actActDistances = self.distanceMatrix[(split == 0) & (self.labels == 1), :][:, (split == 1) & (self.labels == 1)]
             actDecDistances = self.distanceMatrix[(split == 0) & (self.labels == 1), :][:, (split == 1) & (self.labels == 0)]
-            actWeights = weight((np.amin(actActDistances, axis=1) / np.amin(actDecDistances, axis=1)), a, b)
+            actWeights = vWeight((np.amin(actActDistances, axis=1) / np.amin(actDecDistances, axis=1)), a, b)
 
             decActDistances = self.distanceMatrix[(split == 0) & (self.labels == 0), :][:, (split == 1) & (self.labels == 1)]
             decDecDistances = self.distanceMatrix[(split == 0) & (self.labels == 0), :][:, (split == 1) & (self.labels == 0)]
-            decWeights = weight(np.amin(decDecDistances, axis=1) / (np.amin(decActDistances, axis=1)), a, b)
+            decWeights = vWeight(np.amin(decDecDistances, axis=1) / (np.amin(decActDistances, axis=1)), a, b)
 
             holdWeights = np.zeros(self.size)
             validActiveIndices = np.where((split == 0) & (self.labels == 1))[0]
@@ -314,3 +319,26 @@ class data_set:
             trueNegativeWeight = np.sum(np.multiply(decoyValidWeights[split == 0], 1 - predictions))
             return (truePositiveWeight, activeTotalWeight - truePositiveWeight,
                     trueNegativeWeight, decoyTotalWeight -trueNegativeWeight)
+"""
+cd DataSets
+
+from importlib import reload
+import os
+import ukyScore
+import numpy as np
+dataset = 'dekois'
+target_id = '11betaHSD1'
+prefix = os.getcwd() + '/' + dataset + '/'
+activeFile = prefix + 'ligands/' + target_id + '.sdf.gz'
+decoyFile = prefix + 'decoys/' + target_id + '_Celling-v1.12_decoyset.sdf.gz'
+
+reload(ukyScore)
+
+data = ukyScore.data_set(activeFile, decoyFile)
+splits = data.geneticOptimizer(1, printFreq=50, scoreGoal=0.02)
+scores = [data.computeScore(split) for split in splits]
+split = np.array(splits[np.argmin(scores)])
+predictions = data.nearestNeighborPredictions(split)
+perf = data.weightedPerformance(split, predictions, a=1, b=0.5)
+perf
+"""
