@@ -31,7 +31,7 @@ sizeBound = int(np.sqrt(mem.available / 8)/safetyFactor)
 
 
 def weight(x, a):
-    return np.exp(a*(x-1)) / (np.exp(a*(x-1)) + 1)
+    return 2 * np.exp(a*(x-1)) / (np.exp(a*(x-1)) + 1)
 
 
 def approx(array):
