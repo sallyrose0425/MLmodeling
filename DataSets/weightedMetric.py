@@ -4,13 +4,16 @@ from ukyScore import data_set
 import numpy as np
 import pandas as pd
 
+from importlib import reload
+reload(data_set)
+
 dataset = 'dekois'
 target_id = '11betaHSD1'
 prefix = os.getcwd() + '/' + dataset + '/'
 activeFile = prefix + 'ligands/' + target_id + '.sdf.gz'
 decoyFile = prefix + 'decoys/' + target_id + '_Celling-v1.12_decoyset.sdf.gz'
 data = data_set(activeFile, decoyFile)
-splits = data.geneticOptimizer(800, printFreq=50, scoreGoal=0.02)
+splits = data.geneticOptimizer(50, printFreq=50, scoreGoal=0.02)
 scores = [data.computeScore(split) for split in splits]
 split = np.array(splits[np.argmin(scores)])
 
@@ -49,5 +52,5 @@ trueNegativeWeight = np.sum(np.multiply(decoyValidWeights[split == 0], 1 - predi
 truePositiveWeight / activeTotalWeight
 trueNegativeWeight / decoyTotalWeight
 
-perf = data.weightedPerformance(split, predictions, a=100)
+perf = data.weightedPerformance(split, predictions, a=10)
 perf[0]/perf[1], perf[2]/perf[3]
