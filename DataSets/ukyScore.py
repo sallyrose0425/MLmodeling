@@ -168,7 +168,7 @@ class data_set:
         """
 
         np.random.seed(42)
-        t0 = time.time()
+        t0 = time()
         s = 0
         while s < numSamples:
             split = self.randSplit()
@@ -178,7 +178,7 @@ class data_set:
                     self.splits.append(list(split))
                     self.score_samples.append(score)
                     s += 1
-        self.comp_time += time.time() - t0
+        self.comp_time += time() - t0
 
     def nearestNeighborPredictions(self, split):
         trainingLabels = self.labels[split == 1].reset_index(drop=True)
