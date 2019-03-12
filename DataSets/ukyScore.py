@@ -30,6 +30,10 @@ sizeBound = int(np.sqrt(mem.available / 8)/safetyFactor)
  fits distance matrix in user's computer's memory."""
 
 
+def weight(x, a):
+    return np.exp(a*(x-1)) / (np.exp(a*(x-1)) + 1)
+
+
 def approx(array):
     return np.ceil(50*array)/51
 
@@ -274,3 +278,31 @@ class data_set:
                       )
             gen += 1
         return pop
+
+    def weightedPerformance(self, split, predictions, a=2):
+
+        actActDistances = self.distanceMatrix[(split == 0) & (self.labels == 1), :][:, (split == 1) & (self.labels == 1)]
+        actDecDistances = self.distanceMatrix[(split == 0) & (self.labels == 1), :][:, (split == 1) & (self.labels == 0)]
+        actWeights = weight((np.amin(actActDistances, axis=1) / np.amin(actDecDistances, axis=1)), a)
+
+        decActDistances = self.distanceMatrix[(split == 0) & (self.labels == 0), :][:, (split == 1) & (self.labels == 1)]
+        decDecDistances = self.distanceMatrix[(split == 0) & (self.labels == 0), :][:, (split == 1) & (self.labels == 0)]
+        decWeights = weight((np.amin(decActDistances, axis=1) / np.amin(decDecDistances, axis=1)), a)
+
+        holdWeights = np.zeros(self.size)
+        validActiveIndices = np.where((split == 0) & (self.labels == 1))[0]
+        for i in range(len(validActiveIndices)):
+            holdWeights[validActiveIndices[i]] = actWeights[i]
+
+        validDecoyIndices = np.where((split == 0) & (self.labels == 0))[0]
+        for i in range(len(validDecoyIndices)):
+            holdWeights[validDecoyIndices[i]] = decWeights[i]
+
+        labels = self.labels.values
+        activeValidWeights = np.multiply(holdWeights, labels)
+        decoyValidWeights = np.multiply(holdWeights, 1 - labels)
+        activeTotalWeight = np.sum(activeValidWeights)
+        decoyTotalWeight = np.sum(decoyValidWeights)
+        truePositiveWeight = np.sum(np.multiply(activeValidWeights[split == 0], predictions))
+        trueNegativeWeight = np.sum(np.multiply(decoyValidWeights[split == 0], 1 - predictions))
+        return truePositiveWeight, activeTotalWeight, trueNegativeWeight, decoyTotalWeight

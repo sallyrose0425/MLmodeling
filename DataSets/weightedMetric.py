@@ -49,3 +49,5 @@ trueNegativeWeight = np.sum(np.multiply(decoyValidWeights[split == 0], 1 - predi
 truePositiveWeight / activeTotalWeight
 trueNegativeWeight / decoyTotalWeight
 
+perf = data.weightedPerformance(split, predictions, a=100)
+perf[0]/perf[1], perf[2]/perf[3]
