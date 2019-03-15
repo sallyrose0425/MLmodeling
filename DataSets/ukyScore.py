@@ -88,6 +88,7 @@ class data_set:
         self.balanceTol = balanceTol
         self.atomwise = atomwise
         self.metric = Metric
+        self.optRecord = []
 
     def validSplit(self, split):
         """
@@ -234,6 +235,7 @@ class data_set:
                       + ' -- Unique Valid splits: {}/{}'.format(numUnique, POPSIZE)
                       + ' -- Var splits: {}'.format(np.round(var, 4))
                       )
+                self.optRecord.append((time() - t0, minScore))
             gen += 1
         return pop
 
@@ -270,6 +272,7 @@ class data_set:
         for i in range(len(validDecoyIndices)):
             holdWeights[validDecoyIndices[i]] = decWeights[i]
         return holdWeights
+
 
 """
 cd DataSets
