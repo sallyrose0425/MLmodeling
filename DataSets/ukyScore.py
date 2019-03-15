@@ -228,7 +228,7 @@ class data_set:
                     else:
                         var = validPop.var().mean()
                 print('-- Generation {}'.format(gen)
-                      + ' -- Time (hrs): {}'.format(np.round((time() - t0)/3600, 4))
+                      + ' -- Time (sec): {}'.format(np.round((time() - t0), 2))
                       + ' -- Min score: {}'.format(np.round(minScore, 4))
                       + ' -- Mean score: {}'.format(np.round(meanScore, 4))
                       + ' -- Unique Valid splits: {}/{}'.format(numUnique, POPSIZE)
