@@ -271,7 +271,6 @@ class data_set:
             holdWeights[validDecoyIndices[i]] = decWeights[i]
         return holdWeights
 
-
 """
 cd DataSets
 
@@ -288,7 +287,7 @@ decoyFile = prefix + 'decoys/' + target_id + '_Celling-v1.12_decoyset.sdf.gz'
 reload(ukyScore)
 
 data = ukyScore.data_set(activeFile, decoyFile, balanceTol=0.01)
-splits = data.geneticOptimizer(0, printFreq=50, scoreGoal=0.02)
+splits = data.geneticOptimizer(10000, printFreq=50, scoreGoal=0.02)
 scores = [data.computeScore(split) for split in splits]
 split = np.array(splits[np.argmin(scores)])
 
