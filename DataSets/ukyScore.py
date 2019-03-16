@@ -157,7 +157,7 @@ class data_set:
         return split
 
     def geneticOptimizer(self, numGens, printFreq=100, POPSIZE=1000, TOURNSIZE=3,
-                         CXPB=0.5, MUTPB=0.4, INDPB=0.075, scoreGoal=0.02):
+                         CXPB=0.0, MUTPB=0.4, INDPB=0.075, scoreGoal=0.02):
         """
         A method for the genetic optimizer.
 

@@ -24,12 +24,13 @@ def nnPrediction(x, p=1):
 
 
 columnNames = ['target_id', 'rfF1', 'rfF1_weighted', 'rfAUC', 'rfAUC_weighted',
-               'nnF1', 'nnF1_weighted', 'nnAUC', 'nnAUC_weighted']
+               'nnF1', 'nnF1_weighted', 'nnAUC', 'nnAUC_weighted', 'score']
 
 
 dataset = 'dekois'
 files = glob(dataset + '/*_dataPackage.pkl')
 targets = []
+optRecords = []
 for file in files:
     target_id = file.split('/')[1].split('_')[0]
     package = pd.read_pickle(file)
@@ -57,14 +58,19 @@ for file in files:
     nnAUC_weighted = roc_auc_score(validationLabels, nnProbs, sample_weight=weights)
     rfF1_weighted = f1_score(validationLabels, rfPredictions, sample_weight=weights)
     rfAUC_weighted = roc_auc_score(validationLabels, rfProbabilities, sample_weight=weights)
-    optRecord = pd.read_pickle(dataset + '/' + target_id + '_optRecord*.pkl')
+    optResult = pd.read_pickle(dataset + '/' + target_id + '_optRecord.pkl').tail(1).values
+    optScore = optResult[0, 1]
     targets.append(pd.DataFrame([target_id, rfF1, rfF1_weighted, rfAUC, rfAUC_weighted,
-                                 nnF1, nnF1_weighted, nnAUC, nnAUC_weighted]).T)
+                                 nnF1, nnF1_weighted, nnAUC, nnAUC_weighted, optScore]).T)
+    optRecords.append(pd.read_pickle(dataset + '/' + target_id + '_optRecord.pkl'))
 
 
 contribFrame = pd.concat(targets)
 contribFrame.columns = columnNames
 contribFrame = contribFrame.set_index('target_id')
+
+
+optRecords[0]
 
 
 
