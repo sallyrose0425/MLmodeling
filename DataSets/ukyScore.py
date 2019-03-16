@@ -157,7 +157,7 @@ class data_set:
         return split
 
     def geneticOptimizer(self, numGens, printFreq=100, POPSIZE=1000, TOURNSIZE=3,
-                         CXPB=0.4, MUTPB=0.4, INDPB=0.075, scoreGoal=0.02):
+                         CXPB=0.4, MUTPB=0.4, INDPB=0.075, scoreGoal=0.02, verbose=False):
         """
         A method for the genetic optimizer.
 
@@ -167,6 +167,7 @@ class data_set:
             TOURNSIZE = 3 #(3) Size of selection tournaments
             CXPB = 0.5 #(0.5) Probability with which two individuals are crossed
             MUTPB = 0.4 #(0.4) Probability for mutating an individual
+            verbose = False  # Print more statistics
         """
 
         t0 = time()
@@ -228,13 +229,19 @@ class data_set:
                         var = 0.0
                     else:
                         var = validPop.var().mean()
-                print('-- Generation {}'.format(gen)
-                      + ' -- Time (sec): {}'.format(np.round((time() - t0), 2))
-                      + ' -- Min score: {}'.format(np.round(minScore, 4))
-                      + ' -- Mean score: {}'.format(np.round(meanScore, 4))
-                      + ' -- Unique Valid splits: {}/{}'.format(numUnique, POPSIZE)
-                      + ' -- Var splits: {}'.format(np.round(var, 4))
-                      )
+                if verbose:
+                    print('-- Generation {}'.format(gen)
+                          + ' -- Time (sec): {}'.format(np.round((time() - t0), 2))
+                          + ' -- Min score: {}'.format(np.round(minScore, 4))
+                          + ' -- Mean score: {}'.format(np.round(meanScore, 4))
+                          + ' -- Unique Valid splits: {}/{}'.format(numUnique, POPSIZE)
+                          + ' -- Var splits: {}'.format(np.round(var, 4))
+                          )
+                else:
+                    print('-- Generation {}'.format(gen)
+                          + ' -- Time (sec): {}'.format(np.round((time() - t0), 2))
+                          + ' -- Min score: {}'.format(np.round(minScore, 4))
+                          )
                 self.optRecord.append((time() - t0, minScore))
             gen += 1
         return pop
@@ -282,7 +289,7 @@ import os
 import ukyScore
 import numpy as np
 dataset = 'dekois'
-target_id = '11betaHSD1'
+target_id = 'ADRB2'
 prefix = os.getcwd() + '/' + dataset + '/'
 activeFile = prefix + 'ligands/' + target_id + '.sdf.gz'
 decoyFile = prefix + 'decoys/' + target_id + '_Celling-v1.12_decoyset.sdf.gz'
@@ -290,7 +297,12 @@ decoyFile = prefix + 'decoys/' + target_id + '_Celling-v1.12_decoyset.sdf.gz'
 reload(ukyScore)
 
 data = ukyScore.data_set(activeFile, decoyFile, balanceTol=0.01)
-splits = data.geneticOptimizer(10000, printFreq=50, scoreGoal=0.02)
+
+for tournsize in np.linspace(.375, .425, num=5):
+    splits = data.geneticOptimizer(numGens=1000, printFreq=100, POPSIZE=1000, TOURNSIZE=9,
+                             CXPB=0.0, MUTPB=0.4, INDPB=0.075, scoreGoal=0.02)
+    print(data.optRecord)
+    
 scores = [data.computeScore(split) for split in splits]
 split = np.array(splits[np.argmin(scores)])
 

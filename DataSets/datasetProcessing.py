@@ -70,7 +70,7 @@ contribFrame.columns = columnNames
 contribFrame = contribFrame.set_index('target_id')
 
 
-optRecords[0]
+optRecords
 
 
 
