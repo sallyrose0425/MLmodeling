@@ -157,7 +157,7 @@ class data_set:
         return split
 
     def geneticOptimizer(self, numGens, printFreq=100, POPSIZE=1000, TOURNSIZE=3,
-                         CXPB=0.0, MUTPB=0.4, INDPB=0.075, scoreGoal=0.02):
+                         CXPB=0.4, MUTPB=0.4, INDPB=0.075, scoreGoal=0.02):
         """
         A method for the genetic optimizer.
 
@@ -166,7 +166,7 @@ class data_set:
             INDPB = 0.075 #(0.05) Percent of individual bits randomly flipped
             TOURNSIZE = 3 #(3) Size of selection tournaments
             CXPB = 0.5 #(0.5) Probability with which two individuals are crossed
-            MUTPB = 0.4 #(0.2) Probability for mutating an individual
+            MUTPB = 0.4 #(0.4) Probability for mutating an individual
         """
 
         t0 = time()
