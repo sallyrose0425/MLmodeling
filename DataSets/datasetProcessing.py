@@ -1,6 +1,7 @@
 import numpy as np
 import pandas as pd
 from glob import glob
+import warnings
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import f1_score, roc_auc_score
 
@@ -49,15 +50,18 @@ for file in files:
     rfPredictions = package[package['split'] == 0]['rfPreds']
     rfProbabilities = package[package['split'] == 0]['rfProbs']
     validationLabels = package[package['split'] == 0]['labels']
-    rfF1 = f1_score(validationLabels, rfPredictions)
-    rfAUC = roc_auc_score(validationLabels, rfProbabilities)
-    nnF1 = f1_score(validationLabels, nnPredictions)
-    nnAUC = roc_auc_score(validationLabels, nnProbs)
-    weights = package[package['split'] == 0]['weights']  # temporary weighting
-    nnF1_weighted = f1_score(validationLabels, nnPredictions, sample_weight=weights)
-    nnAUC_weighted = roc_auc_score(validationLabels, nnProbs, sample_weight=weights)
-    rfF1_weighted = f1_score(validationLabels, rfPredictions, sample_weight=weights)
-    rfAUC_weighted = roc_auc_score(validationLabels, rfProbabilities, sample_weight=weights)
+    with warnings.catch_warnings():
+        # Suppress warning from predicting no actives
+        warnings.simplefilter("ignore")
+        rfF1 = f1_score(validationLabels, rfPredictions)
+        rfAUC = roc_auc_score(validationLabels, rfProbabilities)
+        nnF1 = f1_score(validationLabels, nnPredictions)
+        nnAUC = roc_auc_score(validationLabels, nnProbs)
+        weights = package[package['split'] == 0]['weights']  # temporary weighting
+        nnF1_weighted = f1_score(validationLabels, nnPredictions, sample_weight=weights)
+        nnAUC_weighted = roc_auc_score(validationLabels, nnProbs, sample_weight=weights)
+        rfF1_weighted = f1_score(validationLabels, rfPredictions, sample_weight=weights)
+        rfAUC_weighted = roc_auc_score(validationLabels, rfProbabilities, sample_weight=weights)
     optResult = pd.read_pickle(dataset + '/' + target_id + '_optRecord.pkl').tail(1).values
     optScore = optResult[0, 1]
     targets.append(pd.DataFrame([target_id, rfF1, rfF1_weighted, rfAUC, rfAUC_weighted,

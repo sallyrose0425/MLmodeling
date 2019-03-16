@@ -300,7 +300,7 @@ data = ukyScore.data_set(activeFile, decoyFile, balanceTol=0.01)
 
 for tournsize in np.linspace(.375, .425, num=5):
     splits = data.geneticOptimizer(numGens=1000, printFreq=100, POPSIZE=1000, TOURNSIZE=9,
-                             CXPB=0.0, MUTPB=0.4, INDPB=0.075, scoreGoal=0.02)
+                             CXPB=0.0, MUTPB=0.8, INDPB=0.075, scoreGoal=0.02)
     print(data.optRecord)
     
 scores = [data.computeScore(split) for split in splits]
