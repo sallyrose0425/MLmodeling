@@ -298,56 +298,12 @@ reload(ukyScore)
 
 data = ukyScore.data_set(activeFile, decoyFile, balanceTol=0.01)
 
-for tournsize in np.linspace(.375, .425, num=5):
-    splits = data.geneticOptimizer(numGens=1000, printFreq=100, POPSIZE=1000, TOURNSIZE=9,
-                             CXPB=0.0, MUTPB=0.8, INDPB=0.075, scoreGoal=0.02)
-    print(data.optRecord)
+for cxpb in np.linspace(0.18,0.22, num=5):
+    for mutpb in np.linspace(0.38,0.42, num=5):
+        for indpb in np.linspace(0.003,0.005, num=5):
+            for tourn in range(3,5):
+                print(f'{cxpb} {mutpb} {indpb} {tourn}')
+                splits = data.geneticOptimizer(numGens=1000, printFreq=999, POPSIZE=1000, TOURNSIZE=tourn,
+                                         CXPB=cxpb, MUTPB=mutpb, INDPB=indpb, scoreGoal=0.02, verbose=False)
     
-scores = [data.computeScore(split) for split in splits]
-split = np.array(splits[np.argmin(scores)])
-
-predictions = data.nearestNeighborPredictions(split)
-perf = data.weightedPerformance(split, predictions, a=1, b=0.5)
-perf
-"""
-
-"""
-labels = data.labels.values
-activeValidWeights = np.multiply(holdWeights, labels)
-decoyValidWeights = np.multiply(holdWeights, 1 - labels)
-activeTotalWeight = np.sum(activeValidWeights)
-decoyTotalWeight = np.sum(decoyValidWeights)
-truePositiveWeight = np.sum(np.multiply(activeValidWeights[split == 0], predictions))
-trueNegativeWeight = np.sum(np.multiply(decoyValidWeights[split == 0], 1 - predictions))
-"""
-
-"""
-    def nearestNeighborPredictions(self, split):
-        trainingLabels = self.labels[split == 1].reset_index(drop=True)
-        distancesToTraining = pd.DataFrame(self.distanceMatrix[split == 0, :][:, split == 1])
-        closest = distancesToTraining.idxmin(axis=1)
-        nearestNeighbors = np.array([trainingLabels[x] for x in closest])
-        return nearestNeighbors
-    def sample(self, numSamples):
-        Produce an array of sampled biases
-        together with the times required to compute them.
-        Initializes the standard deviation, mean, compTimes
-
-        np.random.seed(42)
-        t0 = time()
-        s = 0
-        while s < numSamples:
-            split = self.randSplit()
-            if self.validSplit(split):
-                score = self.computeScore(split)
-                if not np.isnan(score):
-                    self.splits.append(list(split))
-                    self.score_samples.append(score)
-                    s += 1
-        self.comp_time += time() - t0
-    def splitData(self, split):
-        self.trainingFeatures = self.fingerprints[split == 1]
-        self.validationFeatures = self.fingerprints[split == 0]
-        self.trainingLabels = self.labels[split == 1]
-        self.validationLabels = self.labels[split == 0]
 """
