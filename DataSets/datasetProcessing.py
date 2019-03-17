@@ -24,7 +24,7 @@ def nnPrediction(x, p=1):
 
 
 columnNames = ['target_id', 'rfF1', 'rfF1_weighted', 'rfAUC', 'rfAUC_weighted',
-               'nnF1', 'nnF1_weighted', 'nnAUC', 'nnAUC_weighted']
+               'nnF1', 'nnF1_weighted', 'nnAUC', 'nnAUC_weighted', 'atomwise time', 'atomwise bias']
 
 
 dataset = 'dekois'
@@ -57,8 +57,9 @@ for file in files:
     nnAUC_weighted = roc_auc_score(validationLabels, nnProbs, sample_weight=weights)
     rfF1_weighted = f1_score(validationLabels, rfPredictions, sample_weight=weights)
     rfAUC_weighted = roc_auc_score(validationLabels, rfProbabilities, sample_weight=weights)
+    atomwiseLog = pd.read_pickle(dataset + '/' + target_id + '_atomwiseLog.pkl').tail(1).values[0]
     targets.append(pd.DataFrame([target_id, rfF1, rfF1_weighted, rfAUC, rfAUC_weighted,
-                                 nnF1, nnF1_weighted, nnAUC, nnAUC_weighted]).T)
+                                 nnF1, nnF1_weighted, nnAUC, nnAUC_weighted, atomwiseLog[0], atomwiseLog[1]]).T)
 
 
 contribFrame = pd.concat(targets)
