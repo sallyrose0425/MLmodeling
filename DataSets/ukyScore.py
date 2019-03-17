@@ -30,16 +30,6 @@ sizeBound = int(np.sqrt(mem.available / 8)/safetyFactor)
  fits distance matrix in user's computer's memory."""
 
 
-def weight(x, a, b):
-    a = a**b / (1 - a**b)
-    if not np.isfinite(np.exp(a*(x-1))):
-        return 2.0
-    return 2 * np.exp(a*(x-1)) / (np.exp(a*(x-1)) + 1)
-
-
-vWeight = np.vectorize(weight)
-
-
 def approx(array):
     return np.ceil(50*array)/51
 
@@ -89,15 +79,10 @@ class data_set:
         else:
             self.isTooBig = False
             with warnings.catch_warnings():
-                # Suppress warning from distance matrix computation (int->bool)
+                # Suppress warning from distance matrix computation (float->bool)
                 warnings.simplefilter("ignore")
                 self.distanceMatrix = pairwise_distances(self.fingerprints, metric=Metric)
         self.labels = fPrints['Labels']
-        self.bias_samples = []
-        self.splits = []
-        self.score_samples = []
-        self.times = []
-        self.comp_time = 0
         self.targetRatio = targetRatio
         self.ratioTol = ratioTol
         self.balanceTol = balanceTol
@@ -169,39 +154,6 @@ class data_set:
 
         split = np.random.choice(2, size=self.size, p=[1 - self.targetRatio, self.targetRatio])
         return split
-
-    def sample(self, numSamples):
-        """
-        Produce an array of sampled biases
-        together with the times required to compute them.
-        Initializes the standard deviation, mean, compTimes.
-        """
-
-        np.random.seed(42)
-        t0 = time()
-        s = 0
-        while s < numSamples:
-            split = self.randSplit()
-            if self.validSplit(split):
-                score = self.computeScore(split)
-                if not np.isnan(score):
-                    self.splits.append(list(split))
-                    self.score_samples.append(score)
-                    s += 1
-        self.comp_time += time() - t0
-
-    def nearestNeighborPredictions(self, split):
-        trainingLabels = self.labels[split == 1].reset_index(drop=True)
-        distancesToTraining = pd.DataFrame(self.distanceMatrix[split == 0, :][:, split == 1])
-        closest = distancesToTraining.idxmin(axis=1)
-        nearestNeighbors = np.array([trainingLabels[x] for x in closest])
-        return nearestNeighbors
-
-    def splitData(self, split):
-        self.trainingFeatures = self.fingerprints[split == 1]
-        self.validationFeatures = self.fingerprints[split == 0]
-        self.trainingLabels = self.labels[split == 1]
-        self.validationLabels = self.labels[split == 0]
 
     def geneticOptimizer(self, numGens, printFreq=100, POPSIZE=250, TOURNSIZE=3,
                          CXPB=0.5, MUTPB=0.4, INDPB=0.075, scoreGoal=0.02):
@@ -276,7 +228,7 @@ class data_set:
                     else:
                         var = validPop.var().mean()
                 print('-- Generation {}'.format(gen)
-                      + ' -- Time (hrs): {}'.format(np.round((time() - t0)/3600, 4))
+                      + ' -- Time (sec): {}'.format(np.round((time() - t0), 2))
                       + ' -- Min score: {}'.format(np.round(minScore, 4))
                       + ' -- Mean score: {}'.format(np.round(meanScore, 4))
                       + ' -- Unique Valid splits: {}/{}'.format(numUnique, POPSIZE)
@@ -285,40 +237,40 @@ class data_set:
             gen += 1
         return pop
 
-    def weightedPerformance(self, split, predictions, a=0.5, b=0.5):
-        if not ((a >= 0) and (a < 1)):
-            print('Parameter "a" must be in interval [0,1)')
-            return
-        if not b > 0:
-            print('Parameter "b" must be greater than 0')
-            return
+    def weights(self, split):
+        if self.isTooBig:
+            with warnings.catch_warnings():
+                # Suppress warning from distance matrix computation (float->bool)
+                warnings.simplefilter("ignore")
+                validActive = self.fingerprints[(split == 0) & (self.labels == 1)]
+                validDecoy = self.fingerprints[(split == 0) & (self.labels == 0)]
+                trainActive = self.fingerprints[(split == 1) & (self.labels == 1)]
+                trainDecoy = self.fingerprints[(split == 1) & (self.labels == 0)]
+            actActDistances = pairwise_distances_argmin_min(validActive, trainActive, metric=self.metric)
+            actDecDistances = pairwise_distances_argmin_min(validActive, trainDecoy, metric=self.metric)
+            decActDistances = pairwise_distances_argmin_min(validDecoy, trainActive, metric=self.metric)
+            decDecDistances = pairwise_distances_argmin_min(validDecoy, trainDecoy, metric=self.metric)
         else:
-            actActDistances = self.distanceMatrix[(split == 0) & (self.labels == 1), :][:, (split == 1) & (self.labels == 1)]
-            actDecDistances = self.distanceMatrix[(split == 0) & (self.labels == 1), :][:, (split == 1) & (self.labels == 0)]
-            actWeights = vWeight((np.amin(actActDistances, axis=1) / np.amin(actDecDistances, axis=1)), a, b)
+            actActDistances = self.distanceMatrix[(split == 0) & (self.labels == 1), :][:,
+                              (split == 1) & (self.labels == 1)]
+            actDecDistances = self.distanceMatrix[(split == 0) & (self.labels == 1), :][:,
+                              (split == 1) & (self.labels == 0)]
+            decActDistances = self.distanceMatrix[(split == 0) & (self.labels == 0), :][:,
+                              (split == 1) & (self.labels == 1)]
+            decDecDistances = self.distanceMatrix[(split == 0) & (self.labels == 0), :][:,
+                              (split == 1) & (self.labels == 0)]
+        decWeights = np.amin(decDecDistances, axis=1) / np.amin(decActDistances, axis=1)
+        actWeights = np.amin(actActDistances, axis=1) / np.amin(actDecDistances, axis=1)
+        holdWeights = np.zeros(self.size)
+        validActiveIndices = np.where((split == 0) & (self.labels == 1))[0]
+        for i in range(len(validActiveIndices)):
+            holdWeights[validActiveIndices[i]] = actWeights[i]
 
-            decActDistances = self.distanceMatrix[(split == 0) & (self.labels == 0), :][:, (split == 1) & (self.labels == 1)]
-            decDecDistances = self.distanceMatrix[(split == 0) & (self.labels == 0), :][:, (split == 1) & (self.labels == 0)]
-            decWeights = vWeight(np.amin(decDecDistances, axis=1) / (np.amin(decActDistances, axis=1)), a, b)
+        validDecoyIndices = np.where((split == 0) & (self.labels == 0))[0]
+        for i in range(len(validDecoyIndices)):
+            holdWeights[validDecoyIndices[i]] = decWeights[i]
+        return holdWeights
 
-            holdWeights = np.zeros(self.size)
-            validActiveIndices = np.where((split == 0) & (self.labels == 1))[0]
-            for i in range(len(validActiveIndices)):
-                holdWeights[validActiveIndices[i]] = actWeights[i]
-
-            validDecoyIndices = np.where((split == 0) & (self.labels == 0))[0]
-            for i in range(len(validDecoyIndices)):
-                holdWeights[validDecoyIndices[i]] = decWeights[i]
-
-            labels = self.labels.values
-            activeValidWeights = np.multiply(holdWeights, labels)
-            decoyValidWeights = np.multiply(holdWeights, 1 - labels)
-            activeTotalWeight = np.sum(activeValidWeights)
-            decoyTotalWeight = np.sum(decoyValidWeights)
-            truePositiveWeight = np.sum(np.multiply(activeValidWeights[split == 0], predictions))
-            trueNegativeWeight = np.sum(np.multiply(decoyValidWeights[split == 0], 1 - predictions))
-            return (truePositiveWeight, activeTotalWeight - truePositiveWeight,
-                    trueNegativeWeight, decoyTotalWeight -trueNegativeWeight)
 """
 cd DataSets
 
@@ -334,11 +286,53 @@ decoyFile = prefix + 'decoys/' + target_id + '_Celling-v1.12_decoyset.sdf.gz'
 
 reload(ukyScore)
 
-data = ukyScore.data_set(activeFile, decoyFile)
-splits = data.geneticOptimizer(1, printFreq=50, scoreGoal=0.02)
+data = ukyScore.data_set(activeFile, decoyFile, balanceTol=0.01)
+splits = data.geneticOptimizer(10000, printFreq=50, scoreGoal=0.02)
 scores = [data.computeScore(split) for split in splits]
 split = np.array(splits[np.argmin(scores)])
+
 predictions = data.nearestNeighborPredictions(split)
 perf = data.weightedPerformance(split, predictions, a=1, b=0.5)
 perf
+"""
+
+"""
+labels = data.labels.values
+activeValidWeights = np.multiply(holdWeights, labels)
+decoyValidWeights = np.multiply(holdWeights, 1 - labels)
+activeTotalWeight = np.sum(activeValidWeights)
+decoyTotalWeight = np.sum(decoyValidWeights)
+truePositiveWeight = np.sum(np.multiply(activeValidWeights[split == 0], predictions))
+trueNegativeWeight = np.sum(np.multiply(decoyValidWeights[split == 0], 1 - predictions))
+"""
+
+"""
+    def nearestNeighborPredictions(self, split):
+        trainingLabels = self.labels[split == 1].reset_index(drop=True)
+        distancesToTraining = pd.DataFrame(self.distanceMatrix[split == 0, :][:, split == 1])
+        closest = distancesToTraining.idxmin(axis=1)
+        nearestNeighbors = np.array([trainingLabels[x] for x in closest])
+        return nearestNeighbors
+    def sample(self, numSamples):
+        Produce an array of sampled biases
+        together with the times required to compute them.
+        Initializes the standard deviation, mean, compTimes
+
+        np.random.seed(42)
+        t0 = time()
+        s = 0
+        while s < numSamples:
+            split = self.randSplit()
+            if self.validSplit(split):
+                score = self.computeScore(split)
+                if not np.isnan(score):
+                    self.splits.append(list(split))
+                    self.score_samples.append(score)
+                    s += 1
+        self.comp_time += time() - t0
+    def splitData(self, split):
+        self.trainingFeatures = self.fingerprints[split == 1]
+        self.validationFeatures = self.fingerprints[split == 0]
+        self.trainingLabels = self.labels[split == 1]
+        self.validationLabels = self.labels[split == 0]
 """

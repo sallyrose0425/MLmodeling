@@ -23,10 +23,10 @@ def main(dataset, target_id):
         decoyFile = prefix + 'decoys/' + target_id + '_Celling-v1.12_decoyset.sdf.gz'
     elif dataset == 'DUDE':
         activeFile = prefix + target_id + '/actives_final.sdf.gz'
-        decoyFile = prefix+ target_id + '/decoys_final.sdf.gz'
+        decoyFile = prefix + target_id + '/decoys_final.sdf.gz'
     elif dataset == 'MUV':
         activeFile = prefix + target_id + '_actives.sdf.gz'
-        decoyFile = prefix+ target_id + '_decoys.sdf.gz'
+        decoyFile = prefix + target_id + '_decoys.sdf.gz'
     else:
         print('Invalid dataset specified. Did you mean MUV, dekois, or DUDE?')
         return
@@ -36,6 +36,7 @@ def main(dataset, target_id):
     split = splits[np.argmin(scores)]
     data.fingerprints['labels'] = data.labels
     data.fingerprints['split'] = split
+    data.fingerprints['weights'] = data.weights(split)
     pd.to_pickle(data.fingerprints, prefix + target_id + '_dataPackage.pkl')
 
 
