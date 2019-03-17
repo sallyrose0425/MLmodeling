@@ -152,8 +152,10 @@ class data_set:
         Produce a random training / validation split of the data
         with the probability of training being q
         """
-
-        split = np.random.choice(2, size=self.size, p=[1 - self.targetRatio, self.targetRatio])
+        valid = False
+        while not valid:
+            split = np.random.choice(2, size=self.size, p=[1 - self.targetRatio, self.targetRatio])
+            valid = self.validSplit(split)
         return split
 
     def geneticOptimizer(self, numGens, printFreq=100, POPSIZE=1000, TOURNSIZE=3,
