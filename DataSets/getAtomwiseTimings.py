@@ -20,5 +20,5 @@ for target_id in targets:
     for string in targetOutString:
         s, t = string.split('minObj= ')
         acumLog.append((float(s.split(' sec')[0]), float(t.split('\n')[0])))
-    pd.DataFrame(acumLog).to_pickle(prefix + target_id + 'atomwiseLog.pkl')
+    pd.DataFrame(acumLog).to_pickle(prefix + target_id + '_atomwiseLog.pkl')
 
