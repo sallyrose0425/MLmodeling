@@ -4,7 +4,6 @@ from glob import glob
 import warnings
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import f1_score, roc_auc_score
-
 import matplotlib.pyplot as plt
 
 
@@ -63,11 +62,22 @@ for file in files:
         nnAUC_weighted = roc_auc_score(validationLabels, nnProbs, sample_weight=weights)
         rfF1_weighted = f1_score(validationLabels, rfPredictions, sample_weight=weights)
         rfAUC_weighted = roc_auc_score(validationLabels, rfProbabilities, sample_weight=weights)
-    optResult = pd.read_pickle(dataset + '/' + target_id + '_optRecord.pkl').tail(1).values
-    optScore = optResult[0, 1]
-    atomwiseLog = pd.read_pickle(dataset + '/' + target_id + '_atomwiseLog.pkl').tail(1).values[0]
+    log = pd.read_pickle(dataset + '/' + target_id + '_optRecord.pkl')
+    Alog = pd.read_pickle(dataset + '/' + target_id + '_atomwiseLog.pkl')
+    optScore = log.tail(1).values[0, 1]
+    atomwiseLog = Alog.tail(1).values[0]
+    log = log.values
+    Alog = Alog.values
     targets.append(pd.DataFrame([target_id, rfF1, rfF1_weighted, rfAUC, rfAUC_weighted,
                                  nnF1, nnF1_weighted, nnAUC, nnAUC_weighted, optScore, atomwiseLog[0], atomwiseLog[1]]).T)
+    plt.figure()
+    plt.plot(log[:, 0], log[:, 1], 'r', label='ukyOpt')
+    plt.plot(Alog[:, 0], Alog[:, 1], 'k', label='Atomwise')
+    plt.xlabel('Time (sec)')
+    plt.ylabel('Score')
+    plt.title(target_id)
+    plt.legend()
+    plt.savefig(dataset + '/' + target_id + '_opts')
 
 
 contribFrame = pd.concat(targets)
@@ -95,6 +105,7 @@ plt.ylabel('NN AUC')
 plt.subplots_adjust(top=0.92, bottom=0.12, left=0.10, right=0.95, hspace=0.25,
                     wspace=0.35)
 plt.savefig(dataset + '/' + 'scoreScatter')
+
 
 
 
