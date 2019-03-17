@@ -25,13 +25,12 @@ def nnPrediction(x, p=1):
 
 
 columnNames = ['target_id', 'rfF1', 'rfF1_weighted', 'rfAUC', 'rfAUC_weighted',
-               'nnF1', 'nnF1_weighted', 'nnAUC', 'nnAUC_weighted', 'score']
+               'nnF1', 'nnF1_weighted', 'nnAUC', 'nnAUC_weighted', 'optScore', 'atomwise time', 'atomwise bias']
 
 
 dataset = 'dekois'
 files = glob(dataset + '/*_dataPackage.pkl')
 targets = []
-optRecords = []
 for file in files:
     target_id = file.split('/')[1].split('_')[0]
     package = pd.read_pickle(file)
@@ -64,20 +63,14 @@ for file in files:
         rfAUC_weighted = roc_auc_score(validationLabels, rfProbabilities, sample_weight=weights)
     optResult = pd.read_pickle(dataset + '/' + target_id + '_optRecord.pkl').tail(1).values
     optScore = optResult[0, 1]
+    atomwiseLog = pd.read_pickle(dataset + '/' + target_id + '_atomwiseLog.pkl').tail(1).values[0]
     targets.append(pd.DataFrame([target_id, rfF1, rfF1_weighted, rfAUC, rfAUC_weighted,
-                                 nnF1, nnF1_weighted, nnAUC, nnAUC_weighted, optScore]).T)
-    optRecords.append(pd.read_pickle(dataset + '/' + target_id + '_optRecord.pkl'))
+                                 nnF1, nnF1_weighted, nnAUC, nnAUC_weighted, optScore, atomwiseLog[0], atomwiseLog[1]]).T)
 
 
 contribFrame = pd.concat(targets)
 contribFrame.columns = columnNames
 contribFrame = contribFrame.set_index('target_id')
-
-
-optRecords
-
-
-
 
 
 
