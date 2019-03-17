@@ -5,6 +5,8 @@ import warnings
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import f1_score, roc_auc_score
 
+import matplotlib.pyplot as plt
+
 
 def sigmoid(scalar):
     sig = (1 + np.exp(-scalar))**(-1)
@@ -71,6 +73,31 @@ for file in files:
 contribFrame = pd.concat(targets)
 contribFrame.columns = columnNames
 contribFrame = contribFrame.set_index('target_id')
+
+# save scatterplots
+plt.figure()
+plt.subplot(221)
+plt.scatter(contribFrame['optScore'], contribFrame['rfF1'], marker='.')
+plt.xlabel('Score')
+plt.ylabel('RF F1')
+plt.subplot(222)
+plt.scatter(contribFrame['optScore'], contribFrame['rfAUC'], marker='.')
+plt.xlabel('Score')
+plt.ylabel('RF AUC')
+plt.subplot(223)
+plt.scatter(contribFrame['optScore'], contribFrame['nnF1'], marker='.')
+plt.xlabel('Score')
+plt.ylabel('NN F1')
+plt.subplot(224)
+plt.scatter(contribFrame['optScore'], contribFrame['nnAUC'], marker='.')
+plt.xlabel('Score')
+plt.ylabel('NN AUC')
+plt.subplots_adjust(top=0.92, bottom=0.12, left=0.10, right=0.95, hspace=0.25,
+                    wspace=0.35)
+plt.savefig(dataset + '/' + 'scoreScatter')
+
+
+
 
 
 
