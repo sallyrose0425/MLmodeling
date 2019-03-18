@@ -42,7 +42,7 @@ for file in files:
     rf = RandomForestClassifier(n_estimators=100)
     rf.fit(trainingFeatures, trainingLabels)
     package['rfProbs'] = rf.predict_proba(features)[:, 1]
-    package['rfPreds'] = package['rfProbs'].apply(lambda x: int(x > 0.5))
+    package['rfPreds'] = package['rfProbs'].apply(lambda x: int(x > 0.1))
     package['nnPreds'] = package.apply(lambda x: nnPrediction(x, 1)[0], axis=1)
     package['nnProbs'] = package.apply(lambda x: nnPrediction(x, 2)[1], axis=1)
     nnPredictions = package[package['split'] == 0]['nnPreds']
@@ -57,7 +57,7 @@ for file in files:
         rfAUC = roc_auc_score(validationLabels, rfProbabilities)
         nnF1 = f1_score(validationLabels, nnPredictions)
         nnAUC = roc_auc_score(validationLabels, nnProbs)
-        weights = package[package['split'] == 0]['weights']  # temporary weighting
+        weights = package[package['split'] == 0]['weights']**9  # temporary weighting
         nnF1_weighted = f1_score(validationLabels, nnPredictions, sample_weight=weights)
         nnAUC_weighted = roc_auc_score(validationLabels, nnProbs, sample_weight=weights)
         rfF1_weighted = f1_score(validationLabels, rfPredictions, sample_weight=weights)
@@ -68,8 +68,8 @@ for file in files:
     atomwiseLog = Alog.tail(1).values[0]
     log = log.values
     Alog = Alog.values
-    targets.append(pd.DataFrame([target_id, rfF1, rfF1_weighted, rfAUC, rfAUC_weighted,
-                                 nnF1, nnF1_weighted, nnAUC, nnAUC_weighted, optScore, atomwiseLog[0], atomwiseLog[1]]).T)
+    targets.append(pd.DataFrame([target_id, rfF1, rfF1_weighted, rfAUC, rfAUC_weighted, nnF1, nnF1_weighted,
+                                 nnAUC, nnAUC_weighted, optScore, atomwiseLog[0], atomwiseLog[1]]).T)
     plt.figure()
     plt.plot(log[:, 0], log[:, 1], 'r', label='ukyOpt')
     plt.plot(Alog[:, 0], Alog[:, 1], 'k', label='Atomwise')
@@ -107,7 +107,27 @@ plt.subplots_adjust(top=0.92, bottom=0.12, left=0.10, right=0.95, hspace=0.25,
 plt.savefig(dataset + '/' + 'scoreScatter')
 
 
-
+# save weighted scatterplots
+plt.figure()
+plt.subplot(221)
+plt.scatter(contribFrame['optScore'].values, contribFrame['rfF1_weighted'], marker='.')
+plt.xlabel('Score')
+plt.ylabel('RF F1')
+plt.subplot(222)
+plt.scatter(contribFrame['optScore'], contribFrame['rfAUC_weighted'], marker='.')
+plt.xlabel('Score')
+plt.ylabel('RF AUC')
+plt.subplot(223)
+plt.scatter(contribFrame['optScore'],  contribFrame['nnF1_weighted'], marker='.')
+plt.xlabel('Score')
+plt.ylabel('NN F1')
+plt.subplot(224)
+plt.scatter(contribFrame['optScore'],  contribFrame['nnAUC_weighted'], marker='.')
+plt.xlabel('Score')
+plt.ylabel('NN AUC')
+plt.subplots_adjust(top=0.92, bottom=0.12, left=0.10, right=0.95, hspace=0.25,
+                    wspace=0.35)
+plt.savefig(dataset + '/' + 'weightedScoreScatter')
 
 
 
