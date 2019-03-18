@@ -43,13 +43,6 @@ def sample(n, bestSplit, bestScore):
     return bestSplit, bestScore
 
 
-# begin evolution
-t0 = time()
-while (time() - t0) < 2000:
-
-print(f'{bestScore}, {time()-t0}')
-
-
 if __name__ == '__main__':
     p = Pool(15)
     p.map(sample, (10000, bestSplit,bestScore))
