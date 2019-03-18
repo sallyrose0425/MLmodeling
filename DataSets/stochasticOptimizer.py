@@ -16,29 +16,40 @@ reload(ukyScore)
 
 data = ukyScore.data_set(activeFile, decoyFile, balanceTol=0.01)
 """
-from copy import copy
-valid = False
-while not valid:
-    split = data.randSplit()
-    valid = data.validSplit(split)
+
+from time import time
+from multiprocessing import Pool
+import os
+import ukyScore
+
+dataset = 'dekois'
+target_id = 'ADRB2'
+prefix = os.getcwd() + '/' + dataset + '/'
+activeFile = prefix + 'ligands/' + target_id + '.sdf.gz'
+decoyFile = prefix + 'decoys/' + target_id + '_Celling-v1.12_decoyset.sdf.gz'
+data = ukyScore.data_set(activeFile, decoyFile, balanceTol=0.01)
+bestSplit = data.randSplit()
 labels = data.labels.values
-minScore = data.computeScore(split)
-
-validActiveIndices = np.where((split == 0) & (labels == 1))[0]
-validDecoyIndices = np.where((split == 0) & (labels == 0))[0]
-trainActiveIndices = np.where((split == 1) & (labels == 1))[0]
-trainDecoyIndices = np.where((split == 1) & (labels == 0))[0]
-
-flipBits = (np.random.choice(validActiveIndices),
-            np.random.choice(validDecoyIndices),
-            np.random.choice(trainActiveIndices),
-            np.random.choice(trainDecoyIndices)
-            )
-splitMut = copy(split)
-for bit in list(flipBits):
-    splitMut[bit] = 1 - split[bit]
+bestScore = data.computeScore(bestSplit)
 
 
-data.computeScore(splitMut)
+def sample(n, bestSplit, bestScore):
+    for i in range(n):
+        newSplit = data.randSplit()
+        newScore = data.computeScore(newSplit)
+        if newScore < bestScore:
+            bestSplit = newSplit
+            bestScore = newScore
+    return bestSplit, bestScore
 
-minScore = 2.0
+
+# begin evolution
+t0 = time()
+while (time() - t0) < 2000:
+
+print(f'{bestScore}, {time()-t0}')
+
+
+if __name__ == '__main__':
+    p = Pool(15)
+    p.map(sample, (10000, bestSplit,bestScore))
