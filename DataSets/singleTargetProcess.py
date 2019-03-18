@@ -13,7 +13,7 @@ numGens = 1000  # (1000) Number of generations to run in genetic optimizer
 print_frequency = 100  # (100) How many generations of optimizer before printing update
 targetRatio = 0.8
 ratioTol = 0.01
-balanceTol = 0.05
+balanceTol = 0.02
 
 
 def main(dataset, target_id):
