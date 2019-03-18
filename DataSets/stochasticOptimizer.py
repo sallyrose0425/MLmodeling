@@ -33,16 +33,18 @@ labels = data.labels.values
 bestScore = data.computeScore(bestSplit)
 
 
-def sample(n, bestSplit, bestScore):
+def sample(n, split, score):
     for i in range(n):
         newSplit = data.randSplit()
         newScore = data.computeScore(newSplit)
-        if newScore < bestScore:
-            bestSplit = newSplit
-            bestScore = newScore
-    return bestSplit, bestScore
+        if newScore < score:
+            split = newSplit
+            score = newScore
+    return split, score
 
 
 if __name__ == '__main__':
-    p = Pool(15)
-    p.map(sample, (10000, bestSplit,bestScore))
+    with Pool(15) as p:
+        records = p.map(sample, ([(x, bestSplit, bestScore) for x in range(1000)]))
+
+
