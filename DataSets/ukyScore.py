@@ -155,7 +155,7 @@ class data_set:
             else:
                 scores = np.mean(minPosNegDist) - np.mean(minPosPosDist),\
                          np.mean(minNegPosDist) - np.mean(minNegNegDist)
-            return scores
+            return scores[0], scores[1]
 
     def objectiveFunction(self, split):
         x, y = self.computeScores(split)
@@ -316,26 +316,21 @@ class data_set:
 """
 cd DataSets
 
-from importlib import reload
 import os
 import ukyScore
 import numpy as np
 dataset = 'dekois'
 target_id = 'ADRB2'
-prefix = os.getcwd() + '/' + dataset + '/'
+
+prefix = os.getcwd() + '/DataSets/' + dataset + '/'
 activeFile = prefix + 'ligands/' + target_id + '.sdf.gz'
 decoyFile = prefix + 'decoys/' + target_id + '_Celling-v1.12_decoyset.sdf.gz'
 
-reload(ukyScore)
 
 data = ukyScore.data_set(activeFile, decoyFile, balanceTol=0.01)
+splits = data.geneticOptimizer(numGens=1000, printFreq=50, POPSIZE=1000, scoreGoal=0.01, verbose=False)
 
-for cxpb in np.linspace(0.18,0.22, num=5):
-    for mutpb in np.linspace(0.38,0.42, num=5):
-        for indpb in np.linspace(0.003,0.005, num=5):
-            for tourn in range(3,5):
-                print(f'{cxpb} {mutpb} {indpb} {tourn}')
-                splits = data.geneticOptimizer(numGens=1000, printFreq=999, POPSIZE=1000, TOURNSIZE=tourn,
-                                         CXPB=cxpb, MUTPB=mutpb, INDPB=indpb, scoreGoal=0.02, verbose=False)
-    
+from importlib import reload
+reload(ukyScore)    
 """
+/home/brian/PycharmProjects/MLmodeling/DataSets/dekois/ligands/ADRB2.sdf.gz
