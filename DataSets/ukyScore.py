@@ -71,19 +71,19 @@ class data_set:
         # Gathering fingerprints
         decoyPrints = makePrints(decoyFile)
         activePrints = makePrints(activeFile)
-								# Adding label columns
+        # Adding label columns
         activePrints['Labels'] = int(1)
         decoyPrints['Labels'] = int(0)
-								# Combining into one dataframe
+        # Combining into one dataframe
         fPrints = activePrints.append(decoyPrints, ignore_index=True)
-								# Creating useful instance variables
+        # Creating useful instance variables
         self.size = fPrints.shape[0]
         self.fingerprints = fPrints.drop('Labels', axis=1)
         if self.size > sizeBound:
             self.isTooBig = True
         else:
             self.isTooBig = False
-										  # Store distance matrix if not too big
+            # Store distance matrix if not too big
             with warnings.catch_warnings():
                 # Suppress warning from distance matrix computation (float->bool)
                 warnings.simplefilter("ignore")
@@ -94,7 +94,7 @@ class data_set:
         self.balanceTol = balanceTol
         self.atomwise = atomwise
         self.metric = Metric
-								# Initialize the optimal split and its score
+        # Initialize the optimal split and its score
         self.optRecord = []
         self.bestScore = 2.0
         self.bestSplit = np.zeros(self.size)
@@ -131,14 +131,14 @@ class data_set:
             decoyActDistances = pairwise_distances_argmin_min(validDecoy, trainActive, metric=self.metric)
             decoyDecoyDistances = pairwise_distances_argmin_min(validDecoy, trainDecoy, metric=self.metric)
             if self.atomwise:
-																# AA - AI
+                """AA - AI"""
                 activeMeanDistance = np.mean(approx(actDecoyDistances[1]) - approx(actActDistances[1]))
-                # II - IA
-																decoyMeanDistance = np.mean(approx(decoyActDistances[1]) - approx(decoyDecoyDistances[1]))
+                """II - IA"""
+                decoyMeanDistance = np.mean(approx(decoyActDistances[1]) - approx(decoyDecoyDistances[1]))
             else:
                 activeMeanDistance = np.mean(actDecoyDistances[1] - actActDistances[1])
                 decoyMeanDistance = np.mean(decoyActDistances[1] - decoyDecoyDistances[1])
-            return activeMeanDistance + decoyMeanDistance
+            return activeMeanDistance, decoyMeanDistance
         else:
             minPosPosDist = np.amin(
                 self.distanceMatrix[(split == 0) & (self.labels == 1), :][:, (split == 1) & (self.labels == 1)], axis=1)
@@ -197,15 +197,13 @@ class data_set:
             CXPB = 0.5 #(0.5) Probability with which two individuals are crossed
             MUTPB = 0.4 #(0.4) Probability for mutating an individual
             verbose = False  #(False) Print more statistics
-        
-								Taken (with minor changes) from example code:
-								https://deap.readthedocs.io/en/master/examples/ga_onemax.html
-								"""
+        Taken (with minor changes) from example code:
+        https://deap.readthedocs.io/en/master/examples/ga_onemax.html"""
 
         t0 = time()
         with warnings.catch_warnings():
             warnings.simplefilter("ignore")
-										  # Create optimizer tools
+            # Create optimizer tools
             creator.create("FitnessMin", base.Fitness, weights=(-1.0,))
             creator.create("Individual", np.ndarray, fitness=creator.FitnessMin)
             toolbox = base.Toolbox()
@@ -217,10 +215,9 @@ class data_set:
             toolbox.register("mutate", tools.mutFlipBit, indpb=INDPB)
             toolbox.register("select", tools.selTournament, tournsize=TOURNSIZE)
         # Set random seed for reproducibility
-								np.random.seed(seed)
+        np.random.seed(seed)
         random.seed(seed)
         pop = toolbox.population(n=POPSIZE)
-								# Future work: initialize with valid population (not random)
         fitnesses = list(map(toolbox.evaluate, pop))
         for ind, fit in zip(pop, fitnesses):
             ind.fitness.values = fit
