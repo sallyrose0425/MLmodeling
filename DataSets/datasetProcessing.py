@@ -70,16 +70,16 @@ for file in files:
     atomwiseLog = Alog.tail(1).values[0]
     log = log.values
     Alog = Alog.values
-    targets.append(pd.DataFrame([target_id, rfF1, rfF1_weighted, rfAUC, rfAUC_weighted, nnF1, nnF1_weighted,
+    targets.append(pd.DataFrame([target_id, rfF1, rfF1_weighted, rfAUC, rfAUC_weighted, nnF1, nnF1_weighted,\
                                  nnAUC, nnAUC_weighted, optScore, atomwiseLog[0], atomwiseLog[1]]).T)
     plt.figure()
-    plt.plot(log[:, 0], log[:, 1], 'r', label='ukyOpt')
+    plt.plot(log[:, 0], log[:, 3], 'r', label='ukyOpt')
     plt.plot(Alog[:, 0], Alog[:, 1], 'k', label='Atomwise')
     plt.xlabel('Time (sec)')
     plt.ylabel('Score')
     plt.title(target_id)
     plt.legend()
-    plt.savefig(dataset + '/' + target_id + '_opts')
+    plt.savefig(os.getcwd() + '/DataSets/' + dataset + '/' + target_id + '_opts')
 
 
 contribFrame = pd.concat(targets)
