@@ -42,7 +42,7 @@ def main(dataset, target_id):
     data.fingerprints['split'] = split
     data.fingerprints['weights'] = data.weights(split)
     pd.to_pickle(data.fingerprints, prefix + target_id + '_dataPackage.pkl')
-    pd.to_pickle(pd.DataFrame(data.optRecord), prefix + target_id + '_optRecord.pkl')
+    pd.to_pickle(pd.DataFrame(data.optRecord, columns=['time', 'AA-AI', 'II-IA', 'score']), prefix + target_id + '_optRecord.pkl')
 
 
 if __name__ == '__main__':

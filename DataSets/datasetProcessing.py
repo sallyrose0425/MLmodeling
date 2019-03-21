@@ -1,3 +1,4 @@
+import os
 import numpy as np
 import pandas as pd
 from glob import glob
@@ -30,10 +31,10 @@ columnNames = ['target_id', 'rfF1', 'rfF1_weighted', 'rfAUC', 'rfAUC_weighted',
 
 
 dataset = 'dekois'
-files = glob(dataset + '/*_dataPackage.pkl')
+files = glob(os.getcwd() + '/DataSets/' + dataset + '/*_dataPackage.pkl')
 targets = []
 for file in files:
-    target_id = file.split('/')[1].split('_')[0]
+    target_id = file.split('/')[-1].split('_')[0]
     package = pd.read_pickle(file)
     features = package.drop(['split', 'labels', 'weights'], axis=1)
     training = package[package['split'] == 1]
@@ -62,7 +63,8 @@ for file in files:
         nnAUC_weighted = roc_auc_score(validationLabels, nnProbs, sample_weight=weights)
         rfF1_weighted = f1_score(validationLabels, rfPredictions, sample_weight=weights)
         rfAUC_weighted = roc_auc_score(validationLabels, rfProbabilities, sample_weight=weights)
-    log = pd.read_pickle(dataset + '/' + target_id + '_optRecord.pkl')
+    log = pd.read_pickle(os.getcwd() + '/DataSets/' + dataset + '/' + target_id + '_optRecord.pkl')
+    log.columns()
     Alog = pd.read_pickle(dataset + '/' + target_id + '_atomwiseLog.pkl')
     optScore = log.tail(1).values[0, 1]
     atomwiseLog = Alog.tail(1).values[0]
