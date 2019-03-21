@@ -6,11 +6,11 @@ import numpy as np
 
 import ukyScore
 
-ATOMWISE = False  # (False) Use the atomwise approximation
+ATOMWISE = True  # (False) Use the atomwise approximation
 metric = 'jaccard'  # ('jaccard') Metric for use in determining fingerprint distances
 score_goal = 0.02  # (0.02) Early termination of genetic optimizer if goal is reached
 numGens = 1000  # (1000) Number of generations to run in genetic optimizer
-print_frequency = 100  # (100) How many generations of optimizer before printing update
+print_frequency = 50  # (100) How many generations of optimizer before printing update
 targetRatio = 0.8  # (0.8) Target training/validation ratio of the split
 ratioTol = 0.01  # (0.01) tolerance for targetRatio
 balanceTol = 0.02  # (0.02) Tolerance for active/decoy ratio in validations set relative to total data set
