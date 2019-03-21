@@ -21,6 +21,7 @@ from deap import tools
 
 
 ###############################################################################
+seed = 42  # random seed used in optimization
 
 safetyFactor = 3  # (3) Fraction of avaliable RAM to use for distance matrix computation
 mem = psutil.virtual_memory()
@@ -61,23 +62,28 @@ class data_set:
 
     Parameters:
         targetRatio (0.8) Target percentage of data used for training
-        ratioTol (0.01) Allowable deviation from SPLIT ratio
-        balanceTol (0.05) Allowable deviation from balance ratio
+        ratioTol (0.01) Allowable deviation from targetRatio
+        balanceTol (0.02) Allowable deviation from balance ratio
     """
 
     def __init__(self, activeFile, decoyFile, targetRatio=0.8, ratioTol=0.01,
                  balanceTol=0.05, atomwise=False, Metric='jaccard'):
+        # Gathering fingerprints
         decoyPrints = makePrints(decoyFile)
         activePrints = makePrints(activeFile)
+								# Adding label columns
         activePrints['Labels'] = int(1)
         decoyPrints['Labels'] = int(0)
+								# Combining into one dataframe
         fPrints = activePrints.append(decoyPrints, ignore_index=True)
+								# Creating useful instance variables
         self.size = fPrints.shape[0]
         self.fingerprints = fPrints.drop('Labels', axis=1)
         if self.size > sizeBound:
             self.isTooBig = True
         else:
             self.isTooBig = False
+										  # Store distance matrix if not too big
             with warnings.catch_warnings():
                 # Suppress warning from distance matrix computation (float->bool)
                 warnings.simplefilter("ignore")
@@ -88,6 +94,7 @@ class data_set:
         self.balanceTol = balanceTol
         self.atomwise = atomwise
         self.metric = Metric
+								# Initialize the optimal split and its score
         self.optRecord = []
         self.bestScore = 2.0
         self.bestSplit = np.zeros(self.size)
@@ -124,8 +131,10 @@ class data_set:
             decoyActDistances = pairwise_distances_argmin_min(validDecoy, trainActive, metric=self.metric)
             decoyDecoyDistances = pairwise_distances_argmin_min(validDecoy, trainDecoy, metric=self.metric)
             if self.atomwise:
+																# AA - AI
                 activeMeanDistance = np.mean(approx(actDecoyDistances[1]) - approx(actActDistances[1]))
-                decoyMeanDistance = np.mean(approx(decoyActDistances[1]) - approx(decoyDecoyDistances[1]))
+                # II - IA
+																decoyMeanDistance = np.mean(approx(decoyActDistances[1]) - approx(decoyDecoyDistances[1]))
             else:
                 activeMeanDistance = np.mean(actDecoyDistances[1] - actActDistances[1])
                 decoyMeanDistance = np.mean(decoyActDistances[1] - decoyDecoyDistances[1])
@@ -158,7 +167,7 @@ class data_set:
     def randSplit(self):
         """
         Produce a random training / validation split of the data
-        with the probability of training being q
+        with the probability of training being targetRatio
         """
         valid = False
         while not valid:
@@ -182,17 +191,21 @@ class data_set:
         A method for the genetic optimizer.
 
         Parameters:
-            POPSIZE = 1000 #(250) Number of active individuals in a generation
-            INDPB = 0.075 #(0.05) Percent of individual bits randomly flipped
-            TOURNSIZE = 3 #(3) Size of selection tournaments
+            POPSIZE = 1000 #(1000) Number of individuals in a generation
+            INDPB = 0.075 #(0.075) Percent of individual bits randomly flipped
+            TOURNSIZE = 4 #(4) Size of selection tournaments
             CXPB = 0.5 #(0.5) Probability with which two individuals are crossed
             MUTPB = 0.4 #(0.4) Probability for mutating an individual
-            verbose = False  # Print more statistics
-        """
+            verbose = False  #(False) Print more statistics
+        
+								Taken (with minor changes) from example code:
+								https://deap.readthedocs.io/en/master/examples/ga_onemax.html
+								"""
 
         t0 = time()
         with warnings.catch_warnings():
             warnings.simplefilter("ignore")
+										  # Create optimizer tools
             creator.create("FitnessMin", base.Fitness, weights=(-1.0,))
             creator.create("Individual", np.ndarray, fitness=creator.FitnessMin)
             toolbox = base.Toolbox()
@@ -203,9 +216,11 @@ class data_set:
             toolbox.register("mate", tools.cxOnePoint)
             toolbox.register("mutate", tools.mutFlipBit, indpb=INDPB)
             toolbox.register("select", tools.selTournament, tournsize=TOURNSIZE)
-        np.random.seed(42)
-        random.seed(42)
+        # Set random seed for reproducibility
+								np.random.seed(seed)
+        random.seed(seed)
         pop = toolbox.population(n=POPSIZE)
+								# Future work: initialize with valid population (not random)
         fitnesses = list(map(toolbox.evaluate, pop))
         for ind, fit in zip(pop, fitnesses):
             ind.fitness.values = fit

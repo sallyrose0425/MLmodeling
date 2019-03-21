@@ -11,9 +11,9 @@ metric = 'jaccard'  # ('jaccard') Metric for use in determining fingerprint dist
 score_goal = 0.02  # (0.02) Early termination of genetic optimizer if goal is reached
 numGens = 1000  # (1000) Number of generations to run in genetic optimizer
 print_frequency = 100  # (100) How many generations of optimizer before printing update
-targetRatio = 0.8
-ratioTol = 0.01
-balanceTol = 0.02
+targetRatio = 0.8  # (0.8) Target training/validation ratio of the split
+ratioTol = 0.01  # (0.01) tolerance for targetRatio
+balanceTol = 0.02  # (0.02) Tolerance for active/decoy ratio in validations set relative to total data set
 
 
 def main(dataset, target_id):
@@ -30,10 +30,14 @@ def main(dataset, target_id):
     else:
         print('Invalid dataset specified. Did you mean MUV, dekois, or DUDE?')
         return
+    # Create data_set class instance called "data"
     data = ukyScore.data_set(activeFile, decoyFile, targetRatio, ratioTol, balanceTol, atomwise=ATOMWISE, Metric=metric)
+    # Run the geneticOptimizer method on data
     splits = data.geneticOptimizer(numGens, printFreq=print_frequency, scoreGoal=score_goal)
+    # Grab optimal split from polulation
     scores = [data.objectiveFunction(split) for split in splits]
     split = splits[np.argmin(scores)]
+    # Record features, labels, split, and some metrics
     data.fingerprints['labels'] = data.labels
     data.fingerprints['split'] = split
     data.fingerprints['weights'] = data.weights(split)
