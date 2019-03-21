@@ -187,7 +187,7 @@ class data_set:
         return self.bestScore
 
     def geneticOptimizer(self, numGens, printFreq=100, POPSIZE=1000, TOURNSIZE=4,
-                         CXPB=0.18, MUTPB=0.39, INDPB=0.005, scoreGoal=0.02, verbose=False):
+                         CXPB=0.18, MUTPB=0.39, INDPB=0.005, scoreGoal=0.01, verbose=False):
         """
         A method for the genetic optimizer.
 
@@ -325,7 +325,7 @@ activeFile = prefix + 'ligands/' + target_id + '.sdf.gz'
 decoyFile = prefix + 'decoys/' + target_id + '_Celling-v1.12_decoyset.sdf.gz'
 
 data = ukyScore.data_set(activeFile, decoyFile, balanceTol=0.01, atomwise=True)
-splits = data.geneticOptimizer(numGens=100, printFreq=50, POPSIZE=1000, scoreGoal=0.01, verbose=False)
+splits = data.geneticOptimizer(numGens=100, printFreq=50, POPSIZE=100, scoreGoal=0.01, verbose=False)
 
 from importlib import reload
 reload(ukyScore) 
