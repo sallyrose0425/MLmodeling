@@ -158,7 +158,8 @@ class data_set:
             return scores[0], scores[1]
 
     def objectiveFunction(self, split):
-        x, y = self.computeScores(split)
+        x = self.computeScores(split)[0]
+        y = self.computeScores(split)[1]
         if self.atomwise:
             return x + y
         else:
@@ -314,22 +315,21 @@ class data_set:
 
 
 """
-cd DataSets
 
 import os
 import ukyScore
 import numpy as np
 dataset = 'dekois'
 target_id = 'ADRB2'
-
 prefix = os.getcwd() + '/DataSets/' + dataset + '/'
 activeFile = prefix + 'ligands/' + target_id + '.sdf.gz'
 decoyFile = prefix + 'decoys/' + target_id + '_Celling-v1.12_decoyset.sdf.gz'
-
 
 data = ukyScore.data_set(activeFile, decoyFile, balanceTol=0.01)
 splits = data.geneticOptimizer(numGens=1000, printFreq=50, POPSIZE=1000, scoreGoal=0.01, verbose=False)
 
 from importlib import reload
-reload(ukyScore)    
+reload(ukyScore) 
+
+data.computeScores(data.randSplit())   
 """
