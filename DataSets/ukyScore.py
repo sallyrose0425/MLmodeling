@@ -246,7 +246,7 @@ class data_set:
                 ind.fitness.values = fit
             pop[:] = offspring
             if gen % printFreq == 0:
-                Pop = pd.selfFrame(pop)
+                Pop = pd.DataFrame(pop)
                 validPop = Pop[Pop.apply(lambda x: self.validSplit(x), axis=1)]
                 validPop = validPop.drop_duplicates()
                 numUnique = len(validPop)
@@ -325,7 +325,7 @@ activeFile = prefix + 'ligands/' + target_id + '.sdf.gz'
 decoyFile = prefix + 'decoys/' + target_id + '_Celling-v1.12_decoyset.sdf.gz'
 
 data = ukyScore.data_set(activeFile, decoyFile, balanceTol=0.01, atomwise=True)
-splits = data.geneticOptimizer(numGens=1000, printFreq=50, POPSIZE=1000, scoreGoal=0.01, verbose=False)
+splits = data.geneticOptimizer(numGens=100, printFreq=50, POPSIZE=1000, scoreGoal=0.01, verbose=False)
 
 from importlib import reload
 reload(ukyScore) 
