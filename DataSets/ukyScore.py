@@ -161,9 +161,9 @@ class data_set:
         x = self.computeScores(split)[0]
         y = self.computeScores(split)[1]
         if self.atomwise:
-            return x + y
+            return x + y,
         else:
-            return np.sqrt(x**2 + y**2)
+            return np.sqrt(x**2 + y**2),
 
     def randSplit(self):
         """
