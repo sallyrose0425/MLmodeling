@@ -333,4 +333,3 @@ splits = data.geneticOptimizer(numGens=1000, printFreq=50, POPSIZE=1000, scoreGo
 from importlib import reload
 reload(ukyScore)    
 """
-/home/brian/PycharmProjects/MLmodeling/DataSets/dekois/ligands/ADRB2.sdf.gz
