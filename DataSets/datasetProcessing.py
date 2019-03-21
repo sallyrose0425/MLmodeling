@@ -64,8 +64,8 @@ for file in files:
         rfF1_weighted = f1_score(validationLabels, rfPredictions, sample_weight=weights)
         rfAUC_weighted = roc_auc_score(validationLabels, rfProbabilities, sample_weight=weights)
     log = pd.read_pickle(os.getcwd() + '/DataSets/' + dataset + '/' + target_id + '_optRecord.pkl')
-    log.columns()
-    Alog = pd.read_pickle(dataset + '/' + target_id + '_atomwiseLog.pkl')
+    log = log.rename({0:'time', 1:'AA-AI', 2:'II-IA', 3:'score'}, axis=1)
+    Alog = pd.read_pickle(os.getcwd() + '/DataSets/' + dataset + '/' + target_id + '_atomwiseLog.pkl')
     optScore = log.tail(1).values[0, 1]
     atomwiseLog = Alog.tail(1).values[0]
     log = log.values

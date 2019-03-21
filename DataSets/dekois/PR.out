@@ -1,0 +1,12 @@
+usage: remove_AVE_bias2.py [-h]
+                           [-fpType {DayLight,ECFP4,ECFP6,ECFP12,AP,MACCS}]
+                           -activeMols ACTIVEMOLS -inactiveMols INACTIVEMOLS
+                           [-trainingToValidationRatio TRAININGTOVALIDATIONRATIO]
+                           [-outDir OUTDIR] [-numWorkers NUMWORKERS]
+                           [-statePickleFile STATEPICKLEFILE]
+                           [-maxIter MAXITER] [-maxNumMols MAXNUMMOLS]
+remove_AVE_bias2.py: error: argument -numWorkers: invalid int value: 'Atomwise_splits/PR'
+
+real	2m5.841s
+user	0m0.593s
+sys	0m0.107s
