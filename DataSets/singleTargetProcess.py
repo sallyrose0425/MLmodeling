@@ -32,7 +32,7 @@ def main(dataset, target_id):
         return
     data = ukyScore.data_set(activeFile, decoyFile, targetRatio, ratioTol, balanceTol, atomwise=ATOMWISE, Metric=metric)
     splits = data.geneticOptimizer(numGens, printFreq=print_frequency, scoreGoal=score_goal)
-    scores = [data.computeScore(split) for split in splits]
+    scores = [data.objectiveFunction(split) for split in splits]
     split = splits[np.argmin(scores)]
     data.fingerprints['labels'] = data.labels
     data.fingerprints['split'] = split

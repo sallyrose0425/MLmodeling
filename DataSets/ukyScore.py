@@ -97,7 +97,6 @@ class data_set:
         Return True if the split has the proper training/validation ratio
         for both actives and decoys
         """
-
         numTraining = np.sum(split)
         numValidation = self.size - numTraining
         trueRatio = float(numTraining) / self.size
@@ -112,7 +111,7 @@ class data_set:
         nonEmpty = bool(numActiveValidation) and bool(numValidation - numActiveValidation)
         return check and nonEmpty
 
-    def computeScore(self, split):
+    def computeScores(self, split):
         if not self.validSplit(split):
             return 2.0,
         if self.isTooBig:
@@ -142,12 +141,19 @@ class data_set:
             minNegNegDist = np.amin(
                 self.distanceMatrix[(split == 0) & (self.labels == 0), :][:, (split == 1) & (self.labels == 0)], axis=1)
             if self.atomwise:
-                score = np.mean(approx(minPosNegDist)) + np.mean(approx(minNegPosDist))\
-                        - np.mean(approx(minPosPosDist)) - np.mean(approx(minNegNegDist))
+                scores = np.mean(approx(minPosNegDist)) - np.mean(approx(minPosPosDist)),\
+                         np.mean(approx(minNegPosDist)) - np.mean(approx(minNegNegDist))
             else:
-                score = np.mean(minPosNegDist) + np.mean(minNegPosDist)\
-                        - np.mean(minPosPosDist) - np.mean(minNegNegDist)
-            return score,
+                scores = np.mean(minPosNegDist) - np.mean(minPosPosDist),\
+                         np.mean(minNegPosDist) - np.mean(minNegNegDist)
+            return scores
+
+    def objectiveFunction(self, split):
+        x, y = self.computeScores(split)
+        if self.atomwise:
+            return x + y
+        else:
+            return np.sqrt(x**2 + y**2)
 
     def randSplit(self):
         """
@@ -164,7 +170,7 @@ class data_set:
         np.random.seed()
         for i in range(numSamples):
             newSplit = self.randSplit()
-            newScore = self.computeScore(newSplit)[0]
+            newScore = self.objectiveFunction(newSplit)[0]
             if newScore < self.bestScore:
                 self.bestSplit = newSplit
                 self.bestScore = newScore
@@ -193,7 +199,7 @@ class data_set:
             toolbox.register("attr_bool", np.random.choice, 2, p=[1 - self.targetRatio, self.targetRatio])
             toolbox.register("individual", tools.initRepeat, creator.Individual, toolbox.attr_bool, self.size)
             toolbox.register("population", tools.initRepeat, list, toolbox.individual)
-            toolbox.register("evaluate", self.computeScore)
+            toolbox.register("evaluate", self.objectiveFunction)
             toolbox.register("mate", tools.cxOnePoint)
             toolbox.register("mutate", tools.mutFlipBit, indpb=INDPB)
             toolbox.register("select", tools.selTournament, tournsize=TOURNSIZE)
@@ -236,7 +242,7 @@ class data_set:
                     minScore = np.nan
                     var = np.nan
                 else:
-                    scores = validPop.apply(lambda x: self.computeScore(x)[0], axis=1)
+                    scores = validPop.apply(lambda x: self.objectiveFunction(x)[0], axis=1)
                     meanScore = np.mean(scores.values)
                     minScore = np.min(scores.values)
                     if numUnique == 1:
