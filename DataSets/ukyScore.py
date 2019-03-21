@@ -246,7 +246,7 @@ class data_set:
                 ind.fitness.values = fit
             pop[:] = offspring
             if gen % printFreq == 0:
-                Pop = pd.DataFrame(pop)
+                Pop = pd.selfFrame(pop)
                 validPop = Pop[Pop.apply(lambda x: self.validSplit(x), axis=1)]
                 validPop = validPop.drop_duplicates()
                 numUnique = len(validPop)
@@ -258,25 +258,23 @@ class data_set:
                     scores = validPop.apply(lambda x: self.objectiveFunction(x)[0], axis=1)
                     meanScore = np.mean(scores.values)
                     minScore = np.min(scores.values)
-
-                    if numUnique == 1:
-                        var = 0.0
-                    else:
-                        var = validPop.var().mean()
+                    optSplit = validPop[scores == minScore]
+                    scoreParts = self.computeScores(optSplit.values[0])
                 if verbose:
                     print('-- Generation {}'.format(gen)
                           + ' -- Time (sec): {}'.format(np.round((time() - t0), 2))
                           + ' -- Min score: {}'.format(np.round(minScore, 4))
+                          + f' -- Score parts: {scoreParts[0]}, {scoreParts[1]}'
                           + ' -- Mean score: {}'.format(np.round(meanScore, 4))
                           + ' -- Unique Valid splits: {}/{}'.format(numUnique, POPSIZE)
-                          + ' -- Var splits: {}'.format(np.round(var, 4))
                           )
                 else:
                     print('-- Generation {}'.format(gen)
                           + ' -- Time (sec): {}'.format(np.round((time() - t0), 2))
                           + ' -- Min score: {}'.format(np.round(minScore, 4))
+                          + f' -- Score parts: {scoreParts[0]}, {scoreParts[1]}'
                           )
-                self.optRecord.append((time() - t0, minScore))
+                self.optRecord.append((time() - t0, scoreParts[0], scoreParts[1], minScore))
             gen += 1
         return pop
 
@@ -378,8 +376,8 @@ t0 = time()
                 ind.fitness.values = fit
             pop[:] = offspring
             if gen % printFreq == 0:
-                Pop = pd.DataFrame(pop)
-                validPop = Pop[Pop.apply(lambda x: data.validSplit(x), axis=1)]
+                Pop = pd.selfFrame(pop)
+                validPop = Pop[Pop.apply(lambda x: self.validSplit(x), axis=1)]
                 validPop = validPop.drop_duplicates()
                 numUnique = len(validPop)
                 if numUnique == 0:
@@ -387,27 +385,25 @@ t0 = time()
                     minScore = np.nan
                     var = np.nan
                 else:
-                    scores = validPop.apply(lambda x: data.objectiveFunction(x)[0], axis=1)
+                    scores = validPop.apply(lambda x: self.objectiveFunction(x)[0], axis=1)
                     meanScore = np.mean(scores.values)
                     minScore = np.min(scores.values)
-                    optSplit = 
-                    if numUnique == 1:
-                        var = 0.0
-                    else:
-                        var = validPop.var().mean()
+                    optSplit = validPop[scores == minScore]
+                    scoreParts = self.computeScores(optSplit.values[0])
                 if verbose:
                     print('-- Generation {}'.format(gen)
                           + ' -- Time (sec): {}'.format(np.round((time() - t0), 2))
                           + ' -- Min score: {}'.format(np.round(minScore, 4))
+                          + f' -- Score parts: {scoreParts[0]}, {scoreParts[1]}'
                           + ' -- Mean score: {}'.format(np.round(meanScore, 4))
                           + ' -- Unique Valid splits: {}/{}'.format(numUnique, POPSIZE)
-                          + ' -- Var splits: {}'.format(np.round(var, 4))
                           )
                 else:
                     print('-- Generation {}'.format(gen)
                           + ' -- Time (sec): {}'.format(np.round((time() - t0), 2))
                           + ' -- Min score: {}'.format(np.round(minScore, 4))
+                          + f' -- Score parts: {scoreParts[0]}, {scoreParts[1]}'
                           )
-                data.optRecord.append((time() - t0, data.computeScores()))
+                self.optRecord.append((time() - t0, scoreParts[0], scoreParts[1], minScore))
             gen += 1
 """
