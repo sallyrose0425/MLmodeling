@@ -266,7 +266,7 @@ class data_set:
                     optSplit = validPop[scores == minScore]
                     scoreParts = self.computeScores(optSplit.values[0])
                 if verbose:
-                    print(f'{self.target} -- Generation {}'.format(gen)
+                    print(f'{self.target} -- Generation {gen}'
                           + ' -- Time (sec): {}'.format(np.round((time() - t0), 2))
                           + ' -- Min score: {}'.format(np.round(minScore, 4))
                           + f' -- Score parts: {scoreParts[0]}, {scoreParts[1]}'
@@ -274,7 +274,7 @@ class data_set:
                           + ' -- Unique Valid splits: {}/{}'.format(numUnique, POPSIZE)
                           )
                 else:
-                    print(f'{self.target} -- Generation {}'.format(gen)
+                    print(f'{self.target} -- Generation {gen}'
                           + ' -- Time (sec): {}'.format(np.round((time() - t0), 2))
                           + ' -- Min score: {}'.format(np.round(minScore, 4))
                           + f' -- Score parts: {scoreParts[0]}, {scoreParts[1]}'
