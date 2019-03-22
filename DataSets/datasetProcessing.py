@@ -7,6 +7,7 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import f1_score, roc_auc_score
 import matplotlib.pyplot as plt
 from scipy.optimize import curve_fit
+from scipy import stats
 
 
 def sigmoid(scalar):
@@ -48,6 +49,7 @@ files = glob(os.getcwd() + '/DataSets/' + dataset + '/*_dataPackage.pkl')
 targets = []
 params = []
 paramsAtom = []
+aggStats = []
 for file in files:
     target_id = file.split('/')[-1].split('_')[0]
     package = pd.read_pickle(file)
@@ -79,6 +81,7 @@ for file in files:
         rfF1_weighted = f1_score(validationLabels, rfPredictions, sample_weight=weights)
         rfAUC_weighted = roc_auc_score(validationLabels, rfProbabilities, sample_weight=weights)
     samples = pd.read_pickle(os.getcwd() + '/DataSets/' + dataset + '/' + target_id + '_samples.pkl')
+    s, t, mean, var, skew, kurt = stats.describe(samples)
     log = pd.read_pickle(os.getcwd() + '/DataSets/' + dataset + '/' + target_id + '_optRecord.pkl')
     log = log.rename({0:'time', 1:'AA-AI', 2:'II-IA', 3:'score'}, axis=1)
     logNew = pd.read_pickle(os.getcwd() + '/DataSets/' + dataset + '/' + target_id + '_optRecordNewScore.pkl')
@@ -98,8 +101,10 @@ for file in files:
             modelAtom, parAtom = fitModel(Alog[1:, 0], Alog[1:, 1])
             params.append(par)
             paramsAtom.append(parAtom)
+            aggStats.append((mean, var, skew, kurt))
         except RuntimeError:
             pass
+
 
 
 # generate aggregate model plots
@@ -129,9 +134,9 @@ plt.show()
 plt.savefig(os.getcwd() + '/DataSets/' + dataset + '/' + target_id + '_optsNewScore')
 
 
-
-
-
+statsDF = pd.DataFrame(aggStats)
+combined = pd.concat([params, statsDF], axis=1)
+combined.corr().values[4:,0:4]
 
 
 contribFrame = pd.concat(targets)
