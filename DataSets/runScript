@@ -1,18 +1,18 @@
 # !/bin/bash
-python singleTargetProcess.py MUV aid858 & \ 
-python singleTargetProcess.py MUV aid832 & \ 
-python singleTargetProcess.py MUV aid689 & \ 
-python singleTargetProcess.py MUV aid692 & \ 
-python singleTargetProcess.py MUV aid548 & \ 
-python singleTargetProcess.py MUV aid652 & \ 
-python singleTargetProcess.py MUV aid846 & \ 
-python singleTargetProcess.py MUV aid852 & \ 
-python singleTargetProcess.py MUV aid810 & \ 
-python singleTargetProcess.py MUV aid713 & \ 
-python singleTargetProcess.py MUV aid733 & \ 
-python singleTargetProcess.py MUV aid859 & \ 
-python singleTargetProcess.py MUV aid466 & \ 
-python singleTargetProcess.py MUV aid737 & \ 
-python singleTargetProcess.py MUV aid644 & \ 
-python singleTargetProcess.py MUV aid600 & \ 
-python singleTargetProcess.py MUV aid712 & \ 
+
+python singleTargetProcess.py dekois CDK2 & 
+python singleTargetProcess.py dekois HIV1PR & 
+python singleTargetProcess.py dekois FKBP1A & 
+python singleTargetProcess.py dekois DHFR & 
+python singleTargetProcess.py dekois AR & 
+python singleTargetProcess.py dekois PYGL-out & 
+python singleTargetProcess.py dekois PDK1 & 
+python singleTargetProcess.py dekois ADRB2 & 
+python singleTargetProcess.py dekois 11betaHSD1 & 
+python singleTargetProcess.py dekois ALR2 & 
+python singleTargetProcess.py dekois VEGFR1 & 
+python singleTargetProcess.py dekois SRC & 
+python singleTargetProcess.py dekois PDE4B & 
+python singleTargetProcess.py dekois BCL2 & 
+python singleTargetProcess.py dekois PNP & 
+python singleTargetProcess.py dekois LCK
