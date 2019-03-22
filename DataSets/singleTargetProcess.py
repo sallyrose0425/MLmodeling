@@ -6,9 +6,9 @@ import numpy as np
 
 import ukyScore
 
-ATOMWISE = False  # (False) Use the atomwise approximation
+ATOMWISE = True  # (False) Use the atomwise approximation
 metric = 'jaccard'  # ('jaccard') Metric for use in determining fingerprint distances
-score_goal = 0.02  # (0.02) Early termination of genetic optimizer if goal is reached
+score_goal = 0.01  # (0.02) Early termination of genetic optimizer if goal is reached
 numGens = 1000  # (1000) Number of generations to run in genetic optimizer
 print_frequency = 50  # (100) How many generations of optimizer before printing update
 targetRatio = 0.8  # (0.8) Target training/validation ratio of the split
@@ -41,9 +41,11 @@ def main(dataset, target_id):
     data.fingerprints['labels'] = data.labels
     data.fingerprints['split'] = split
     data.fingerprints['weights'] = data.weights(split)
-    pd.to_pickle(data.fingerprints, prefix + target_id + '_dataPackageNewScore.pkl')
+    pd.to_pickle(data.fingerprints, prefix + target_id + '_dataPackage.pkl')
     pd.to_pickle(pd.DataFrame(data.optRecord, columns=['time', 'AA-AI', 'II-IA', 'score']),
-                 prefix + target_id + '_optRecordNewScore.pkl')
+                 prefix + target_id + '_optRecord.pkl')
+    pd.to_pickle(data.sample(100), prefix + target_id + '_samples.pkl')
+
 
 
 if __name__ == '__main__':
