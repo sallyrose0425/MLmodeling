@@ -17,7 +17,7 @@ balanceTol = 0.02  # (0.02) Tolerance for active/decoy ratio in validations set 
 
 
 def main(dataset, target_id):
-    prefix = os.getcwd() + '/DataSets/' + dataset + '/'
+    prefix = os.getcwd() + dataset + '/'
     if dataset == 'dekois':
         activeFile = prefix + 'ligands/' + target_id + '.sdf.gz'
         decoyFile = prefix + 'decoys/' + target_id + '_Celling-v1.12_decoyset.sdf.gz'
@@ -31,6 +31,7 @@ def main(dataset, target_id):
         print('Invalid dataset specified. Did you mean MUV, dekois, or DUDE?')
         return
     # Create data_set class instance called "data"
+    print(f'Creating data set {target_id}')
     data = ukyScore.data_set(activeFile, decoyFile, targetRatio, ratioTol, balanceTol, atomwise=ATOMWISE, Metric=metric)
     # Run the geneticOptimizer method on data
     splits = data.geneticOptimizer(numGens, printFreq=print_frequency, scoreGoal=score_goal)

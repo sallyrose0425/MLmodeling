@@ -81,12 +81,14 @@ class data_set:
         self.fingerprints = fPrints.drop('Labels', axis=1)
         if self.size > sizeBound:
             self.isTooBig = True
+            print('Is too big for distance Matrix')
         else:
             self.isTooBig = False
             # Store distance matrix if not too big
             with warnings.catch_warnings():
                 # Suppress warning from distance matrix computation (float->bool)
                 warnings.simplefilter("ignore")
+                print('Computing distance matrix')
                 self.distanceMatrix = pairwise_distances(self.fingerprints, metric=Metric)
         self.labels = fPrints['Labels']
         self.targetRatio = targetRatio
@@ -98,6 +100,7 @@ class data_set:
         self.optRecord = []
         self.bestScore = 2.0
         self.bestSplit = np.zeros(self.size)
+        print('Finishing initialization')
 
     def validSplit(self, split):
         """
