@@ -186,7 +186,7 @@ class data_set:
                 self.bestScore = newScore
         return self.bestScore
 
-    def geneticOptimizer(self, numGens, printFreq=100, POPSIZE=1000, TOURNSIZE=4,
+    def geneticOptimizer(self, numGens, printFreq=100, POPSIZE=500, TOURNSIZE=4,
                          CXPB=0.18, MUTPB=0.39, INDPB=0.005, scoreGoal=0.01, verbose=False):
         """
         A method for the genetic optimizer.

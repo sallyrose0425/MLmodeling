@@ -6,6 +6,7 @@ import warnings
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import f1_score, roc_auc_score
 import matplotlib.pyplot as plt
+from scipy.optimize import curve_fit
 
 
 def sigmoid(scalar):
@@ -26,6 +27,18 @@ def nnPrediction(x, p=1):
         return 1 - label, w
 
 
+def expModel(x, a, b, c, d):
+    return a + b*np.exp(-c*x) + d*x
+
+
+def fitModel(x, y):
+    popt, pcov = curve_fit(expModel, x, y, p0=(0.0, 0.5, 0.005, 0.0))
+
+    def f(z):
+        return expModel(z, *popt)
+    return f, popt
+
+
 columnNames = ['target_id', 'rfF1', 'rfF1_weighted', 'rfAUC', 'rfAUC_weighted',
                'nnF1', 'nnF1_weighted', 'nnAUC', 'nnAUC_weighted', 'optScore', 'atomwise time', 'atomwise bias']
 
@@ -33,6 +46,8 @@ columnNames = ['target_id', 'rfF1', 'rfF1_weighted', 'rfAUC', 'rfAUC_weighted',
 dataset = 'dekois'
 files = glob(os.getcwd() + '/DataSets/' + dataset + '/*_dataPackage.pkl')
 targets = []
+params = []
+paramsAtom = []
 for file in files:
     target_id = file.split('/')[-1].split('_')[0]
     package = pd.read_pickle(file)
@@ -65,21 +80,57 @@ for file in files:
         rfAUC_weighted = roc_auc_score(validationLabels, rfProbabilities, sample_weight=weights)
     log = pd.read_pickle(os.getcwd() + '/DataSets/' + dataset + '/' + target_id + '_optRecord.pkl')
     log = log.rename({0:'time', 1:'AA-AI', 2:'II-IA', 3:'score'}, axis=1)
+    logNew = pd.read_pickle(os.getcwd() + '/DataSets/' + dataset + '/' + target_id + '_optRecordNewScore.pkl')
+    logNew = logNew.rename({0:'time', 1:'AA-AI', 2:'II-IA', 3:'score'}, axis=1)
     Alog = pd.read_pickle(os.getcwd() + '/DataSets/' + dataset + '/' + target_id + '_atomwiseLog.pkl')
     optScore = log.tail(1).values[0, 1]
     atomwiseLog = Alog.tail(1).values[0]
-    log = log.values
-    Alog = Alog.values
     targets.append(pd.DataFrame([target_id, rfF1, rfF1_weighted, rfAUC, rfAUC_weighted, nnF1, nnF1_weighted,\
                                  nnAUC, nnAUC_weighted, optScore, atomwiseLog[0], atomwiseLog[1]]).T)
-    plt.figure()
-    plt.plot(log[:, 0], log[:, 3], 'r', label='ukyOpt')
-    plt.plot(Alog[:, 0], Alog[:, 1], 'k', label='Atomwise')
-    plt.xlabel('Time (sec)')
-    plt.ylabel('Score')
-    plt.title(target_id)
-    plt.legend()
-    plt.savefig(os.getcwd() + '/DataSets/' + dataset + '/' + target_id + '_opts')
+    log = log.values
+    logNew = logNew.values
+    Alog = Alog.values
+
+    if (len(log) > 4) and (len(Alog) > 4):
+        try:
+            model, par = fitModel(log[1:, 0], log[1:, 3])
+            modelAtom, parAtom = fitModel(Alog[1:, 0], Alog[1:, 1])
+            params.append(par)
+            paramsAtom.append(parAtom)
+        except RuntimeError:
+            pass
+
+
+# generate aggregate model plots
+params = pd.DataFrame(params)
+paramsAtom = pd.DataFrame(paramsAtom)
+meanParams = params.mean().values
+meanAtomParams = paramsAtom.mean().values
+X = np.linspace(9,4000, 200)
+plt.figure()
+plt.plot(X, expModel(X, *meanParams), 'b', linewidth=5, label='ukyOpt')
+plt.plot(X, expModel(X, *meanAtomParams), 'r', linewidth=5, label='Atomwise')
+plt.title('Model Means')
+plt.legend()
+plt.show()
+
+
+# generate optimizer comparison plot
+plt.figure()
+plt.plot(log[:, 0], log[:, 3], 'r', marker='^', linewidth=0, label='ukyOpt')
+plt.plot(logNew[:, 0], logNew[:, 3], 'b', marker='s', linewidth=0, label='ukyOptNew')
+plt.plot(Alog[:, 0], Alog[:, 1], 'k', marker='.', linewidth=0, label='Atomwise')
+plt.xlabel('Time (sec)')
+plt.ylabel('Score')
+plt.title(target_id)
+plt.legend()
+plt.show()
+plt.savefig(os.getcwd() + '/DataSets/' + dataset + '/' + target_id + '_optsNewScore')
+
+
+
+
+
 
 
 contribFrame = pd.concat(targets)
