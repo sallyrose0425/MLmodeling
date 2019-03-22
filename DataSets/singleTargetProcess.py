@@ -47,7 +47,6 @@ def main(dataset, target_id):
     pd.to_pickle(data.sample(100), prefix + target_id + '_samples.pkl')
 
 
-
 if __name__ == '__main__':
     if len(sys.argv) > 2:
         main(sys.argv[1], sys.argv[2])

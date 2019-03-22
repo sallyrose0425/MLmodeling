@@ -78,6 +78,7 @@ for file in files:
         nnAUC_weighted = roc_auc_score(validationLabels, nnProbs, sample_weight=weights)
         rfF1_weighted = f1_score(validationLabels, rfPredictions, sample_weight=weights)
         rfAUC_weighted = roc_auc_score(validationLabels, rfProbabilities, sample_weight=weights)
+    samples = pd.read_pickle(os.getcwd() + '/DataSets/' + dataset + '/' + target_id + '_samples.pkl')
     log = pd.read_pickle(os.getcwd() + '/DataSets/' + dataset + '/' + target_id + '_optRecord.pkl')
     log = log.rename({0:'time', 1:'AA-AI', 2:'II-IA', 3:'score'}, axis=1)
     logNew = pd.read_pickle(os.getcwd() + '/DataSets/' + dataset + '/' + target_id + '_optRecordNewScore.pkl')

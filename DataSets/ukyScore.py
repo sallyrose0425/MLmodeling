@@ -178,13 +178,12 @@ class data_set:
 
     def sample(self, numSamples):
         np.random.seed()
+        sample = []
         for i in range(numSamples):
             newSplit = self.randSplit()
             newScore = self.objectiveFunction(newSplit)[0]
-            if newScore < self.bestScore:
-                self.bestSplit = newSplit
-                self.bestScore = newScore
-        return self.bestScore
+            sample.append(newScore)
+        return sample
 
     def geneticOptimizer(self, numGens, printFreq=100, POPSIZE=500, TOURNSIZE=4,
                          CXPB=0.18, MUTPB=0.39, INDPB=0.005, scoreGoal=0.01, verbose=False):
