@@ -69,6 +69,7 @@ class data_set:
     def __init__(self, activeFile, decoyFile, targetRatio=0.8, ratioTol=0.01,
                  balanceTol=0.05, atomwise=False, Metric='jaccard'):
         # Gathering fingerprints
+        print('Gathering fingerprints')
         decoyPrints = makePrints(decoyFile)
         activePrints = makePrints(activeFile)
         # Adding label columns
@@ -203,6 +204,7 @@ class data_set:
         Taken (with minor changes) from example code:
         https://deap.readthedocs.io/en/master/examples/ga_onemax.html"""
 
+        print('Initializing optimizer...')
         t0 = time()
         with warnings.catch_warnings():
             warnings.simplefilter("ignore")
@@ -226,6 +228,7 @@ class data_set:
             ind.fitness.values = fit
         gen = 0
         minScore = 2.0
+        print('Beginning optimization...')
         while gen < numGens and scoreGoal < minScore:
             # Select the next generation individuals
             offspring = toolbox.select(pop, len(pop))
@@ -255,7 +258,6 @@ class data_set:
                 if numUnique == 0:
                     meanScore = np.nan
                     minScore = np.nan
-                    var = np.nan
                 else:
                     scores = validPop.apply(lambda x: self.objectiveFunction(x)[0], axis=1)
                     meanScore = np.mean(scores.values)
