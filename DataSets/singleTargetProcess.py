@@ -32,7 +32,7 @@ def main(dataset, target_id):
         return
     # Create data_set class instance called "data"
     print(f'Creating data set {target_id}')
-    data = ukyScore.data_set(activeFile, decoyFile, targetRatio, ratioTol, balanceTol, atomwise=ATOMWISE, Metric=metric)
+    data = ukyScore.data_set(target_id, activeFile, decoyFile, targetRatio, ratioTol, balanceTol, atomwise=ATOMWISE, Metric=metric)
     # Run the geneticOptimizer method on data
 
     splits = data.geneticOptimizer(numGens, printFreq=print_frequency, scoreGoal=score_goal)

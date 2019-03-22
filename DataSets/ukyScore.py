@@ -66,7 +66,7 @@ class data_set:
         balanceTol (0.02) Allowable deviation from balance ratio
     """
 
-    def __init__(self, activeFile, decoyFile, targetRatio=0.8, ratioTol=0.01,
+    def __init__(self, target_id, activeFile, decoyFile, targetRatio=0.8, ratioTol=0.01,
                  balanceTol=0.05, atomwise=False, Metric='jaccard'):
         # Gathering fingerprints
         print('Gathering fingerprints')
@@ -78,6 +78,7 @@ class data_set:
         # Combining into one dataframe
         fPrints = activePrints.append(decoyPrints, ignore_index=True)
         # Creating useful instance variables
+        self.target = target_id
         self.size = fPrints.shape[0]
         self.fingerprints = fPrints.drop('Labels', axis=1)
         if self.size > sizeBound:
@@ -204,7 +205,7 @@ class data_set:
         Taken (with minor changes) from example code:
         https://deap.readthedocs.io/en/master/examples/ga_onemax.html"""
 
-        print('Initializing optimizer...')
+        print(f'{self.target} - Initializing optimizer ...')
         t0 = time()
         with warnings.catch_warnings():
             warnings.simplefilter("ignore")
@@ -228,7 +229,7 @@ class data_set:
             ind.fitness.values = fit
         gen = 0
         minScore = 2.0
-        print('Beginning optimization...')
+        print(f'{self.target} - Beginning optimization...')
         while gen < numGens and scoreGoal < minScore:
             # Select the next generation individuals
             offspring = toolbox.select(pop, len(pop))
@@ -265,7 +266,7 @@ class data_set:
                     optSplit = validPop[scores == minScore]
                     scoreParts = self.computeScores(optSplit.values[0])
                 if verbose:
-                    print('-- Generation {}'.format(gen)
+                    print(f'{self.target} -- Generation {}'.format(gen)
                           + ' -- Time (sec): {}'.format(np.round((time() - t0), 2))
                           + ' -- Min score: {}'.format(np.round(minScore, 4))
                           + f' -- Score parts: {scoreParts[0]}, {scoreParts[1]}'
@@ -273,7 +274,7 @@ class data_set:
                           + ' -- Unique Valid splits: {}/{}'.format(numUnique, POPSIZE)
                           )
                 else:
-                    print('-- Generation {}'.format(gen)
+                    print(f'{self.target} -- Generation {}'.format(gen)
                           + ' -- Time (sec): {}'.format(np.round((time() - t0), 2))
                           + ' -- Min score: {}'.format(np.round(minScore, 4))
                           + f' -- Score parts: {scoreParts[0]}, {scoreParts[1]}'
