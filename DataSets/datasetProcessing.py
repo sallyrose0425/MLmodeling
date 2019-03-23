@@ -84,27 +84,39 @@ for file in files:
     s, t, mean, var, skew, kurt = stats.describe(samples)
     log = pd.read_pickle(os.getcwd() + '/DataSets/' + dataset + '/' + target_id + '_optRecord.pkl')
     log = log.rename({0:'time', 1:'AA-AI', 2:'II-IA', 3:'score'}, axis=1)
-    logNew = pd.read_pickle(os.getcwd() + '/DataSets/' + dataset + '/' + target_id + '_optRecordNewScore.pkl')
-    logNew = logNew.rename({0:'time', 1:'AA-AI', 2:'II-IA', 3:'score'}, axis=1)
+    #logNew = pd.read_pickle(os.getcwd() + '/DataSets/' + dataset + '/' + target_id + '_optRecordNewScore.pkl')
+    #logNew = logNew.rename({0:'time', 1:'AA-AI', 2:'II-IA', 3:'score'}, axis=1)
     Alog = pd.read_pickle(os.getcwd() + '/DataSets/' + dataset + '/' + target_id + '_atomwiseLog.pkl')
-    optScore = log.tail(1).values[0, 1]
-    atomwiseLog = Alog.tail(1).values[0]
-    targets.append(pd.DataFrame([target_id, rfF1, rfF1_weighted, rfAUC, rfAUC_weighted, nnF1, nnF1_weighted,\
-                                 nnAUC, nnAUC_weighted, optScore, atomwiseLog[0], atomwiseLog[1]]).T)
-    log = log.values
-    logNew = logNew.values
-    Alog = Alog.values
-
-    if (len(log) > 4) and (len(Alog) > 4):
-        try:
-            model, par = fitModel(log[1:, 0], log[1:, 3])
-            modelAtom, parAtom = fitModel(Alog[1:, 0], Alog[1:, 1])
-            params.append(par)
-            paramsAtom.append(parAtom)
-            aggStats.append((mean, var, skew, kurt))
-        except RuntimeError:
-            pass
-
+    if len(Alog)>0:
+        optScore = log.tail(1).values[0, 1]
+        atomwiseLog = Alog.tail(1).values[0]
+        targets.append(pd.DataFrame([target_id, rfF1, rfF1_weighted, rfAUC, rfAUC_weighted, nnF1, nnF1_weighted,\
+                                     nnAUC, nnAUC_weighted, optScore, atomwiseLog[0], atomwiseLog[1]]).T)
+        log = log.values
+        #logNew = logNew.values
+        Alog = Alog.values
+        with warnings.catch_warnings():
+            # Suppress warning from predicting no actives
+            warnings.simplefilter("ignore")
+            if (len(log) > 4) and (len(Alog) > 4):
+                try:
+                    model, par = fitModel(log[1:, 0], log[1:, 3])
+                    modelAtom, parAtom = fitModel(Alog[1:, 0], Alog[1:, 1])
+                    params.append(par)
+                    paramsAtom.append(parAtom)
+                    aggStats.append((mean, var, skew, kurt))
+                except RuntimeError:
+                    pass
+        # generate optimizer comparison plot
+        plt.figure()
+        plt.plot(log[:, 0], log[:, 3], 'r', marker='^', linewidth=0, label='ukyOpt')
+        # plt.plot(logNew[:, 0], logNew[:, 3], 'b', marker='s', linewidth=0, label='ukyOptNew')
+        plt.plot(Alog[:, 0], Alog[:, 1], 'k', marker='.', linewidth=0, label='Atomwise')
+        plt.xlabel('Time (sec)')
+        plt.ylabel('Score')
+        plt.title(target_id)
+        plt.legend()
+        plt.savefig(os.getcwd() + '/DataSets/' + dataset + '/' + target_id + '_optsScore')
 
 
 # generate aggregate model plots
@@ -121,17 +133,7 @@ plt.legend()
 plt.show()
 
 
-# generate optimizer comparison plot
-plt.figure()
-plt.plot(log[:, 0], log[:, 3], 'r', marker='^', linewidth=0, label='ukyOpt')
-plt.plot(logNew[:, 0], logNew[:, 3], 'b', marker='s', linewidth=0, label='ukyOptNew')
-plt.plot(Alog[:, 0], Alog[:, 1], 'k', marker='.', linewidth=0, label='Atomwise')
-plt.xlabel('Time (sec)')
-plt.ylabel('Score')
-plt.title(target_id)
-plt.legend()
-plt.show()
-plt.savefig(os.getcwd() + '/DataSets/' + dataset + '/' + target_id + '_optsNewScore')
+
 
 
 statsDF = pd.DataFrame(aggStats)

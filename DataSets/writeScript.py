@@ -3,7 +3,7 @@ import sys
 from glob import glob
 
 
-dataset = 'dekois'
+dataset = 'DUDE'
 files = glob(os.getcwd() + '/DataSets/' + dataset + '/decoys/*.sdf.gz')
 
 calls = ['# !/bin/bash\ntsp -S 16\n']

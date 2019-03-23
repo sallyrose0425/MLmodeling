@@ -10,6 +10,7 @@ ATOMWISE = True  # (False) Use the atomwise approximation
 metric = 'jaccard'  # ('jaccard') Metric for use in determining fingerprint distances
 score_goal = 0.01  # (0.02) Early termination of genetic optimizer if goal is reached
 numGens = 1000  # (1000) Number of generations to run in genetic optimizer
+popSize = 500
 print_frequency = 50  # (100) How many generations of optimizer before printing update
 targetRatio = 0.8  # (0.8) Target training/validation ratio of the split
 ratioTol = 0.01  # (0.01) tolerance for targetRatio
@@ -35,7 +36,7 @@ def main(dataset, target_id):
     data = ukyScore.data_set(target_id, activeFile, decoyFile, targetRatio, ratioTol, balanceTol, atomwise=ATOMWISE, Metric=metric)
     # Run the geneticOptimizer method on data
 
-    splits = data.geneticOptimizer(numGens, printFreq=print_frequency, scoreGoal=score_goal)
+    splits = data.geneticOptimizer(numGens, POPSIZE=popSize, printFreq=print_frequency, scoreGoal=score_goal)
     # Grab optimal split from polulation
     scores = [data.objectiveFunction(split) for split in splits]
     split = splits[np.argmin(scores)]
