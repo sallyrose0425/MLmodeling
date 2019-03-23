@@ -3,7 +3,7 @@ from glob import glob
 
 import pandas as pd
 
-dataset = 'dekois'
+dataset = 'DUDE'
 
 prefix = os.getcwd() + '/DataSets/' + dataset
 files = glob(prefix + '/*.out')
