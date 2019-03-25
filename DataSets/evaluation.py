@@ -44,7 +44,7 @@ def main(dataset, target_id):
         trainingLabels = data.labels[trainIndices]
         validationLabels = data.labels[validIndices]
         split = np.array([int(x in trainIndices) for x in range(data.size)])
-        weights = ((data.weights(split))[validIndices])**9  # temporary weighting
+        weights = ((data.weights(split))[validIndices])**12  # temporary weighting
         score = data.computeScores(split, check=False)
         if ATOMWISE:
             score = score[0] + score[1]
