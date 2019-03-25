@@ -30,20 +30,24 @@ def main(dataset, target_id):
     data = ukyScore.data_set(target_id, activeFile, decoyFile, atomwise=ATOMWISE, Metric=metric)
     skf = StratifiedKFold(n_splits=3, shuffle=True)
     splits = [(train, test) for train, test in skf.split(data.fingerprints, data.labels)]
+    perf = []
     for splitIndices in splits:
-        trainIndices, validIndices = splits[0]
-        X_train = data.fingerprints.T[trainIndices].T
-        X_valid = data.fingerprints.T[validIndices].T
-        y_train = data.labels[trainIndices]
-        y_valid = data.labels[validIndices]
+        trainIndices, validIndices = splitIndices
+        trainingFeatures = data.fingerprints.T[trainIndices].T
+        validFeatures = data.fingerprints.T[validIndices].T
+        trainingLabels = data.labels[trainIndices]
+        validationLabels = data.labels[validIndices]
+        weights = (data.weights(split))[validIndices]  # temporary weighting
         split = np.array([int(x in trainIndices) for x in range(data.size)])
-        data.computeScores(split, check=False)
-    # Record features, labels, split, and some metrics
-    data.fingerprints['labels'] = data.labels
-    data.fingerprints['split'] = split
-    data.fingerprints['weights'] = data.weights(split)
-    pd.to_pickle(data.fingerprints, prefix + target_id + '_dataPackage.pkl')
-
+        score = data.computeScores(split, check=False)
+        score = np.sqrt(score[0]**2 + score[1]**2)
+        rf = RandomForestClassifier(n_estimators=100)
+        rf.fit(trainingFeatures, trainingLabels)
+        rfProbs = rf.predict_proba(validFeatures)[:, 1]
+        rfAUC = roc_auc_score(validationLabels, rfProbs)
+        rfAUC_weighted = roc_auc_score(validationLabels, rfProbs, sample_weight=weights)
+        perf.append((score, rfAUC, rfAUC_weighted))
+    pd.to_pickle(perf, f'{prefix}{target_id}_performance.pkl')
 
 
 if __name__ == '__main__':
