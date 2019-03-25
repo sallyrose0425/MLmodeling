@@ -12,6 +12,10 @@ import ukyScore
 ATOMWISE = True  # (False) Use the atomwise approximation
 metric = 'jaccard'  # ('jaccard') Metric for use in determining fingerprint distances
 
+def sigmoid(scalar):
+    sig = (1 + np.exp(-scalar))**(-1)
+    return sig
+
 
 def main(dataset, target_id):
     prefix = os.getcwd() + '/' + dataset + '/'
@@ -40,7 +44,7 @@ def main(dataset, target_id):
         trainingLabels = data.labels[trainIndices]
         validationLabels = data.labels[validIndices]
         split = np.array([int(x in trainIndices) for x in range(data.size)])
-        weights = ((data.weights(split))[validIndices])**4  # temporary weighting
+        weights = sigmoid(-1 + ((data.weights(split))[validIndices])**4)  # temporary weighting
         score = data.computeScores(split, check=False)
         score = np.sqrt(score[0]**2 + score[1]**2)
         rf = RandomForestClassifier(n_estimators=100)
