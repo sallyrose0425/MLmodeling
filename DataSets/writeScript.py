@@ -2,7 +2,7 @@ import os
 from glob import glob
 
 
-dataset = 'dekois'
+dataset = 'DUDE'
 prefix = os.getcwd() + '/DataSets/' + dataset + '/'
 files = glob(os.getcwd() + '/DataSets/' + dataset + '/*')
 targets = []

@@ -42,7 +42,7 @@ def main(dataset, target_id):
         split = np.array([int(x in trainIndices) for x in range(data.size)])
         weights = (data.weights(split))[validIndices]  # temporary weighting
         score = data.computeScores(split, check=False)
-        score = np.sqrt(score[0]**2 + score[1]**4)
+        score = np.sqrt(score[0]**2 + score[1]**9)
         rf = RandomForestClassifier(n_estimators=100)
         rf.fit(trainingFeatures, trainingLabels)
         rfProbs = rf.predict_proba(validFeatures)[:, 1]
@@ -57,6 +57,3 @@ if __name__ == '__main__':
         main(sys.argv[1], sys.argv[2])
     else:
         print("Specify dataset and target...")
-
-dataset = 'dekois'
-target_id = '11betaHSD1'
