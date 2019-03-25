@@ -9,7 +9,7 @@ from sklearn.metrics import f1_score, roc_auc_score
 
 import ukyScore
 
-ATOMWISE = True  # (False) Use the atomwise approximation
+ATOMWISE = False  # (False) Use the atomwise approximation
 metric = 'jaccard'  # ('jaccard') Metric for use in determining fingerprint distances
 
 def sigmoid(scalar):
@@ -44,7 +44,7 @@ def main(dataset, target_id):
         trainingLabels = data.labels[trainIndices]
         validationLabels = data.labels[validIndices]
         split = np.array([int(x in trainIndices) for x in range(data.size)])
-        weights = ((data.weights(split))[validIndices])**12  # temporary weighting
+        weights = ((data.weights(split))[validIndices])**8  # temporary weighting
         score = data.computeScores(split, check=False)
         if ATOMWISE:
             score = score[0] + score[1]

@@ -220,28 +220,48 @@ plt.savefig(dataset + '/' + 'weightedScoreScatter')
 
 ########################################################################################################################
 dataset = 'dekois'
+prefix = os.getcwd() + '/DataSets/' + dataset + '/'
 files = glob(os.getcwd() + '/DataSets/' + dataset + '/*_performance.pkl')
 perfs = []
 for file in files:
     target_id = file.split('/')[-1].split('_')[0]
+    optPackage = pd.read_pickle(prefix + target_id + '_dataPackage.pkl')
+    features = optPackage.drop(['split', 'labels', 'weights'], axis=1)
+    training = optPackage[package['split'] == 1]
+    trainingFeatures = training.drop(['split', 'labels', 'weights'], axis=1)
+    trainingLabels = training['labels']
+    rf = RandomForestClassifier(n_estimators=100)
+    rf.fit(trainingFeatures, trainingLabels)
+    optPackage['rfProbs'] = rf.predict(features)
+    rfPredictions = optPackage[optPackage['split'] == 0]['rfProbs']
+    validationLabels = optPackage[optPackage['split'] == 0]['labels']
+    rfAUC = roc_auc_score(validationLabels, rfPredictions)
+    log = pd.read_pickle(os.getcwd() + '/DataSets/' + dataset + '/' + target_id + '_optRecord.pkl')
+    optScore = log.tail(1).values[0, 1]
     performance = pd.read_pickle(file)
-    perf = np.mean(np.array(performance), axis=0)
+    perf = list(np.mean(np.array(performance), axis=0))
+    perf.extend([optScore, rfAUC])
     perfs.append(perf)
 perfs = pd.DataFrame(perfs)
 # save scatterplots
 plt.figure()
-
-plt.subplot(211)
+plt.subplot(311)
 plt.scatter(perfs[0], perfs[1])
 plt.xlabel('Score')
 plt.ylabel('RF AUC')
 pearson = np.round(perfs[0].corr(perfs[1]), 2)
 plt.title(f'Pearson {pearson}')
-plt.subplot(212)
+plt.subplot(312)
 plt.scatter(perfs[0], perfs[2])
 plt.xlabel('Score')
 plt.ylabel('RF AUC weighted')
 pearson = np.round(perfs[0].corr(perfs[2]), 2)
+plt.title(f'Pearson {pearson}')
+plt.subplot(313)
+plt.scatter(perfs[3], perfs[4])
+plt.xlabel('Score')
+plt.ylabel('RF AUC')
+pearson = np.round(perfs[3].corr(perfs[4]), 2)
 plt.title(f'Pearson {pearson}')
 plt.tight_layout()
 plt.savefig(dataset + '/' + 'scoreScatter')
