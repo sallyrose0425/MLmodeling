@@ -4,6 +4,8 @@ import sys
 import pandas as pd
 import numpy as np
 from sklearn.model_selection import StratifiedKFold
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.metrics import f1_score, roc_auc_score
 
 import ukyScore
 
@@ -37,8 +39,8 @@ def main(dataset, target_id):
         validFeatures = data.fingerprints.T[validIndices].T
         trainingLabels = data.labels[trainIndices]
         validationLabels = data.labels[validIndices]
-        weights = (data.weights(split))[validIndices]  # temporary weighting
         split = np.array([int(x in trainIndices) for x in range(data.size)])
+        weights = (data.weights(split))[validIndices]  # temporary weighting
         score = data.computeScores(split, check=False)
         score = np.sqrt(score[0]**2 + score[1]**2)
         rf = RandomForestClassifier(n_estimators=100)
