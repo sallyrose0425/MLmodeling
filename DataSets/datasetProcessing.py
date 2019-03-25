@@ -218,3 +218,30 @@ plt.savefig(dataset + '/' + 'weightedScoreScatter')
 
 
 
+########################################################################################################################
+dataset = 'dekois'
+files = glob(os.getcwd() + '/DataSets/' + dataset + '/*_performance.pkl')
+perfs = []
+for file in files:
+    target_id = file.split('/')[-1].split('_')[0]
+    performance = pd.read_pickle(file)
+    perf = np.mean(np.array(performance), axis=0)
+    perfs.append(perf)
+perfs = pd.DataFrame(perfs)
+# save scatterplots
+plt.figure()
+
+plt.subplot(211)
+plt.scatter(perfs[0], perfs[1])
+plt.xlabel('Score')
+plt.ylabel('RF AUC')
+pearson = np.round(perfs[0].corr(perfs[1]), 2)
+plt.title(f'Pearson {pearson}')
+plt.subplot(212)
+plt.scatter(perfs[0], perfs[2])
+plt.xlabel('Score')
+plt.ylabel('RF AUC weighted')
+pearson = np.round(perfs[0].corr(perfs[2]), 2)
+plt.title(f'Pearson {pearson}')
+plt.tight_layout()
+plt.savefig(dataset + '/' + 'scoreScatter')

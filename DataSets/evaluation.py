@@ -42,7 +42,7 @@ def main(dataset, target_id):
         split = np.array([int(x in trainIndices) for x in range(data.size)])
         weights = (data.weights(split))[validIndices]  # temporary weighting
         score = data.computeScores(split, check=False)
-        score = np.sqrt(score[0]**2 + score[1]**2)
+        score = np.sqrt(score[0]**2 + score[1]**4)
         rf = RandomForestClassifier(n_estimators=100)
         rf.fit(trainingFeatures, trainingLabels)
         rfProbs = rf.predict_proba(validFeatures)[:, 1]
