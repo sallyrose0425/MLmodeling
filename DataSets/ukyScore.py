@@ -123,9 +123,10 @@ class data_set:
         nonEmpty = bool(numActiveValidation) and bool(numValidation - numActiveValidation)
         return check and nonEmpty
 
-    def computeScores(self, split):
-        if not self.validSplit(split):
-            return 1.0, 1.0
+    def computeScores(self, split, check=False):
+        if check:
+            if not self.validSplit(split):
+                return 1.0, 1.0
         if self.isTooBig:
             validActive = self.fingerprints[(split == 0) & (self.labels == 1)]
             validDecoy = self.fingerprints[(split == 0) & (self.labels == 0)]

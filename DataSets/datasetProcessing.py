@@ -41,10 +41,10 @@ def fitModel(x, y):
 
 
 columnNames = ['target_id', 'rfF1', 'rfF1_weighted', 'rfAUC', 'rfAUC_weighted',
-               'nnF1', 'nnF1_weighted', 'nnAUC', 'nnAUC_weighted', 'optScore', 'atomwise time', 'atomwise bias']
+               'nnF1', 'nnF1_weighted', 'nnAUC', 'nnAUC_weighted', 'optScore']
 
 
-dataset = 'DUDE'
+dataset = 'dekois'
 files = glob(os.getcwd() + '/DataSets/' + dataset + '/*_dataPackage.pkl')
 targets = []
 params = []
@@ -71,28 +71,36 @@ for file in files:
     with warnings.catch_warnings():
         # Suppress warning from predicting no actives
         warnings.simplefilter("ignore")
-        rfF1 = f1_score(validationLabels, rfPredictions)
-        rfAUC = roc_auc_score(validationLabels, rfProbabilities)
-        nnF1 = f1_score(validationLabels, nnPredictions)
-        nnAUC = roc_auc_score(validationLabels, nnProbs)
-        weights = package[package['split'] == 0]['weights']**9  # temporary weighting
-        nnF1_weighted = f1_score(validationLabels, nnPredictions, sample_weight=weights)
-        nnAUC_weighted = roc_auc_score(validationLabels, nnProbs, sample_weight=weights)
-        rfF1_weighted = f1_score(validationLabels, rfPredictions, sample_weight=weights)
-        rfAUC_weighted = roc_auc_score(validationLabels, rfProbabilities, sample_weight=weights)
+        try:
+            rfF1 = f1_score(validationLabels, rfPredictions)
+            rfAUC = roc_auc_score(validationLabels, rfProbabilities)
+            nnF1 = f1_score(validationLabels, nnPredictions)
+            nnAUC = roc_auc_score(validationLabels, nnProbs)
+            weights = package[package['split'] == 0]['weights']**2  # temporary weighting
+            nnF1_weighted = f1_score(validationLabels, nnPredictions, sample_weight=weights)
+            nnAUC_weighted = roc_auc_score(validationLabels, nnProbs, sample_weight=weights)
+            rfF1_weighted = f1_score(validationLabels, rfPredictions, sample_weight=weights)
+            rfAUC_weighted = roc_auc_score(validationLabels, rfProbabilities, sample_weight=weights)
+            log = pd.read_pickle(os.getcwd() + '/DataSets/' + dataset + '/' + target_id + '_optRecord.pkl')
+            optScore = log.tail(1).values[0, 1]
+            targets.append(pd.DataFrame([target_id, rfF1, rfF1_weighted, rfAUC, rfAUC_weighted, nnF1, nnF1_weighted, \
+                                         nnAUC, nnAUC_weighted, optScore]).T)
+        except ValueError:
+            pass
+
     samples = pd.read_pickle(os.getcwd() + '/DataSets/' + dataset + '/' + target_id + '_samples.pkl')
     s, t, mean, var, skew, kurt = stats.describe(samples)
-    log = pd.read_pickle(os.getcwd() + '/DataSets/' + dataset + '/' + target_id + '_optRecord.pkl')
+
     log = log.rename({0:'time', 1:'AA-AI', 2:'II-IA', 3:'score'}, axis=1)
+
     #logNew = pd.read_pickle(os.getcwd() + '/DataSets/' + dataset + '/' + target_id + '_optRecordNewScore.pkl')
     #logNew = logNew.rename({0:'time', 1:'AA-AI', 2:'II-IA', 3:'score'}, axis=1)
     try:
         Alog = pd.read_pickle(os.getcwd() + '/DataSets/' + dataset + '/' + target_id + '_atomwiseLog.pkl')
         if len(Alog)>0:
-            optScore = log.tail(1).values[0, 1]
+
             atomwiseLog = Alog.tail(1).values[0]
-            targets.append(pd.DataFrame([target_id, rfF1, rfF1_weighted, rfAUC, rfAUC_weighted, nnF1, nnF1_weighted,\
-                                         nnAUC, nnAUC_weighted, optScore, atomwiseLog[0], atomwiseLog[1]]).T)
+
             log = log.values
             #logNew = logNew.values
             Alog = Alog.values
@@ -152,6 +160,7 @@ combined.corr().values[4:,0:4]
 contribFrame = pd.concat(targets)
 contribFrame.columns = columnNames
 contribFrame = contribFrame.set_index('target_id')
+contribFrame = contribFrame.astype(float)
 
 # save scatterplots
 plt.figure()
@@ -159,18 +168,26 @@ plt.subplot(221)
 plt.scatter(contribFrame['optScore'], contribFrame['rfF1'], marker='.')
 plt.xlabel('Score')
 plt.ylabel('RF F1')
+pearson = np.round(contribFrame['optScore'].corr(contribFrame['rfF1']), 2)
+plt.title(f'Pearson {pearson}')
 plt.subplot(222)
 plt.scatter(contribFrame['optScore'], contribFrame['rfAUC'], marker='.')
 plt.xlabel('Score')
 plt.ylabel('RF AUC')
+pearson = np.round(contribFrame['optScore'].corr(contribFrame['rfAUC']), 2)
+plt.title(f'Pearson {pearson}')
 plt.subplot(223)
 plt.scatter(contribFrame['optScore'], contribFrame['nnF1'], marker='.')
 plt.xlabel('Score')
 plt.ylabel('NN F1')
+pearson = np.round(contribFrame['optScore'].corr(contribFrame['nnF1']), 2)
+plt.title(f'Pearson {pearson}')
 plt.subplot(224)
 plt.scatter(contribFrame['optScore'], contribFrame['nnAUC'], marker='.')
 plt.xlabel('Score')
 plt.ylabel('NN AUC')
+pearson = np.round(contribFrame['optScore'].corr(contribFrame['nnAUC']), 2)
+plt.title(f'Pearson {pearson}')
 plt.subplots_adjust(top=0.92, bottom=0.12, left=0.10, right=0.95, hspace=0.25,
                     wspace=0.35)
 plt.savefig(dataset + '/' + 'scoreScatter')

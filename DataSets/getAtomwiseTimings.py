@@ -7,7 +7,7 @@ dataset = 'DUDE'
 
 prefix = os.getcwd() + '/DataSets/' + dataset
 files = glob(prefix + '/*.out')
-targets = sorted(list(set([f.split('.')[0].split('/')[-1] for f in files])))
+targets = list(set([f.split('.')[0].split('/')[-1] for f in files]))
 
 for target_id in targets:
     targetOutFile = prefix + '/' + target_id + '.out'
