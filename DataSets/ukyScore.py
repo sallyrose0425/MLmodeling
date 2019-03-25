@@ -123,7 +123,7 @@ class data_set:
         nonEmpty = bool(numActiveValidation) and bool(numValidation - numActiveValidation)
         return check and nonEmpty
 
-    def computeScores(self, split, check=False):
+    def computeScores(self, split, check=True):
         if check:
             if not self.validSplit(split):
                 return 1.0, 1.0

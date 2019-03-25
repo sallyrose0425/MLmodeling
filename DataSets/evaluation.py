@@ -37,7 +37,7 @@ def main(dataset, target_id):
         y_train = data.labels[trainIndices]
         y_valid = data.labels[validIndices]
         split = np.array([int(x in trainIndices) for x in range(data.size)])
-        data.computeScores(split)
+        data.computeScores(split, check=False)
     # Record features, labels, split, and some metrics
     data.fingerprints['labels'] = data.labels
     data.fingerprints['split'] = split
