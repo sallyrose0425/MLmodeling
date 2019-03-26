@@ -311,10 +311,12 @@ class data_set:
         holdWeights = np.zeros(self.size)
         validActiveIndices = np.where((split == 0) & (self.labels == 1))[0]
         for i in range(len(validActiveIndices)):
+            assert actWeights[i]!=0, 'duplicate mol!'
             holdWeights[validActiveIndices[i]] = actWeights[i]
 
         validDecoyIndices = np.where((split == 0) & (self.labels == 0))[0]
         for i in range(len(validDecoyIndices)):
+            assert decWeights[i]!=0, 'duplicate mol!'
             holdWeights[validDecoyIndices[i]] = decWeights[i]
         return holdWeights
 
