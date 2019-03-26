@@ -6,11 +6,11 @@ import numpy as np
 
 import ukyScore
 
-ATOMWISE = False  # (False) Use the atomwise approximation
+ATOMWISE = True  # (False) Use the atomwise approximation
 metric = 'jaccard'  # ('jaccard') Metric for use in determining fingerprint distances
 score_goal = 0.01  # (0.02) Early termination of genetic optimizer if goal is reached
 numGens = 1000  # (1000) Number of generations to run in genetic optimizer
-popSize = 500
+popSize = 1000
 print_frequency = 50  # (100) How many generations of optimizer before printing update
 targetRatio = 0.8  # (0.8) Target training/validation ratio of the split
 ratioTol = 0.01  # (0.01) tolerance for targetRatio
@@ -35,7 +35,6 @@ def main(dataset, target_id):
     print(f'Creating data set {target_id}')
     data = ukyScore.data_set(target_id, activeFile, decoyFile, targetRatio, ratioTol, balanceTol, atomwise=ATOMWISE, Metric=metric)
     # Run the geneticOptimizer method on data
-
     splits = data.geneticOptimizer(numGens, POPSIZE=popSize, printFreq=print_frequency, scoreGoal=score_goal)
     # Grab optimal split from polulation
     scores = [data.objectiveFunction(split) for split in splits]
@@ -47,7 +46,6 @@ def main(dataset, target_id):
     pd.to_pickle(data.fingerprints, prefix + target_id + '_dataPackage.pkl')
     pd.to_pickle(pd.DataFrame(data.optRecord, columns=['time', 'AA-AI', 'II-IA', 'score']),
                  prefix + target_id + '_optRecord.pkl')
-    pd.to_pickle(data.sample(100), prefix + target_id + '_samples.pkl')
 
 
 if __name__ == '__main__':

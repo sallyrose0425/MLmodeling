@@ -2,7 +2,7 @@ import os
 from glob import glob
 
 
-dataset = 'DUDE'
+dataset = 'dekois'
 prefix = os.getcwd() + '/DataSets/' + dataset + '/'
 files = glob(os.getcwd() + '/DataSets/' + dataset + '/*')
 targets = []
@@ -29,6 +29,10 @@ for target_id in targets:
 sizes.sort()
 
 calls = ['# !/bin/bash\ntsp -S 16\n']
+for pair in sizes:
+    target_id = pair[1]
+    call = f'tsp python singleTargetProcess.py {dataset} {target_id} \n'
+    calls.append(call)
 for pair in sizes:
     target_id = pair[1]
     call = f'tsp python evaluation.py {dataset} {target_id} \n'

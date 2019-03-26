@@ -5,7 +5,7 @@ import pandas as pd
 import numpy as np
 from sklearn.model_selection import StratifiedKFold
 from sklearn.ensemble import RandomForestClassifier
-from sklearn.metrics import f1_score, roc_auc_score
+from sklearn.metrics import roc_auc_score, auc
 
 import ukyScore
 
@@ -17,8 +17,26 @@ def sigmoid(scalar):
     return sig
 
 
+def weightedROC(t, optPackage):
+    optPackage['rfPreds'] = optPackage['rfProbs'] > t
+    optPackage['rfPreds'] = optPackage['rfPreds'].apply(lambda x: int(x))
+    Pos = optPackage[optPackage['rfPreds'] == 1]
+    Neg = optPackage[optPackage['rfPreds'] == 0]
+    Pos = Pos[Pos['split'] == 0]
+    Neg = Neg[Neg['split'] == 0]
+    truePos = Pos[Pos['labels'] == 1]
+    falsePos = Pos[Pos['labels'] == 0]
+    trueNeg = Neg[Neg['labels'] == 0]
+    falseNeg = Neg[Neg['labels'] == 1]
+    falseNeg['weights'] = falseNeg['weights'].apply(lambda x: 1/x)
+    falsePos['weights'] = falsePos['weights'].apply(lambda x: 1 / x)
+    TPR = truePos['weights'].sum() / (truePos['weights'].sum() + falseNeg['weights'].sum())
+    FPR = falsePos['weights'].sum() / (falsePos['weights'].sum() + trueNeg['weights'].sum())
+    return [FPR, TPR]
+
+
 def main(dataset, target_id):
-    prefix = os.getcwd() + '/' + dataset + '/'
+    prefix = os.getcwd() + '/DataSets/' + dataset + '/'
     if dataset == 'dekois':
         activeFile = prefix + 'ligands/' + target_id + '.sdf.gz'
         decoyFile = prefix + 'decoys/' + target_id + '_Celling-v1.12_decoyset.sdf.gz'
@@ -44,7 +62,7 @@ def main(dataset, target_id):
         trainingLabels = data.labels[trainIndices]
         validationLabels = data.labels[validIndices]
         split = np.array([int(x in trainIndices) for x in range(data.size)])
-        weights = ((data.weights(split))[validIndices])**8  # temporary weighting
+        weights = ((data.weights(split))[validIndices])**1  # temporary weighting
         score = data.computeScores(split, check=False)
         if ATOMWISE:
             score = score[0] + score[1]
@@ -54,7 +72,13 @@ def main(dataset, target_id):
         rf.fit(trainingFeatures, trainingLabels)
         rfProbs = rf.predict_proba(validFeatures)[:, 1]
         rfAUC = roc_auc_score(validationLabels, rfProbs)
-        rfAUC_weighted = roc_auc_score(validationLabels, rfProbs, sample_weight=weights)
+        metricFrame = pd.DataFrame([data.labels, split, data.weights(split), rfProbs],
+                                   index=['labels', 'split', 'weights', 'rfProbs']).T
+        curve = np.array([weightedROC(t, metricFrame) for t in np.linspace(0, 1, num=100)])
+        rfAUC_weighted = auc(curve[:, 0], curve[:, 1])
+
+
+        #rfAUC_weighted = roc_auc_score(validationLabels, rfProbs, sample_weight=weights])
         perf.append((score, rfAUC, rfAUC_weighted))
     pd.to_pickle(perf, f'{prefix}{target_id}_performance.pkl')
 

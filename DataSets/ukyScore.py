@@ -67,7 +67,7 @@ class data_set:
     """
 
     def __init__(self, target_id, activeFile, decoyFile, targetRatio=0.8, ratioTol=0.01,
-                 balanceTol=0.05, atomwise=False, Metric='jaccard'):
+                 balanceTol=0.02, atomwise=True, Metric='jaccard'):
         # Gathering fingerprints
         print('Gathering fingerprints')
         decoyPrints = makePrints(decoyFile)
@@ -77,6 +77,7 @@ class data_set:
         decoyPrints['Labels'] = int(0)
         # Combining into one dataframe
         fPrints = activePrints.append(decoyPrints, ignore_index=True)
+        fPrints = fPrints.drop_duplicates(subset=list(range(2048)))
         # Creating useful instance variables
         self.target = target_id
         self.size = fPrints.shape[0]
@@ -191,7 +192,7 @@ class data_set:
             sample.append(newScore)
         return sample
 
-    def geneticOptimizer(self, numGens, printFreq=100, POPSIZE=500, TOURNSIZE=4,
+    def geneticOptimizer(self, numGens, printFreq=100, POPSIZE=1000, TOURNSIZE=4,
                          CXPB=0.18, MUTPB=0.39, INDPB=0.005, scoreGoal=0.01, verbose=False):
         """
         A method for the genetic optimizer.
@@ -311,12 +312,10 @@ class data_set:
         holdWeights = np.zeros(self.size)
         validActiveIndices = np.where((split == 0) & (self.labels == 1))[0]
         for i in range(len(validActiveIndices)):
-            assert actWeights[i]!=0, 'duplicate mol!'
             holdWeights[validActiveIndices[i]] = actWeights[i]
 
         validDecoyIndices = np.where((split == 0) & (self.labels == 0))[0]
         for i in range(len(validDecoyIndices)):
-            assert decWeights[i]!=0, 'duplicate mol!'
             holdWeights[validDecoyIndices[i]] = decWeights[i]
         return holdWeights
 
