@@ -29,8 +29,8 @@ def weightedROC(t, optPackage):
     falsePos = Pos[Pos['labels'] == 0]
     trueNeg = Neg[Neg['labels'] == 0]
     falseNeg = Neg[Neg['labels'] == 1]
-    # falseNeg['weights'] = falseNeg['weights'].apply(lambda x: 0 if x == 0 else 1/x)
-    # falsePos['weights'] = falsePos['weights'].apply(lambda x: 0 if x == 0 else 1/x)
+    falseNeg['weights'] = falseNeg['weights'].apply(lambda x: 0 if x == 0 else 1/x)
+    falsePos['weights'] = falsePos['weights'].apply(lambda x: 0 if x == 0 else 1/x)
     TPR = truePos['weights'].sum() / (truePos['weights'].sum() + falseNeg['weights'].sum())
     FPR = falsePos['weights'].sum() / (falsePos['weights'].sum() + trueNeg['weights'].sum())
     return [FPR, TPR]
