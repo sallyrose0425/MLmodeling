@@ -70,14 +70,13 @@ class data_set:
                  balanceTol=0.02, atomwise=True, Metric='jaccard'):
         # Gathering fingerprints
         print('Gathering fingerprints')
-        decoyPrints = makePrints(decoyFile)
-        activePrints = makePrints(activeFile)
+        decoyPrints = makePrints(decoyFile).drop_duplicates()
+        activePrints = makePrints(activeFile).drop_duplicates()
         # Adding label columns
         activePrints['Labels'] = int(1)
         decoyPrints['Labels'] = int(0)
         # Combining into one dataframe
         fPrints = activePrints.append(decoyPrints, ignore_index=True)
-        fPrints = fPrints.drop_duplicates(subset=list(range(2048)))
         # Creating useful instance variables
         self.target = target_id
         self.size = fPrints.shape[0]
