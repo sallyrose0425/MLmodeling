@@ -227,7 +227,7 @@ for file in files:
     target_id = file.split('/')[-1].split('_')[0]
     optPackage = pd.read_pickle(prefix + target_id + '_dataPackage.pkl')
     features = optPackage.drop(['split', 'labels', 'weights'], axis=1)
-    training = optPackage[package['split'] == 1]
+    training = optPackage[optPackage['split'] == 1]
     trainingFeatures = training.drop(['split', 'labels', 'weights'], axis=1)
     trainingLabels = training['labels']
     rf = RandomForestClassifier(n_estimators=100)
@@ -237,7 +237,8 @@ for file in files:
     validationLabels = optPackage[optPackage['split'] == 0]['labels']
     rfAUC = roc_auc_score(validationLabels, rfPredictions)
     log = pd.read_pickle(os.getcwd() + '/DataSets/' + dataset + '/' + target_id + '_optRecord.pkl')
-    optScore = log.tail(1).values[0, 1]
+    optScore = log.tail(1).values[0, 3]
+    assert optScore > -0.2, 'low score!'
     performance = pd.read_pickle(file)
     perf = list(np.mean(np.array(performance), axis=0))
     perf.extend([optScore, rfAUC])

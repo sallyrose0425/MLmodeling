@@ -29,8 +29,8 @@ def weightedROC(t, optPackage):
     falsePos = Pos[Pos['labels'] == 0]
     trueNeg = Neg[Neg['labels'] == 0]
     falseNeg = Neg[Neg['labels'] == 1]
-    falseNeg['weights'] = falseNeg['weights'].apply(lambda x: 0 if x == 0 else 1/x)
-    falsePos['weights'] = falsePos['weights'].apply(lambda x: 0 if x == 0 else 1/x)
+    # falseNeg['weights'] = falseNeg['weights'].apply(lambda x: 0 if x == 0 else 1/x)
+    # falsePos['weights'] = falsePos['weights'].apply(lambda x: 0 if x == 0 else 1/x)
     TPR = truePos['weights'].sum() / (truePos['weights'].sum() + falseNeg['weights'].sum())
     FPR = falsePos['weights'].sum() / (falsePos['weights'].sum() + trueNeg['weights'].sum())
     return [FPR, TPR]
@@ -71,7 +71,7 @@ def main(dataset, target_id):
             score = np.sqrt(score[0]**2 + score[1]**2)
         rf = RandomForestClassifier(n_estimators=100)
         rf.fit(trainingFeatures, trainingLabels)
-        rfProbs = rf.predict_proba(validFeatures)[:, 1]
+        rfProbs = rf.predict(validFeatures)[:, 1]
         rfAUC = roc_auc_score(validationLabels, rfProbs)
         metricFrame = pd.DataFrame([data.labels, split, weights, rfProbs],
                                    index=['labels', 'split', 'weights', 'rfProbs']).T
