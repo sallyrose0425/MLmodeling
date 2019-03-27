@@ -29,8 +29,8 @@ def weightedROC(t, optPackage):
     falsePos = Pos[Pos['labels'] == 0]
     trueNeg = Neg[Neg['labels'] == 0]
     falseNeg = Neg[Neg['labels'] == 1]
-    falseNeg['weights'] = falseNeg['weights'].apply(lambda x: 0 if x == 0 else 1/x)
-    falsePos['weights'] = falsePos['weights'].apply(lambda x: 0 if x == 0 else 1/x)
+    # falseNeg['weights'] = falseNeg['weights'].apply(lambda x: 0 if x == 0 else 1/x)
+    # falsePos['weights'] = falsePos['weights'].apply(lambda x: 0 if x == 0 else 1/x)
     TPR = truePos['weights'].sum() / (truePos['weights'].sum() + falseNeg['weights'].sum())
     FPR = falsePos['weights'].sum() / (falsePos['weights'].sum() + trueNeg['weights'].sum())
     return [FPR, TPR]
@@ -63,7 +63,7 @@ def main(dataset, target_id):
         trainingLabels = data.labels[trainIndices]
         validationLabels = data.labels[validIndices]
         split = np.array([int(x in trainIndices) for x in range(data.size)])
-        weights = ((data.weights(split))[validIndices])**1  # temporary weighting
+        weights = data.weights(split)  # temporary weighting
         score = data.computeScores(split, check=False)
         if ATOMWISE:
             score = score[0] + score[1]
@@ -71,9 +71,8 @@ def main(dataset, target_id):
             score = np.sqrt(score[0]**2 + score[1]**2)
         rf = RandomForestClassifier(n_estimators=100)
         rf.fit(trainingFeatures, trainingLabels)
-        rfProbs = rf.predict_proba(validFeatures)[:, 1]
-        rfPreds = rf.predict(validFeatures)
-        rfAUC = roc_auc_score(validationLabels, rfProbs)
+        rfProbs = rf.predict_proba(data.fingerprints)[:, 1]
+        rfAUC = roc_auc_score(validationLabels, rfProbs[validIndices])
         metricFrame = pd.DataFrame([data.labels, split, weights, rfProbs],
                                    index=['labels', 'split', 'weights', 'rfProbs']).T
         curve = np.array([weightedROC(t, metricFrame) for t in np.linspace(0, 1, num=100)])
