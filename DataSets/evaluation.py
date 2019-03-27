@@ -71,7 +71,7 @@ def main(dataset, target_id):
             score = np.sqrt(score[0]**2 + score[1]**2)
         rf = RandomForestClassifier(n_estimators=100)
         rf.fit(trainingFeatures, trainingLabels)
-        rfProbs = rf.predict(validFeatures)[:, 1]
+        rfProbs = rf.predict_proba(validFeatures)[:, 1]
         rfAUC = roc_auc_score(validationLabels, rfProbs)
         metricFrame = pd.DataFrame([data.labels, split, weights, rfProbs],
                                    index=['labels', 'split', 'weights', 'rfProbs']).T
