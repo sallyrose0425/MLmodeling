@@ -72,7 +72,8 @@ def main(dataset, target_id):
         rf = RandomForestClassifier(n_estimators=100)
         rf.fit(trainingFeatures, trainingLabels)
         rfProbs = rf.predict_proba(validFeatures)[:, 1]
-        rfAUC = roc_auc_score(validationLabels, rfProbs)
+        rfPreds = rf.predict(validFeatures)
+        rfAUC = roc_auc_score(validationLabels, rfPreds)
         metricFrame = pd.DataFrame([data.labels, split, weights, rfProbs],
                                    index=['labels', 'split', 'weights', 'rfProbs']).T
         curve = np.array([weightedROC(t, metricFrame) for t in np.linspace(0, 1, num=100)])
