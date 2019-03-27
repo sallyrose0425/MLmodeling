@@ -5,7 +5,7 @@ import pandas as pd
 import numpy as np
 from sklearn.model_selection import StratifiedKFold
 from sklearn.ensemble import RandomForestClassifier
-from sklearn.metrics import roc_auc_score, auc
+from sklearn.metrics import roc_auc_score, auc, roc_curve
 
 import ukyScore
 
@@ -37,7 +37,7 @@ def weightedROC(t, optPackage):
 
 
 def main(dataset, target_id):
-    prefix = os.getcwd() + '/' + dataset + '/'
+    prefix = os.getcwd() + '/DataSets/' + dataset + '/'
     if dataset == 'dekois':
         activeFile = prefix + 'ligands/' + target_id + '.sdf.gz'
         decoyFile = prefix + 'decoys/' + target_id + '_Celling-v1.12_decoyset.sdf.gz'
@@ -73,12 +73,12 @@ def main(dataset, target_id):
         rf.fit(trainingFeatures, trainingLabels)
         rfProbs = rf.predict_proba(validFeatures)[:, 1]
         rfPreds = rf.predict(validFeatures)
-        rfAUC = roc_auc_score(validationLabels, rfPreds)
+        rfAUC = roc_auc_score(validationLabels, rfProbs)
         metricFrame = pd.DataFrame([data.labels, split, weights, rfProbs],
                                    index=['labels', 'split', 'weights', 'rfProbs']).T
         curve = np.array([weightedROC(t, metricFrame) for t in np.linspace(0, 1, num=100)])
+        curve = np.vstack([np.array([1, 1]), curve])
         rfAUC_weighted = auc(curve[:, 0], curve[:, 1])
-
         # rfAUC_weighted = roc_auc_score(validationLabels, rfProbs, sample_weight=weights])
         perf.append((score, rfAUC, rfAUC_weighted))
     pd.to_pickle(perf, f'{prefix}{target_id}_performance.pkl')
