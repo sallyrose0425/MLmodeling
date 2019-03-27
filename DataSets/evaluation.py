@@ -37,7 +37,7 @@ def weightedROC(t, optPackage):
 
 
 def main(dataset, target_id):
-    prefix = os.getcwd() + '/DataSets/' + dataset + '/'
+    prefix = os.getcwd() + '/' + dataset + '/'
     if dataset == 'dekois':
         activeFile = prefix + 'ligands/' + target_id + '.sdf.gz'
         decoyFile = prefix + 'decoys/' + target_id + '_Celling-v1.12_decoyset.sdf.gz'
