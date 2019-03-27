@@ -18,7 +18,7 @@ balanceTol = 0.02  # (0.02) Tolerance for active/decoy ratio in validations set 
 
 
 def main(dataset, target_id):
-    prefix = os.getcwd() + '/' + dataset + '/'
+    prefix = os.getcwd() + '/DataSets/' + dataset + '/'
     if dataset == 'dekois':
         activeFile = prefix + 'ligands/' + target_id + '.sdf.gz'
         decoyFile = prefix + 'decoys/' + target_id + '_Celling-v1.12_decoyset.sdf.gz'

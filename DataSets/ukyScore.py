@@ -313,7 +313,6 @@ class data_set:
         validActiveIndices = np.where((split == 0) & (self.labels == 1))[0]
         for i in range(len(validActiveIndices)):
             holdWeights[validActiveIndices[i]] = actWeights[i]
-
         validDecoyIndices = np.where((split == 0) & (self.labels == 0))[0]
         for i in range(len(validDecoyIndices)):
             holdWeights[validDecoyIndices[i]] = decWeights[i]
