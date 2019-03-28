@@ -267,40 +267,4 @@ plt.title(f'Pearson {pearson}')
 plt.tight_layout()
 plt.savefig(dataset + '/' + 'scoreScatter')
 
-########################################################################################################################
 
-optPackage['rfProbs'] = rf.predict_proba(features)[:, 1]
-
-
-def weightedROC(t, ):
-    metricFrame['rfPreds'] = metricFrame['rfProbs'] > t
-    metricFrame['rfPreds'] = metricFrame['rfPreds'].apply(lambda x: int(x))
-    Pos = metricFrame[metricFrame['rfPreds'] == 1]
-    Neg = metricFrame[metricFrame['rfPreds'] == 0]
-    Pos = Pos[Pos['split'] == 0]
-    Neg = Neg[Neg['split'] == 0]
-    truePos = Pos[Pos['labels'] == 1]
-    falsePos = Pos[Pos['labels'] == 0]
-    trueNeg = Neg[Neg['labels'] == 0]
-    falseNeg = Neg[Neg['labels'] == 1]
-    falseNeg['weights'] = falseNeg['weights'].apply(lambda x: 1/x)
-    falsePos['weights'] = falsePos['weights'].apply(lambda x: 1 / x)
-    TPR = truePos['weights'].sum() / (truePos['weights'].sum() + falseNeg['weights'].sum())
-    FPR = falsePos['weights'].sum() / (falsePos['weights'].sum() + trueNeg['weights'].sum())
-    return [FPR, TPR]
-
-curve = np.array([weightedROC(t) for t in np.linspace(0, 1, num=100)])
-rfAUC_weighted = auc(curve[:, 0], curve[:, 1])
-
-
-plt.plot(curve[:, 0], curve[:, 1])
-
-validation = optPackage[optPackage['split'] == 0]
-validationActive = validation[validation['labels'] == 1]
-validationDecoy = validation[validation['labels'] == 0]
-
-validation['weights'].hist(bins=25)
-validationActive['weights'].hist(bins=25)
-
-
-attempt = t.fit(optPackage['weights'].values)

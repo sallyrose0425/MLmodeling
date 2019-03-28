@@ -63,7 +63,16 @@ def main(dataset, target_id):
         trainingLabels = data.labels[trainIndices]
         validationLabels = data.labels[validIndices]
         split = np.array([int(x in trainIndices) for x in range(data.size)])
-        weights = data.weights(split)  # temporary weighting
+        weights = pd.Series(data.weights(split))  # temporary weighting
+        compWeights = weights[validIndices].values
+
+        def cfd(x):
+            hist, bin_edges = np.histogram(compWeights, density=True, bins=25)
+            hist = np.cumsum(hist)/hist.size
+            findBin = [x > y for y in bin_edges].index(False)
+            return hist[findBin - 1]
+        transWeight = np.vectorize(cfd)
+        weights = transWeight(weights)
         score = data.computeScores(split, check=False)
         if ATOMWISE:
             score = score[0] + score[1]
