@@ -59,11 +59,11 @@ def main(dataset, target_id):
     for splitIndices in splits:
         trainIndices, validIndices = splitIndices
         trainingFeatures = data.fingerprints.T[trainIndices].T
-        validFeatures = data.fingerprints.T[validIndices].T
+        # validFeatures = data.fingerprints.T[validIndices].T
         trainingLabels = data.labels[trainIndices]
         validationLabels = data.labels[validIndices]
         split = np.array([int(x in trainIndices) for x in range(data.size)])
-        weights = pd.Series(data.weights(split)**4)  # temporary weighting
+        weights = pd.Series(data.weights(split)) # temporary weighting
         compWeights = weights[validIndices].values
 
         def cfd(x):
@@ -72,7 +72,7 @@ def main(dataset, target_id):
             findBin = [x > y for y in bin_edges].index(False)
             return hist[findBin - 1]
         transWeight = np.vectorize(cfd)
-        weights = transWeight(weights)
+        weights = (transWeight(weights))**4
         score = data.computeScores(split, check=False)
         if ATOMWISE:
             score = score[0] + score[1]
