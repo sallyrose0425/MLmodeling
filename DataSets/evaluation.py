@@ -63,7 +63,7 @@ def main(dataset, target_id):
         trainingLabels = data.labels[trainIndices]
         validationLabels = data.labels[validIndices]
         split = np.array([int(x in trainIndices) for x in range(data.size)])
-        weights = pd.Series(data.weights(split))  # temporary weighting
+        weights = pd.Series(data.weights(split)**4)  # temporary weighting
         compWeights = weights[validIndices].values
 
         def cfd(x):
