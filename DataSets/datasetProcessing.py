@@ -221,11 +221,11 @@ plt.savefig(dataset + '/' + 'weightedScoreScatter')
 ########################################################################################################################
 dataset = 'dekois'
 prefix = os.getcwd() + '/DataSets/' + dataset + '/'
-files = glob(os.getcwd() + '/DataSets/' + dataset + '/*_performance.pkl')
+files = glob(os.getcwd() + '/DataSets/' + dataset + '/*_performanceNew.pkl')
 perfs = []
 for file in files:
     target_id = file.split('/')[-1].split('_')[0]
-    optPackage = pd.read_pickle(prefix + target_id + '_dataPackage.pkl')
+    optPackage = pd.read_pickle(prefix + target_id + '_dataPackageNew.pkl')
     features = optPackage.drop(['split', 'labels', 'weights'], axis=1)
     training = optPackage[optPackage['split'] == 1]
     trainingFeatures = training.drop(['split', 'labels', 'weights'], axis=1)
@@ -236,7 +236,7 @@ for file in files:
     rfPredictions = optPackage[optPackage['split'] == 0]['rfPreds']
     validationLabels = optPackage[optPackage['split'] == 0]['labels']
     rfAUC = roc_auc_score(validationLabels, rfPredictions)
-    log = pd.read_pickle(os.getcwd() + '/DataSets/' + dataset + '/' + target_id + '_optRecord.pkl')
+    log = pd.read_pickle(os.getcwd() + '/DataSets/' + dataset + '/' + target_id + '_optRecordNew.pkl')
     optScore = log.tail(1).values[0, 3]
     assert optScore > -0.2, 'low score!'
     performance = pd.read_pickle(file)

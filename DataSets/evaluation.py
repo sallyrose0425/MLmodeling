@@ -9,7 +9,7 @@ from sklearn.metrics import roc_auc_score, auc, roc_curve
 
 import ukyScore
 
-ATOMWISE = True  # (False) Use the atomwise approximation
+ATOMWISE = False  # (False) Use the atomwise approximation
 metric = 'jaccard'  # ('jaccard') Metric for use in determining fingerprint distances
 
 
@@ -89,7 +89,7 @@ def main(dataset, target_id):
         rfAUC_weighted = auc(curve[:, 0], curve[:, 1])
         # rfAUC_weighted = roc_auc_score(validationLabels, rfProbs, sample_weight=weights])
         perf.append((score, rfAUC, rfAUC_weighted))
-    pd.to_pickle(perf, f'{prefix}{target_id}_performance.pkl')
+    pd.to_pickle(perf, f'{prefix}{target_id}_performanceNew.pkl')
 
 
 if __name__ == '__main__':
