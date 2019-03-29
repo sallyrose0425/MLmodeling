@@ -5,7 +5,8 @@ import pandas as pd
 import numpy as np
 from sklearn.model_selection import StratifiedKFold
 from sklearn.ensemble import RandomForestClassifier
-from sklearn.metrics import roc_auc_score, auc, roc_curve
+from sklearn.metrics import roc_auc_score, auc, jaccard_similarity_score
+
 
 import ukyScore
 
@@ -13,9 +14,20 @@ ATOMWISE = False  # (False) Use the atomwise approximation
 metric = 'jaccard'  # ('jaccard') Metric for use in determining fingerprint distances
 
 
-def sigmoid(scalar):
-    sig = (1 + np.exp(-scalar))**(-1)
-    return sig
+def nnPredictor(weight, label):
+    if weight < 1:
+        return label
+    else:
+        return 1 - label
+
+
+def distToNN(probs, nn):
+    dist = []
+    for t in np.linspace(0, 1, num=100):
+        preds = probs > t
+        preds = preds.apply(lambda a: int(a)).values
+        dist.append(jaccard_similarity_score(preds, nn.values))
+    return min(dist)
 
 
 def weightedROC(t, optPackage):
@@ -63,16 +75,6 @@ def main(dataset, target_id):
         trainingLabels = data.labels[trainIndices]
         validationLabels = data.labels[validIndices]
         split = np.array([int(x in trainIndices) for x in range(data.size)])
-        weights = pd.Series(data.weights(split)) # temporary weighting
-        compWeights = weights[validIndices].values
-
-        def cfd(x):
-            hist, bin_edges = np.histogram(compWeights, density=True, bins=25)
-            hist = np.cumsum(hist)/hist.size
-            findBin = [x > y for y in bin_edges].index(False)
-            return hist[findBin - 1]
-        transWeight = np.vectorize(cfd)
-        weights = (transWeight(weights))**4
         score = data.computeScores(split, check=False)
         if ATOMWISE:
             score = score[0] + score[1]
@@ -82,13 +84,30 @@ def main(dataset, target_id):
         rf.fit(trainingFeatures, trainingLabels)
         rfProbs = rf.predict_proba(data.fingerprints)[:, 1]
         rfAUC = roc_auc_score(validationLabels, rfProbs[validIndices])
+        weights = pd.Series(data.weights(split))  # temporary weighting
         metricFrame = pd.DataFrame([data.labels, split, weights, rfProbs],
                                    index=['labels', 'split', 'weights', 'rfProbs']).T
-        curve = np.array([weightedROC(t, metricFrame) for t in np.linspace(0, 1, num=100)])
-        curve = np.vstack([np.array([1, 1]), curve])
-        rfAUC_weighted = auc(curve[:, 0], curve[:, 1])
-        # rfAUC_weighted = roc_auc_score(validationLabels, rfProbs, sample_weight=weights])
-        perf.append((score, rfAUC, rfAUC_weighted))
+        metricFrame['nn'] = metricFrame.apply(lambda t: nnPredictor(t.loc['weights'], t.loc['labels']), axis=1)
+        nnDist = distToNN(metricFrame['rfProbs'], metricFrame['nn'])
+        compWeights = weights[validIndices].values
+
+        def cfd(x):
+            hist, bin_edges = np.histogram(compWeights, density=True, bins=100)
+            hist = np.cumsum(hist) / hist.size
+            if x == 0:
+                return 0
+            elif x >= bin_edges[-1]:
+                return hist[-1]
+            else:
+                findBin = [x >= y for y in bin_edges].index(False)
+                return hist[findBin]
+
+        weights = np.array([cfd(x) for x in weights])
+        # curve = np.array([weightedROC(t, metricFrame) for t in np.linspace(0, 1, num=100)])
+        # curve = np.vstack([np.array([1, 1]), curve])
+        # rfAUC_weighted = auc(curve[:, 0], curve[:, 1])
+        rfAUC_weighted = roc_auc_score(validationLabels, rfProbs[validIndices], sample_weight=weights[validIndices])
+        perf.append((score, rfAUC, rfAUC_weighted, nnDist))
     pd.to_pickle(perf, f'{prefix}{target_id}_performanceNew.pkl')
 
 
