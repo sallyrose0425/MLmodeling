@@ -90,18 +90,18 @@ def main(dataset, target_id):
         metricFrame['nn'] = metricFrame.apply(lambda t: nnPredictor(t.loc['weights'], t.loc['labels']), axis=1)
         nnDist = distToNN(metricFrame['rfProbs'], metricFrame['nn'])
         compWeights = weights[validIndices].values
+        hist, bin_edges = np.histogram(compWeights, density=True, bins=100)
+        hist = np.cumsum(hist * np.diff(bin_edges))
 
         def cfd(x):
-            hist, bin_edges = np.histogram(compWeights, density=True, bins=100)
-            hist = np.cumsum(hist) / hist.size
-            if x == 0:
-                return 0
-            elif x >= bin_edges[-1]:
-                return hist[-1]
-            else:
+            try:
                 findBin = [x >= y for y in bin_edges].index(False)
+            except ValueError:
+                return 1
+            if findBin == 100:
+                return 1
+            else:
                 return hist[findBin]
-
         weights = np.array([cfd(x) for x in weights])
         # curve = np.array([weightedROC(t, metricFrame) for t in np.linspace(0, 1, num=100)])
         # curve = np.vstack([np.array([1, 1]), curve])
