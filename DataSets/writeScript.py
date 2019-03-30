@@ -29,15 +29,12 @@ for target_id in targets:
 sizes.sort()
 
 calls = ['# !/bin/bash\ntsp -S 16\n']
+
 for pair in sizes:
     target_id = pair[1]
     call = f'tsp python singleTargetProcess.py {dataset} {target_id} \n'
     calls.append(call)
-for pair in sizes:
-    target_id = pair[1]
-    call = f'tsp python evaluation.py {dataset} {target_id} \n'
-    calls.append(call)
 
-f = open(os.getcwd() + '/DataSets/runScript', 'w+')
+f = open('/home/brian/bin/runScript', 'w+')
 f.writelines(calls)
 f.close()

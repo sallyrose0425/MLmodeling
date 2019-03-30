@@ -33,7 +33,7 @@ def distToNN(probs, nn):
     for t in np.linspace(0, 1, num=100):
         preds = probs > t
         preds = preds.apply(lambda a: int(a)).values
-        dist.append(jaccard_similarity_score(preds, nn.values))
+        dist.append(1 - jaccard_similarity_score(preds, nn.values))
     return max(dist)
 
 
@@ -83,7 +83,7 @@ def main(dataset, target_id):
     # Run the geneticOptimizer method on data
     splits = data.geneticOptimizer(numGens, POPSIZE=popSize, printFreq=print_frequency, scoreGoal=score_goal)
     # Grab optimal split from polulation
-    scores = [data.objectiveFunction(split) for split in splits]
+    scores = [data.objectiveFunction(split)[0] for split in splits]
     split = splits[np.argmin(scores)]
     # Record performance stats
     trainingFeatures = data.fingerprints[split == 1]
@@ -105,7 +105,7 @@ def main(dataset, target_id):
     pd.to_pickle(data.fingerprints, prefix + target_id + '_dataPackage.pkl')
     pd.to_pickle(pd.DataFrame(data.optRecord, columns=['time', 'AA-AI', 'II-IA', 'score']),
                  prefix + target_id + '_optRecord.pkl')
-    statsArray = np.array([meanScore, meanRfAUC, meanNnDist, min(scores)[0], rfAUC, nnDistOpt])
+    statsArray = np.array([meanScore, meanRfAUC, meanNnDist, min(scores), rfAUC, nnDistOpt])
     pd.to_pickle(statsArray, prefix + target_id + '_perfStats.pkl')
 
 

@@ -4,6 +4,7 @@ import pandas as pd
 from glob import glob
 import warnings
 from sklearn.ensemble import RandomForestClassifier
+from sklearn.metrics import roc_auc_score, auc, jaccard_similarity_score
 from sklearn.metrics import f1_score, roc_auc_score, auc
 import matplotlib.pyplot as plt
 from scipy.optimize import curve_fit
@@ -219,50 +220,37 @@ plt.savefig(dataset + '/' + 'weightedScoreScatter')
 
 
 ########################################################################################################################
+
+
 dataset = 'dekois'
 prefix = os.getcwd() + '/DataSets/' + dataset + '/'
-files = glob(os.getcwd() + '/DataSets/' + dataset + '/*_performanceNew.pkl')
+files = glob(os.getcwd() + '/DataSets/' + dataset + '/*_perfStats.pkl')
 perfs = []
 for file in files:
-    target_id = file.split('/')[-1].split('_')[0]
-    optPackage = pd.read_pickle(prefix + target_id + '_dataPackageNew.pkl')
-    features = optPackage.drop(['split', 'labels', 'weights'], axis=1)
-    training = optPackage[optPackage['split'] == 1]
-    trainingFeatures = training.drop(['split', 'labels', 'weights'], axis=1)
-    trainingLabels = training['labels']
-    rf = RandomForestClassifier(n_estimators=100)
-    rf.fit(trainingFeatures, trainingLabels)
-    optPackage['rfPreds'] = rf.predict(features)
-    rfPredictions = optPackage[optPackage['split'] == 0]['rfPreds']
-    validationLabels = optPackage[optPackage['split'] == 0]['labels']
-    rfAUC = roc_auc_score(validationLabels, rfPredictions)
-    log = pd.read_pickle(os.getcwd() + '/DataSets/' + dataset + '/' + target_id + '_optRecordNew.pkl')
-    optScore = log.tail(1).values[0, 3]
-    assert optScore > -0.2, 'low score!'
-    performance = pd.read_pickle(file)
-    perf = list(np.mean(np.array(performance), axis=0))
-    perf.extend([optScore, rfAUC])
-    perfs.append(perf)
-perfs = pd.DataFrame(perfs)
+    perfs.append(pd.read_pickle(file))
+perfs = pd.DataFrame(perfs,
+        columns=['score', 'rfAUC', 'nnDist', 'optScore', 'rfAUCopt', 'nnDistOpt'])
 # save scatterplots
+
+plt.scatter(perfs['score'], perfs['nnDist'])
 plt.figure()
 plt.subplot(311)
-plt.scatter(perfs[0], perfs[1])
+plt.scatter(perfs['score'], perfs['rfAUC'])
 plt.xlabel('Score')
 plt.ylabel('RF AUC')
-pearson = np.round(perfs[0].corr(perfs[1]), 2)
+pearson = np.round(perfs['score'].corr(perfs['rfAUC']), 2)
 plt.title(f'Pearson {pearson}')
 plt.subplot(312)
-plt.scatter(perfs[0], perfs[2])
+plt.scatter(perfs['score'], perfs['rfAUC_weighted'])
 plt.xlabel('Score')
 plt.ylabel('RF AUC weighted')
-pearson = np.round(perfs[0].corr(perfs[2]), 2)
+pearson = np.round(perfs['score'].corr(perfs['rfAUC_weighted']), 2)
 plt.title(f'Pearson {pearson}')
 plt.subplot(313)
-plt.scatter(perfs[3], perfs[4])
+plt.scatter(perfs['optScore'], perfs['rfAUCopt'])
 plt.xlabel('Score')
 plt.ylabel('RF AUC')
-pearson = np.round(perfs[3].corr(perfs[4]), 2)
+pearson = np.round(perfs['optScore'].corr(perfs['rfAUCopt']), 2)
 plt.title(f'Pearson {pearson}')
 plt.tight_layout()
 plt.savefig(dataset + '/' + 'scoreScatter')
