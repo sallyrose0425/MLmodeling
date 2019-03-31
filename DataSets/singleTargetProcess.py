@@ -10,7 +10,7 @@ from sklearn.metrics import roc_auc_score, jaccard_similarity_score
 
 import ukyScore
 
-ATOMWISE = True  # (False) Use the atomwise approximation
+ATOMWISE = False  # (False) Use the atomwise approximation
 metric = 'jaccard'  # ('jaccard') Metric for use in determining fingerprint distances
 score_goal = 0.01  # (0.02) Early termination of genetic optimizer if goal is reached
 numGens = 500  # (1000) Number of generations to run in genetic optimizer
@@ -58,6 +58,7 @@ def main(dataset, target_id):
     skf = StratifiedKFold(n_splits=3, shuffle=True)
     splits = [(train, test) for train, test in skf.split(data.fingerprints, data.labels)]
     perf = []
+    rf = RandomForestClassifier(n_estimators=100)
     for splitIndices in splits:
         trainIndices, validIndices = splitIndices
         trainingFeatures = data.fingerprints.T[trainIndices].T
@@ -69,7 +70,6 @@ def main(dataset, target_id):
             score = score[0] + score[1]
         else:
             score = np.sqrt(score[0] ** 2 + score[1] ** 2)
-        rf = RandomForestClassifier(n_estimators=100)
         rf.fit(trainingFeatures, trainingLabels)
         rfProbs = rf.predict_proba(data.fingerprints)[:, 1]
         rfAUC = roc_auc_score(validationLabels, rfProbs[validIndices])
@@ -102,11 +102,11 @@ def main(dataset, target_id):
     data.fingerprints['labels'] = data.labels
     data.fingerprints['split'] = split
     data.fingerprints['weights'] = data.weights(split)
-    pd.to_pickle(data.fingerprints, prefix + target_id + '_dataPackage.pkl')
+    pd.to_pickle(data.fingerprints, prefix + target_id + '_dataPackageNew.pkl')
     pd.to_pickle(pd.DataFrame(data.optRecord, columns=['time', 'AA-AI', 'II-IA', 'score']),
-                 prefix + target_id + '_optRecord.pkl')
+                 prefix + target_id + '_optRecordNew.pkl')
     statsArray = np.array([meanScore, meanRfAUC, meanNnDist, min(scores), rfAUC, nnDistOpt])
-    pd.to_pickle(statsArray, prefix + target_id + '_perfStats.pkl')
+    pd.to_pickle(statsArray, prefix + target_id + '_perfStatsNew.pkl')
 
 
 if __name__ == '__main__':
