@@ -1,6 +1,5 @@
 import os
 import sys
-import random
 import pandas as pd
 import numpy as np
 
@@ -10,7 +9,7 @@ from sklearn.metrics import roc_auc_score, jaccard_similarity_score
 
 import ukyScore
 
-ATOMWISE = False  # (False) Use the atomwise approximation
+ATOMWISE = True  # (False) Use the atomwise approximation
 metric = 'jaccard'  # ('jaccard') Metric for use in determining fingerprint distances
 score_goal = 0.01  # (0.02) Early termination of genetic optimizer if goal is reached
 numGens = 500  # (1000) Number of generations to run in genetic optimizer
@@ -55,8 +54,6 @@ def main(dataset, target_id):
     print(f'Creating data set {target_id}')
     data = ukyScore.data_set(target_id, activeFile, decoyFile, targetRatio, ratioTol, balanceTol, atomwise=ATOMWISE, Metric=metric)
     # Three-fold cross validation stats
-    np.random.seed(42)
-    random.seed(42)
     skf = StratifiedKFold(n_splits=3, shuffle=True)
     splits = [(train, test) for train, test in skf.split(data.fingerprints, data.labels)]
     perf = []
