@@ -2,8 +2,8 @@
 # Necessary Packages:
 (Python 3)
   - Pandas
-  - DEAP
-  - rdKit
+  - [DEAP](http://deap.readthedocs.org/)
+  - [rdKit](https://www.rdkit.org/docs/GettingStartedInPython.html)
   - skLearn
 
 # Assumed File Structure:
@@ -48,7 +48,7 @@ CYP2A6 - Initializing optimizer ...
 CYP2A6 - Beginning optimization...
 CYP2A6 -- Generation 0 -- Time (sec): 48.86 -- Min score: 0.0049 -- Score parts: -0.14005602240896348, 0.1449491188880615
 ```
-In practice we use taskSpooler and run multiple instances in parallel:
+In practice we use [taskSpooler](http://vicerveza.homeunix.net/~viric/soft/ts/man_ts.html) and run multiple instances in parallel:
 ```
 # !/bin/bash
 tsp -S 16
