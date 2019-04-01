@@ -1,6 +1,6 @@
 import os
 import sys
-
+import random
 import pandas as pd
 import numpy as np
 
@@ -55,6 +55,8 @@ def main(dataset, target_id):
     print(f'Creating data set {target_id}')
     data = ukyScore.data_set(target_id, activeFile, decoyFile, targetRatio, ratioTol, balanceTol, atomwise=ATOMWISE, Metric=metric)
     # Three-fold cross validation stats
+    np.random.seed(42)
+    random.seed(42)
     skf = StratifiedKFold(n_splits=3, shuffle=True)
     splits = [(train, test) for train, test in skf.split(data.fingerprints, data.labels)]
     perf = []
@@ -95,7 +97,7 @@ def main(dataset, target_id):
         weights = np.array([cfd(x) for x in weights])
         rfAUC_weighted = roc_auc_score(validationLabels, rfProbs[validIndices], sample_weight=weights[validIndices])
         perf.append((score, rfAUC, rfAUC_weighted, nnDist))
-    meanScore, meanRfAUC, meanNnDist = np.mean(np.array(perf), axis=0)
+    meanScore, meanRfAUC, meanRfAUCWeighted, meanNnDist = np.mean(np.array(perf), axis=0)
     # Run the geneticOptimizer method on data
     splits = data.geneticOptimizer(numGens, POPSIZE=popSize, printFreq=print_frequency, scoreGoal=score_goal)
     # Grab optimal split from polulation
@@ -120,9 +122,9 @@ def main(dataset, target_id):
     data.fingerprints['weights'] = data.weights(split)
     pd.to_pickle(data.fingerprints, prefix + target_id + '_dataPackage.pkl')
     pd.to_pickle(pd.DataFrame(data.optRecord, columns=['time', 'AA-AI', 'II-IA', 'score']),
-                 prefix + target_id + '_optRecordNew.pkl')
-    statsArray = np.array([meanScore, meanRfAUC, meanNnDist, min(scores), rfAUC, nnDistOpt])
-    pd.to_pickle(statsArray, prefix + target_id + '_perfStatsNew.pkl')
+                 prefix + target_id + '_optRecord.pkl')
+    statsArray = np.array([meanScore, meanRfAUC, meanRfAUCWeighted, meanNnDist, min(scores), rfAUC, nnDistOpt])
+    pd.to_pickle(statsArray, prefix + target_id + '_perfStats.pkl')
 
 
 if __name__ == '__main__':
