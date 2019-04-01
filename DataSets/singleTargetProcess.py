@@ -117,11 +117,11 @@ def main(dataset, target_id):
     data.fingerprints['labels'] = data.labels
     data.fingerprints['split'] = split
     data.fingerprints['weights'] = data.weights(split)
-    pd.to_pickle(data.fingerprints, prefix + target_id + '_dataPackage.pkl')
+    pd.to_pickle(data.fingerprints, prefix + target_id + '_dataPackageNew.pkl')
     pd.to_pickle(pd.DataFrame(data.optRecord, columns=['time', 'AA-AI', 'II-IA', 'score']),
-                 prefix + target_id + '_optRecord.pkl')
+                 prefix + target_id + '_optRecordNew.pkl')
     statsArray = np.array([meanScore, meanRfAUC, meanRfAUCWeighted, meanNnDist, min(scores), rfAUC, nnDistOpt])
-    pd.to_pickle(statsArray, prefix + target_id + '_perfStats.pkl')
+    pd.to_pickle(statsArray, prefix + target_id + '_perfStatsNew.pkl')
 
 
 if __name__ == '__main__':
