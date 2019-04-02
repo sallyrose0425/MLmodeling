@@ -8,11 +8,14 @@ import matplotlib.pyplot as plt
 
 dataset = 'dekois'
 prefix = os.getcwd() + '/DataSets/' + dataset + '/'
-files = glob(os.getcwd() + '/DataSets/' + dataset + '/*_perfStats.pkl')
+files = glob(os.getcwd() + '/DataSets/' + dataset + '/*_perfStatsNew.pkl')
 perfs = []
 for file in files:
     perfs.append(pd.read_pickle(file))
-perfs = pd.DataFrame(perfs, columns=['score', 'rfAUC', 'rfAUC_weighted', 'nnSimilarity', 'optScore', 'rfAUCopt', 'nnSimilarityOpt'])
+perfs = pd.DataFrame(perfs, columns=['score', 'rfAUC', 'rfAUC_weighted', 'nnSimilarity',
+                                     'rfAUC_PR', 'rfAUC_PR_weighted',
+                                     'optScore', 'rfAUCopt', 'nnSimilarityOpt',
+                                     'rfAUC_PR_Opt', 'rfAUC_PR_Opt_weighted'])
 # perfs['nnSimilarity'] = 1 - perfs['nnSimilarity']
 # perfs['nnSimilarityOpt'] = 1 - perfs['nnSimilarityOpt']
 
@@ -48,6 +51,7 @@ plt.xlabel('AVE bias')
 plt.ylabel('nn similarity')
 plt.subplot(313)
 plt.scatter(perfs['optScore'], perfs['rfAUCopt'])
+plt.axhline(y=0.5, color='k', linestyle='--')
 plt.xlabel('AVE bias')
 plt.ylabel('rf AUC')
 pearson = np.round(perfs['optScore'].corr(perfs['rfAUCopt']), 2)

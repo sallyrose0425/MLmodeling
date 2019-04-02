@@ -71,8 +71,8 @@ def main(dataset, target_id):
             score = np.sqrt(score[0] ** 2 + score[1] ** 2)
         rf.fit(trainingFeatures, trainingLabels)
         rfProbs = rf.predict_proba(data.fingerprints)[:, 1]
-        fpr, tpr, _ = precision_recall_curve(validationLabels, rfProbs[validIndices])
-        rfAUC_PR = auc(fpr, tpr)
+        precision, recall, thresholds = precision_recall_curve(validationLabels, rfProbs[validIndices])
+        rfAUC_PR = auc(recall, precision)
         rfAUC = roc_auc_score(validationLabels, rfProbs[validIndices])
         weights = pd.Series(data.weights(split))  # temporary weighting
         metricFrame = pd.DataFrame([data.labels, split, weights, rfProbs],
@@ -94,11 +94,12 @@ def main(dataset, target_id):
                 return hist[findBin]
 
         weights = np.array([cfd(x) for x in weights])
-        fpr, tpr, _ = precision_recall_curve(validationLabels, rfProbs[validIndices])
-        rfAUC_PR_weighted = auc(fpr, tpr, sample_weight=weights[validIndices])
+        precision, recall, thresholds = precision_recall_curve(validationLabels, rfProbs[split == 0],
+                                                               sample_weight=weights[validIndices])
+        rfAUC_PR_weighted = auc(recall, precision)
         rfAUC_weighted = roc_auc_score(validationLabels, rfProbs[validIndices], sample_weight=weights[validIndices])
         perf.append((score, rfAUC, rfAUC_weighted, nnDist, rfAUC_PR, rfAUC_PR_weighted))
-    meanScore, meanRfAUC, meanRfAUCWeighted, meanNnDist = np.mean(np.array(perf), axis=0)
+    meanScore, meanRfAUC, meanRfAUCWeighted, meanNnDist, rfAUC_PR, rfAUC_PR_weighted = np.mean(np.array(perf), axis=0)
     # Run the geneticOptimizer method on data
     splits = data.geneticOptimizer(numGens, POPSIZE=popSize, printFreq=print_frequency, scoreGoal=score_goal)
     # Grab optimal split from polulation
@@ -111,7 +112,12 @@ def main(dataset, target_id):
     rfProbs = rf.predict_proba(data.fingerprints)[:, 1]
     validationLabels = data.labels[split == 0]
     rfAUC = roc_auc_score(validationLabels, rfProbs[split == 0])
+    precision, recall, thresholds = precision_recall_curve(validationLabels, rfProbs[split == 0])
+    rfAUC_PR_Opt = auc(recall, precision)
     weights = pd.Series(data.weights(split))  # temporary weighting
+    precision, recall, thresholds = precision_recall_curve(validationLabels, rfProbs[split == 0],
+                                                           sample_weight=weights[split == 0])
+    rfAUC_PR_Opt_weighted = auc(recall, precision)
     metricFrame = pd.DataFrame([data.labels, split, weights, rfProbs],
                                index=['labels', 'split', 'weights', 'rfProbs']).T
     metricFrame['nn'] = metricFrame.apply(lambda t: nnPredictor(t.loc['weights'], t.loc['labels']), axis=1)
@@ -121,11 +127,14 @@ def main(dataset, target_id):
     data.fingerprints['labels'] = data.labels
     data.fingerprints['split'] = split
     data.fingerprints['weights'] = data.weights(split)
-    pd.to_pickle(data.fingerprints, prefix + target_id + '_dataPackageNew.pkl')
+    pd.to_pickle(data.fingerprints, prefix + target_id + '_dataPackage.pkl')
     pd.to_pickle(pd.DataFrame(data.optRecord, columns=['time', 'AA-AI', 'II-IA', 'score']),
                  prefix + target_id + '_optRecordNew.pkl')
-    statsArray = np.array([meanScore, meanRfAUC, meanRfAUCWeighted, meanNnDist, min(scores), rfAUC, nnDistOpt])
-    pd.to_pickle(statsArray, prefix + target_id + '_perfStatsNew.pkl')
+    statsArray = np.array([meanScore, meanRfAUC, meanRfAUCWeighted, meanNnDist,
+                           rfAUC_PR, rfAUC_PR_weighted,
+                           min(scores), rfAUC, nnDistOpt,
+                           rfAUC_PR_Opt, rfAUC_PR_Opt_weighted])
+    pd.to_pickle(statsArray, prefix + target_id + '_perfStats.pkl')
 
 
 if __name__ == '__main__':
