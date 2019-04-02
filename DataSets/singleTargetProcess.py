@@ -5,11 +5,11 @@ import numpy as np
 
 from sklearn.model_selection import StratifiedKFold
 from sklearn.ensemble import RandomForestClassifier
-from sklearn.metrics import roc_auc_score, jaccard_similarity_score
+from sklearn.metrics import roc_auc_score, jaccard_similarity_score, auc, precision_recall_curve
 
 import ukyScore
 
-ATOMWISE = False  # (False) Use the atomwise approximation
+ATOMWISE = True  # (False) Use the atomwise approximation
 metric = 'jaccard'  # ('jaccard') Metric for use in determining fingerprint distances
 score_goal = 0.01  # (0.02) Early termination of genetic optimizer if goal is reached
 numGens = 500  # (1000) Number of generations to run in genetic optimizer
@@ -71,6 +71,8 @@ def main(dataset, target_id):
             score = np.sqrt(score[0] ** 2 + score[1] ** 2)
         rf.fit(trainingFeatures, trainingLabels)
         rfProbs = rf.predict_proba(data.fingerprints)[:, 1]
+        fpr, tpr, _ = precision_recall_curve(validationLabels, rfProbs[validIndices])
+        rfAUC_PR = auc(fpr, tpr)
         rfAUC = roc_auc_score(validationLabels, rfProbs[validIndices])
         weights = pd.Series(data.weights(split))  # temporary weighting
         metricFrame = pd.DataFrame([data.labels, split, weights, rfProbs],
@@ -92,8 +94,10 @@ def main(dataset, target_id):
                 return hist[findBin]
 
         weights = np.array([cfd(x) for x in weights])
+        fpr, tpr, _ = precision_recall_curve(validationLabels, rfProbs[validIndices])
+        rfAUC_PR_weighted = auc(fpr, tpr, sample_weight=weights[validIndices])
         rfAUC_weighted = roc_auc_score(validationLabels, rfProbs[validIndices], sample_weight=weights[validIndices])
-        perf.append((score, rfAUC, rfAUC_weighted, nnDist))
+        perf.append((score, rfAUC, rfAUC_weighted, nnDist, rfAUC_PR, rfAUC_PR_weighted))
     meanScore, meanRfAUC, meanRfAUCWeighted, meanNnDist = np.mean(np.array(perf), axis=0)
     # Run the geneticOptimizer method on data
     splits = data.geneticOptimizer(numGens, POPSIZE=popSize, printFreq=print_frequency, scoreGoal=score_goal)
