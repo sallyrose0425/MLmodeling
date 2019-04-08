@@ -10,7 +10,7 @@ from sklearn.metrics import roc_auc_score, jaccard_similarity_score, auc, precis
 import ukyScore
 
 ATOMWISE = True  # (False) Use the atomwise approximation
-metric = 'euclidean'  # ('jaccard') Metric for use in determining fingerprint distances
+metric = 'jaccard'  # ('jaccard') Metric for use in determining fingerprint distances
 score_goal = 0.01  # (0.02) Early termination of genetic optimizer if goal is reached
 numGens = 500  # (1000) Number of generations to run in genetic optimizer
 popSize = 500
