@@ -9,7 +9,7 @@ from sklearn.metrics import roc_auc_score, jaccard_similarity_score, auc, precis
 
 import ukyScore
 
-ATOMWISE = True  # (False) Use the atomwise approximation
+ATOMWISE = False  # (False) Use the atomwise approximation
 metric = 'jaccard'  # ('jaccard') Metric for use in determining fingerprint distances
 score_goal = 0.01  # (0.02) Early termination of genetic optimizer if goal is reached
 numGens = 500  # (1000) Number of generations to run in genetic optimizer
@@ -127,14 +127,24 @@ def main(dataset, target_id):
     data.fingerprints['labels'] = data.labels
     data.fingerprints['split'] = split
     data.fingerprints['weights'] = data.weights(split)
-    pd.to_pickle(data.fingerprints, prefix + target_id + '_dataPackage.pkl')
-    pd.to_pickle(pd.DataFrame(data.optRecord, columns=['time', 'AA-AI', 'II-IA', 'score']),
-                 prefix + target_id + '_optRecordNew.pkl')
-    statsArray = np.array([meanScore, meanRfAUC, meanRfAUCWeighted, meanNnDist,
-                           rfAUC_PR, rfAUC_PR_weighted,
-                           min(scores), rfAUC, nnDistOpt,
-                           rfAUC_PR_Opt, rfAUC_PR_Opt_weighted])
-    pd.to_pickle(statsArray, prefix + target_id + '_perfStats.pkl')
+    if ATOMWISE:
+        pd.to_pickle(data.fingerprints, prefix + target_id + '_dataPackage.pkl')
+        pd.to_pickle(pd.DataFrame(data.optRecord, columns=['time', 'AA-AI', 'II-IA', 'score']),
+                     prefix + target_id + '_optRecord.pkl')
+        statsArray = np.array([meanScore, meanRfAUC, meanRfAUCWeighted, meanNnDist,
+                               rfAUC_PR, rfAUC_PR_weighted,
+                               min(scores), rfAUC, nnDistOpt,
+                               rfAUC_PR_Opt, rfAUC_PR_Opt_weighted])
+        pd.to_pickle(statsArray, prefix + target_id + '_perfStats.pkl')
+    else:
+        pd.to_pickle(data.fingerprints, prefix + target_id + '_dataPackageNew.pkl')
+        pd.to_pickle(pd.DataFrame(data.optRecord, columns=['time', 'AA-AI', 'II-IA', 'score']),
+                     prefix + target_id + '_optRecordNew.pkl')
+        statsArray = np.array([meanScore, meanRfAUC, meanRfAUCWeighted, meanNnDist,
+                               rfAUC_PR, rfAUC_PR_weighted,
+                               min(scores), rfAUC, nnDistOpt,
+                               rfAUC_PR_Opt, rfAUC_PR_Opt_weighted])
+        pd.to_pickle(statsArray, prefix + target_id + '_perfStatsNew.pkl')
 
 
 if __name__ == '__main__':
