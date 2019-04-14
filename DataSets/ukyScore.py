@@ -31,8 +31,14 @@ sizeBound = int(np.sqrt(mem.available / 8)/safetyFactor)
  fits distance matrix in user's computer's memory."""
 
 
-def approx(array):
-    return np.ceil(50*array)/51
+def approx(scalar):
+    if 50*scalar == int(50*scalar):
+        return (50*scalar - 1)/51
+    else:
+        return np.ceil(50*scalar)/51
+
+
+Approx = np.vectorize(approx)
 
 
 def finger(mol):
@@ -138,9 +144,9 @@ class data_set:
             decoyDecoyDistances = pairwise_distances_argmin_min(validDecoy, trainDecoy, metric=self.metric)
             if self.atomwise:
                 """AA - AI"""
-                activeMeanDistance = np.mean(approx(actDecoyDistances[1]) - approx(actActDistances[1]))
+                activeMeanDistance = np.mean(Approx(actDecoyDistances[1]) - Approx(actActDistances[1]))
                 """II - IA"""
-                decoyMeanDistance = np.mean(approx(decoyActDistances[1]) - approx(decoyDecoyDistances[1]))
+                decoyMeanDistance = np.mean(Approx(decoyActDistances[1]) - Approx(decoyDecoyDistances[1]))
             else:
                 activeMeanDistance = np.mean(actDecoyDistances[1] - actActDistances[1])
                 decoyMeanDistance = np.mean(decoyActDistances[1] - decoyDecoyDistances[1])
