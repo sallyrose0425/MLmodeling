@@ -162,8 +162,8 @@ class data_set:
             minNegNegDist = np.amin(
                 self.distanceMatrix[(split == 0) & (self.labels == 0), :][:, (split == 1) & (self.labels == 0)], axis=1)
             if self.atomwise:
-                scores = np.mean(approx(minPosNegDist)) - np.mean(approx(minPosPosDist)),\
-                         np.mean(approx(minNegPosDist)) - np.mean(approx(minNegNegDist))
+                scores = np.mean(Approx(minPosNegDist)) - np.mean(Approx(minPosPosDist)),\
+                         np.mean(Approx(minNegPosDist)) - np.mean(Approx(minNegNegDist))
             else:
                 scores = np.mean(minPosNegDist) - np.mean(minPosPosDist),\
                          np.mean(minNegPosDist) - np.mean(minNegNegDist)
