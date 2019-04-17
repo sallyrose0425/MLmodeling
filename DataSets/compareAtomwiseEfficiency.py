@@ -10,10 +10,7 @@ import ukyScore
 
 
 def approx(scalar):
-    if 50*scalar == int(50*scalar):
-        return (50*scalar - 1)/51
-    else:
-        return np.ceil(50*scalar)/51
+    return np.floor(50*scalar)/51
 
 
 Approx = np.vectorize(approx)
@@ -45,10 +42,10 @@ for target_id in targets:
 
         t0 = time()
         for i in range(1000):
-            aTest_aTrain_S = np.mean([np.mean(np.any(aTest_aTrain_D < t, axis=1)) for t in np.linspace(0, 1.0, 100)])
-            aTest_iTrain_S = np.mean([np.mean(np.any(aTest_iTrain_D < t, axis=1)) for t in np.linspace(0, 1.0, 100)])
-            iTest_iTrain_S = np.mean([np.mean(np.any(iTest_iTrain_D < t, axis=1)) for t in np.linspace(0, 1.0, 100)])
-            iTest_aTrain_S = np.mean([np.mean(np.any(iTest_aTrain_D < t, axis=1)) for t in np.linspace(0, 1.0, 100)])
+            aTest_aTrain_S = np.mean([np.mean(np.any(aTest_aTrain_D < t, axis=1)) for t in np.linspace(0, 1.0, 50)])
+            aTest_iTrain_S = np.mean([np.mean(np.any(aTest_iTrain_D < t, axis=1)) for t in np.linspace(0, 1.0, 50)])
+            iTest_iTrain_S = np.mean([np.mean(np.any(iTest_iTrain_D < t, axis=1)) for t in np.linspace(0, 1.0, 50)])
+            iTest_aTrain_S = np.mean([np.mean(np.any(iTest_aTrain_D < t, axis=1)) for t in np.linspace(0, 1.0, 50)])
             Atomwise = aTest_aTrain_S - aTest_iTrain_S + iTest_iTrain_S - iTest_aTrain_S
         time_tmp.append(time() - t0)
 
@@ -58,8 +55,8 @@ for target_id in targets:
             minPosNegDist = np.amin(aTest_iTrain_D, axis=1)
             minNegPosDist = np.amin(iTest_aTrain_D, axis=1)
             minNegNegDist = np.amin(iTest_iTrain_D, axis=1)
-            ukyApprox = np.mean(Approx(minPosNegDist)) - np.mean(Approx(minPosPosDist))\
-                        + np.mean(Approx(minNegPosDist)) - np.mean(Approx(minNegNegDist))
+            ukyApprox = np.mean(Approx(minPosNegDist) - Approx(minPosPosDist))\
+                        + np.mean(Approx(minNegPosDist) - Approx(minNegNegDist))
         time_tmp.append(time() - t0)
 
         t0 = time()
@@ -72,32 +69,42 @@ for target_id in targets:
                     np.mean(minNegPosDist) - np.mean(minNegNegDist)
         time_tmp.append(time() - t0)
 
+        t0 = time()
+        for i in range(1000):
+            minPosPosDist = np.amin(aTest_aTrain_D, axis=1)
+            minPosNegDist = np.amin(aTest_iTrain_D, axis=1)
+            minNegPosDist = np.amin(iTest_aTrain_D, axis=1)
+            minNegNegDist = np.amin(iTest_iTrain_D, axis=1)
+            uky_Score = np.sqrt((np.mean(minPosNegDist) - np.mean(minPosPosDist))**2 +\
+                            (np.mean(minNegPosDist) - np.mean(minNegNegDist))**2)
+        time_tmp.append(time() - t0)
+
         times.append(time_tmp)
-        scores.append([Atomwise, ukyApprox, score])
+        scores.append([Atomwise, ukyApprox, score, uky_Score])
     except AttributeError:
         print('Error')
         pass
 
 times = np.array(times)
+scores = np.array(scores)
+
 aveTimes = np.mean(times, axis=0)
 1.0/(aveTimes/aveTimes[0])[1:]
 
-
-scores = np.array(scores)
-
-pd.DataFrame(scores[:,2]-scores[:,0]).hist(bins=20)
-pd.DataFrame(scores[:,1]-scores[:,0]).hist(bins=20)
+compare = np.abs(scores[:,0] - scores[:,2])
+np.mean(compare)
+np.max(compare)
 
 
-compare = np.mean(np.abs(scores[:,2]-scores[:,0]))
 plt.figure()
-plt.plot([0,1],[0,1], ls='--', c='k',zorder=0)
-plt.plot([0,1],[0.02,1.02], c='g',zorder=1)
-plt.plot([0,1],[-0.02,0.98], c='g',zorder=2)
-plt.scatter(scores[:,0], scores[:,2], marker='.',alpha=0.8,zorder=4)
-plt.scatter(scores[:,0], scores[:,1], marker='.', alpha=0.8,zorder=3)
-plt.xlabel('AVE bias')
-plt.ylabel('Score')
+plt.plot([0, 1],[0, 1], ls='--', c='k', label='Expression (2)', zorder=0)
+# plt.plot([0,1],[0.02,1.02], c='g',zorder=1)
+# plt.plot([0,1],[-0.02,0.98], c='g',zorder=2)
+plt.scatter(scores[:, 0], scores[:, 1], alpha=0.8, label='Expression (3)', zorder=1)
+plt.scatter(scores[:, 0], scores[:, 2], alpha=0.8, label='Expression (4)', zorder=2)
+plt.legend()
+plt.xlabel('Expression (2)')
+
 
 
 plt.subplot(212)

@@ -9,6 +9,7 @@ from sklearn.metrics import roc_auc_score, jaccard_similarity_score, auc, precis
 
 import ukyScore
 
+holdout = True  # random holdout for validation after split optimization
 ATOMWISE = False  # (False) Use the atomwise approximation
 metric = 'jaccard'  # ('jaccard') Metric for use in determining fingerprint distances
 score_goal = 0.01  # (0.02) Early termination of genetic optimizer if goal is reached

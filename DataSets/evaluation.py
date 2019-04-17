@@ -108,6 +108,8 @@ def main(dataset, target_id):
         # rfAUC_weighted = auc(curve[:, 0], curve[:, 1])
         rfAUC_weighted = roc_auc_score(validationLabels, rfProbs[validIndices], sample_weight=weights[validIndices])
         perf.append((score, rfAUC, rfAUC_weighted, nnDist))
+
+
     pd.to_pickle(perf, f'{prefix}{target_id}_performanceNew.pkl')
 
 

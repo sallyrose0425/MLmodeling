@@ -32,10 +32,7 @@ sizeBound = int(np.sqrt(mem.available / 8)/safetyFactor)
 
 
 def approx(scalar):
-    if 50*scalar == int(50*scalar):
-        return (50*scalar - 1)/51
-    else:
-        return np.ceil(50*scalar)/51
+    return np.floor(50*scalar)/51
 
 
 Approx = np.vectorize(approx)
