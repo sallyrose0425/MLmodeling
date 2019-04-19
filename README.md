@@ -1,9 +1,14 @@
-# MLmodeling
 
-## Assumed File Structure:
+# Necessary Packages:
+(Python 3)
+  - Pandas
+  - [DEAP](http://deap.readthedocs.org/)
+  - [rdKit](https://www.rdkit.org/docs/GettingStartedInPython.html)
+  - skLearn
 
+# Assumed File Structure:
 
-These scripts assume they are in a folder containing folders named 'MUV', 'dekois', and 'DUDE'.
+These scripts assume they are in a folder (e.g., ```/DataSets```) containing folders named 'MUV', 'dekois', and 'DUDE'.
 They further assume the following:
 
 ### MUV
@@ -20,132 +25,79 @@ Active and decoys are stored in folders named 'target_id'.
 Within each target's folder, the data is stored in ```/actives_final.sdf.gz``` and ```/decoys_final.sdf.gz```.
 
 
-## Usage:
+# Usage:
 
+### 'singleTargetProcess.py'
+The preliminary computations are performed on a per-target basis by the script 'singleTargetProcess.py'. 
+By default, running the script outputs pickle files (into the dataset folder) for each target in the data set:
 
-
-### 'dataPrep.py'
-The preliminary computations are performed on a per-dataset basis by the file 'dataPrep.py'. 
-By default, running the script outputs pickle files (into the dataset folder) for each target data set:
-
-  - the similarity matrix ```target_id_distances.pkl```
+  -```target_id_dataPackage.pkl```
   
-  - a dataframe with the 2048 bit fingerprint of each ligand (active and decoy)
-    and a binary label ```target_id_unsplitDataFrame.pkl```
+  -```target_id_optRecord.pkl```
     
-  - a dataframe containing the VE score, training ratio, and validation equity
-    for a sampling of splits ```target_id_samples.pkl```
-    
-If the distance matrix has already been computed, the script loads it and proceedes to sampling.
+  -```target_id_perfStats.pkl```
 
 Example:
 ```
-  $ python -m scoop dataPrep.py dekois
-  Current target: 17betaHSD1 (1 of 81)
-  Computing decoy fingerprints...
-  Computing active fingerprints...
-  Saved: /DataSets/dekois/17betaHSD1_unsplitDataFrame.pkl
-  Computing distance matrix...
-  Saved: /DataSets/dekois/17betaHSD1_distances.pkl
-  Sampling...
-  Saved: /DataSets/dekois/17betaHSD1_samples.pkl
-  Current target: A2A (2 of 81)
-  ...
+python singleTargetProcess.py dekois CYP2A6
+Creating data set CYP2A6
+Gathering fingerprints
+Computing distance matrix
+Finishing initialization
+CYP2A6 - Initializing optimizer ...
+CYP2A6 - Beginning optimization...
+CYP2A6 -- Generation 0 -- Time (sec): 48.86 -- Min score: 0.0049 -- Score parts: -0.14005602240896348, 0.1449491188880615
 ```
-
-
-### 'bias_analysis.py'
-Some analysis tasks are automated in order to reproduce results presented in the paper.
-Running the script for a data set:
-
-  - prints statistics for the score means and standard deviations over all targets in the data set
-  
-  - plots the aggregated standardized scores over all targets
-  
-Example:
+In practice we use [taskSpooler](http://vicerveza.homeunix.net/~viric/soft/ts/man_ts.html) and run multiple instances in parallel:
 ```
-  $ python bias_analysis.py dekois
-  
-   Pearson cor. coef. for score / split ratio: 0.036649746524803836
-
- Score means (over targets): 
-count    81.000000
-mean      0.475438
-std       0.183936
-min       0.152204
-25%       0.333998
-50%       0.469359
-75%       0.600104
-max       0.865593
-
- Score std (over targets): 
-count    81.000000
-mean      0.055764
-std       0.012451
-min       0.028854
-25%       0.047119
-50%       0.055005
-75%       0.064082
-max       0.090155
+# !/bin/bash
+tsp -S 16
+tsp python singleTargetProcess.py dekois CYP2A6 
+tsp python singleTargetProcess.py dekois PNP 
+tsp python singleTargetProcess.py dekois ALR2 
+tsp python singleTargetProcess.py dekois TP 
+...
 ```
-  
-  
-
-### 'modelCorrelation.py'
-We train a random forest regressor for each data split in the sample (produced by dataPrep.py) and record the AUC score.
-We standardize the AUC and VE scores for each target (across all of the splits for that target), and aggregate them.
-
-Running the script for a data set:
-
-  - prints statistics for the Pearson correlation coefficient between AUC and VE scores
-    over all targets in the data set.
-  
-  - plots the (aggregated standardized) AUC scores against the VE scores. 
-  
-Example:
+We create the run script via:
 ```
-  $ python modelCorrelation.py dekois
+import os
+from glob import glob
+
+
+dataset = 'dekois'
+prefix = os.getcwd() + '/' + dataset + '/'
+files = glob(prefix + '*')
+targets = []
+sizes = []
+for file in files:
+    target_id = file.split('/')[-1].split('_')[0]
+    targets.append(target_id)
+targets = list(set(targets))
+for target_id in targets:
+    if dataset == 'dekois':
+        activeFile = prefix + 'ligands/' + target_id + '.sdf.gz'
+        decoyFile = prefix + 'decoys/' + target_id + '_Celling-v1.12_decoyset.sdf.gz'
+    elif dataset == 'DUDE':
+        activeFile = prefix + target_id + '/actives_final.sdf.gz'
+        decoyFile = prefix + target_id + '/decoys_final.sdf.gz'
+    elif dataset == 'MUV':
+        activeFile = prefix + target_id + '_actives.sdf.gz'
+        decoyFile = prefix + target_id + '_decoys.sdf.gz'
+    try:
+        size = os.path.getsize(activeFile)*os.path.getsize(decoyFile)
+        sizes.append((size, target_id))
+    except FileNotFoundError:
+        pass
+sizes.sort()
+
+calls = ['# !/bin/bash\ntsp -S 16\n']
+
+for pair in sizes:
+    target_id = pair[1]
+    call = f'tsp python singleTargetProcess.py {dataset} {target_id} \n'
+    calls.append(call)
+
+f = open('runScript', 'w+')
+f.writelines(calls)
+f.close()
 ```
-  
-
-
-### 'genSplitOpt.py'
-We use the [DEAP](https://github.com/DEAP/deap) evolutionary algorithm package to produce a minimum VE score split for each target in the data set.
-Running the script for a data set:
-
-  - 
-
-Example:
-```
-  $ python genSplitOpt.py dekois
-```
-  
-## The dataBias module:
-
-The dataPrep.py script creates a data_set class instance from the data of each target.
-
-The class variables include:
-  - self.distanceMatrix 
-    The similarity matrix as computed by sklearn metrics 'jaccard'
-    
-  - self.labels
-    The binary labels for the data set
-    
-  - self.size
-    The number of data points for the data set
-    
-  - self.bias_samples
-    The list of VE scores computed from the sampled splits so far (initially empty)
-    
-  - self.times
-    The list of computation times used to sample each split and evaluate its VE score
-    
-  - self.comp_time
-  The total computation time used so far for sampling and evaluation
-  
-The methods include:
-  - computeAVEbias(self, split)
-  - randSplit(self, q)
-  - sample(self, duration, q)
-
-
