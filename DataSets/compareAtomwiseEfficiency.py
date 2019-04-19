@@ -1,7 +1,5 @@
 import os
 from glob import glob
-import sys
-import pandas as pd
 import numpy as np
 from time import time
 import matplotlib.pyplot as plt
@@ -10,7 +8,7 @@ import ukyScore
 
 
 def approx(scalar):
-    return np.floor(50*scalar)/51
+    return np.floor(50*scalar)
 
 
 Approx = np.vectorize(approx)
@@ -42,10 +40,10 @@ for target_id in targets:
 
         t0 = time()
         for i in range(1000):
-            aTest_aTrain_S = np.mean([np.mean(np.any(aTest_aTrain_D < t, axis=1)) for t in np.linspace(0, 1.0, 50)])
-            aTest_iTrain_S = np.mean([np.mean(np.any(aTest_iTrain_D < t, axis=1)) for t in np.linspace(0, 1.0, 50)])
-            iTest_iTrain_S = np.mean([np.mean(np.any(iTest_iTrain_D < t, axis=1)) for t in np.linspace(0, 1.0, 50)])
-            iTest_aTrain_S = np.mean([np.mean(np.any(iTest_aTrain_D < t, axis=1)) for t in np.linspace(0, 1.0, 50)])
+            aTest_aTrain_S = np.mean([np.mean(np.any(aTest_aTrain_D < t, axis=1)) for t in np.linspace(0, 1.0, 51)])
+            aTest_iTrain_S = np.mean([np.mean(np.any(aTest_iTrain_D < t, axis=1)) for t in np.linspace(0, 1.0, 51)])
+            iTest_iTrain_S = np.mean([np.mean(np.any(iTest_iTrain_D < t, axis=1)) for t in np.linspace(0, 1.0, 51)])
+            iTest_aTrain_S = np.mean([np.mean(np.any(iTest_aTrain_D < t, axis=1)) for t in np.linspace(0, 1.0, 51)])
             Atomwise = aTest_aTrain_S - aTest_iTrain_S + iTest_iTrain_S - iTest_aTrain_S
         time_tmp.append(time() - t0)
 
@@ -55,8 +53,8 @@ for target_id in targets:
             minPosNegDist = np.amin(aTest_iTrain_D, axis=1)
             minNegPosDist = np.amin(iTest_aTrain_D, axis=1)
             minNegNegDist = np.amin(iTest_iTrain_D, axis=1)
-            ukyApprox = np.mean(Approx(minPosNegDist) - Approx(minPosPosDist))\
-                        + np.mean(Approx(minNegPosDist) - Approx(minNegNegDist))
+            ukyApprox = (np.mean(Approx(minPosNegDist) - Approx(minPosPosDist))\
+                        + np.mean(Approx(minNegPosDist) - Approx(minNegNegDist)))/51
         time_tmp.append(time() - t0)
 
         t0 = time()
@@ -91,26 +89,18 @@ scores = np.array(scores)
 aveTimes = np.mean(times, axis=0)
 1.0/(aveTimes/aveTimes[0])[1:]
 
-compare = np.abs(scores[:,0] - scores[:,2])
+compare = np.abs(scores[:, 0] - scores[:, 2])/scores[:, 0]
 np.mean(compare)
 np.max(compare)
 
 
 plt.figure()
-plt.plot([0, 1],[0, 1], ls='--', c='k', label='Expression (2)', zorder=0)
+plt.plot([0, 1], [0, 1], ls='--', c='k', label='AVE Bias', zorder=0)
 # plt.plot([0,1],[0.02,1.02], c='g',zorder=1)
 # plt.plot([0,1],[-0.02,0.98], c='g',zorder=2)
 plt.scatter(scores[:, 0], scores[:, 1], alpha=0.8, label='Expression (3)', zorder=1)
 plt.scatter(scores[:, 0], scores[:, 2], alpha=0.8, label='Expression (4)', zorder=2)
+plt.scatter(scores[:, 0], scores[:, 3], alpha=0.8, label='VE Score', zorder=3)
 plt.legend()
-plt.xlabel('Expression (2)')
+plt.xlabel('AVE Bias')
 
-
-
-plt.subplot(212)
-plt.scatter(perfs['score'], perfs['rfAUC_PR'])
-plt.xlabel('AVE bias')
-plt.ylabel('AUC')
-pearson = np.round(perfs['score'].corr(perfs['rfAUC_PR']), 2)
-plt.title(f'Pearson {pearson}')
-plt.tight_layout()
