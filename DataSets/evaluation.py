@@ -88,6 +88,7 @@ def main(dataset, target_id):
         metricFrame = pd.DataFrame([data.labels, split, weights, rfProbs],
                                    index=['labels', 'split', 'weights', 'rfProbs']).T
         metricFrame['nn'] = metricFrame.apply(lambda t: nnPredictor(t.loc['weights'], t.loc['labels']), axis=1)
+        nnAUC = roc_auc_score(validationLabels, metricFrame['nn'][validIndices])
         nnDist = distToNN(metricFrame['rfProbs'], metricFrame['nn'])
         compWeights = weights[validIndices].values
         hist, bin_edges = np.histogram(compWeights, density=True, bins=100)
@@ -107,10 +108,8 @@ def main(dataset, target_id):
         # curve = np.vstack([np.array([1, 1]), curve])
         # rfAUC_weighted = auc(curve[:, 0], curve[:, 1])
         rfAUC_weighted = roc_auc_score(validationLabels, rfProbs[validIndices], sample_weight=weights[validIndices])
-        perf.append((score, rfAUC, rfAUC_weighted, nnDist))
-
-
-    pd.to_pickle(perf, f'{prefix}{target_id}_performanceNew.pkl')
+        perf.append((score, rfAUC, rfAUC_weighted, nnDist, nnAUC))
+    pd.to_pickle(perf, f'{prefix}{target_id}_performance.pkl')
 
 
 if __name__ == '__main__':
