@@ -23,16 +23,13 @@ from deap import tools
 ###############################################################################
 seed = 42  # random seed used in optimization
 
-safetyFactor = 3  # (3) Fraction of avaliable RAM to use for distance matrix computation
-mem = psutil.virtual_memory()
-sizeBound = int(np.sqrt(mem.available / 8)/safetyFactor)
-# sizeBound = 15100
+sizeBound = 15100
 """sizeBound: max size of dataset that reliably
- fits distance matrix in user's computer's memory."""
+ fits distance matrix in my computer's memory. -- Brian"""
 
 
 def approx(scalar):
-    return np.floor(50*scalar)
+    return int(50*scalar)
 
 
 Approx = np.vectorize(approx)
@@ -162,8 +159,8 @@ class data_set:
                 scores = np.mean(Approx(minPosNegDist) - Approx(minPosPosDist))/51,\
                          np.mean(Approx(minNegPosDist) - Approx(minNegNegDist))/51
             else:
-                scores = np.mean(minPosNegDist) - np.mean(minPosPosDist),\
-                         np.mean(minNegPosDist) - np.mean(minNegNegDist)
+                scores = np.mean(minPosNegDist - minPosPosDist),\
+                         np.mean(minNegPosDist - minNegNegDist)
             return scores[0], scores[1]
 
     def objectiveFunction(self, split):
@@ -195,7 +192,7 @@ class data_set:
         return sample
 
     def geneticOptimizer(self, numGens, printFreq=100, POPSIZE=1000, TOURNSIZE=4,
-                         CXPB=0.18, MUTPB=0.39, INDPB=0.005, scoreGoal=0.01, verbose=False):
+                         CXPB=0.18, MUTPB=0.39, INDPB=0.005, onePoint=True, scoreGoal=0.01, verbose=False):
         """
         A method for the genetic optimizer.
 
@@ -221,7 +218,10 @@ class data_set:
             toolbox.register("individual", tools.initRepeat, creator.Individual, toolbox.attr_bool, self.size)
             toolbox.register("population", tools.initRepeat, list, toolbox.individual)
             toolbox.register("evaluate", self.objectiveFunction)
-            toolbox.register("mate", tools.cxOnePoint)
+            if onePoint:
+                toolbox.register("mate", tools.cxOnePoint)
+            else:
+                toolbox.register("mate", tools.cxTwoPoint)
             toolbox.register("mutate", tools.mutFlipBit, indpb=INDPB)
             toolbox.register("select", tools.selTournament, tournsize=TOURNSIZE)
         # Set random seed for reproducibility
@@ -320,98 +320,3 @@ class data_set:
             holdWeights[validDecoyIndices[i]] = decWeights[i]
         return holdWeights
 
-
-"""
-
-import os
-import ukyScore
-import numpy as np
-dataset = 'dekois'
-target_id = 'ADRB2'
-prefix = os.getcwd() + '/DataSets/' + dataset + '/'
-activeFile = prefix + 'ligands/' + target_id + '.sdf.gz'
-decoyFile = prefix + 'decoys/' + target_id + '_Celling-v1.12_decoyset.sdf.gz'
-
-data = ukyScore.data_set(activeFile, decoyFile, balanceTol=0.01, atomwise=True)
-splits = data.geneticOptimizer(numGens=100, printFreq=50, POPSIZE=100, scoreGoal=0.01, verbose=False)
-
-from importlib import reload
-reload(ukyScore) 
-
-
-t0 = time()
-        with warnings.catch_warnings():
-            warnings.simplefilter("ignore")
-            # Create optimizer tools
-            creator.create("FitnessMin", base.Fitness, weights=(-1.0,))
-            creator.create("Individual", np.ndarray, fitness=creator.FitnessMin)
-            toolbox = base.Toolbox()
-            toolbox.register("attr_bool", np.random.choice, 2, p=[1 - data.targetRatio, data.targetRatio])
-            toolbox.register("individual", tools.initRepeat, creator.Individual, toolbox.attr_bool, data.size)
-            toolbox.register("population", tools.initRepeat, list, toolbox.individual)
-            toolbox.register("evaluate", data.objectiveFunction)
-            toolbox.register("mate", tools.cxOnePoint)
-            toolbox.register("mutate", tools.mutFlipBit, indpb=INDPB)
-            toolbox.register("select", tools.selTournament, tournsize=TOURNSIZE)
-        # Set random seed for reproducibility
-        np.random.seed(42)
-        random.seed(42)
-        pop = toolbox.population(n=POPSIZE)
-        fitnesses = list(map(toolbox.evaluate, pop))
-        for ind, fit in zip(pop, fitnesses):
-            ind.fitness.values = fit
-        gen = 0
-        minScore = 2.0
-        while gen < numGens and scoreGoal < minScore:
-            # Select the next generation individuals
-            offspring = toolbox.select(pop, len(pop))
-            # Clone the selected individuals
-            offspring = list(map(toolbox.clone, offspring))
-            # Apply crossover and mutation on the offspring
-            for child1, child2 in zip(offspring[::2], offspring[1::2]):
-                if random.random() < CXPB:
-                    toolbox.mate(child1, child2)
-                    del child1.fitness.values
-                    del child2.fitness.values
-            for mutant in offspring:
-                if random.random() < MUTPB:
-                    toolbox.mutate(mutant)
-                    del mutant.fitness.values
-            # Evaluate the individuals with an invalid fitness
-            invalid_ind = [ind for ind in offspring if not ind.fitness.valid]
-            fitnesses = map(toolbox.evaluate, invalid_ind)
-            for ind, fit in zip(invalid_ind, fitnesses):
-                ind.fitness.values = fit
-            pop[:] = offspring
-            if gen % printFreq == 0:
-                Pop = pd.selfFrame(pop)
-                validPop = Pop[Pop.apply(lambda x: self.validSplit(x), axis=1)]
-                validPop = validPop.drop_duplicates()
-                numUnique = len(validPop)
-                if numUnique == 0:
-                    meanScore = np.nan
-                    minScore = np.nan
-                    var = np.nan
-                else:
-                    scores = validPop.apply(lambda x: self.objectiveFunction(x)[0], axis=1)
-                    meanScore = np.mean(scores.values)
-                    minScore = np.min(scores.values)
-                    optSplit = validPop[scores == minScore]
-                    scoreParts = self.computeScores(optSplit.values[0])
-                if verbose:
-                    print('-- Generation {}'.format(gen)
-                          + ' -- Time (sec): {}'.format(np.round((time() - t0), 2))
-                          + ' -- Min score: {}'.format(np.round(minScore, 4))
-                          + f' -- Score parts: {scoreParts[0]}, {scoreParts[1]}'
-                          + ' -- Mean score: {}'.format(np.round(meanScore, 4))
-                          + ' -- Unique Valid splits: {}/{}'.format(numUnique, POPSIZE)
-                          )
-                else:
-                    print('-- Generation {}'.format(gen)
-                          + ' -- Time (sec): {}'.format(np.round((time() - t0), 2))
-                          + ' -- Min score: {}'.format(np.round(minScore, 4))
-                          + f' -- Score parts: {scoreParts[0]}, {scoreParts[1]}'
-                          )
-                self.optRecord.append((time() - t0, scoreParts[0], scoreParts[1], minScore))
-            gen += 1
-"""
