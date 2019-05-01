@@ -6,37 +6,9 @@ with funds from grant ####.
 
 Example usage:
 
-    from ukySplit import ukyDataSet
-    import numpy as np
-    import pandas as pd
-
-    # Making artificial data:
-    np.random.seed(42)
-    X = np.random.sample((100,10))
-    y = np.random.randint(2, size=100)
-    attr_df = pd.DataFrame(np.array([hex(t) for t in range(100)]), columns=['smiles_col'])
-    class Dset:
-        def __init__(self, X, y):
-            self.X = X
-            self.y = y
-    dataset = Dset(X,y)
-
-    # Creating the ukyDataset, running the genetic optimizer, and splitting the data set:
-    data = ukyDataSet(dataset.X, dataset.y, ids=attr_df['smiles_col'].values, atomwise=True, Metric='euclidean')
-    split = data.geneticOptimizer(numGens=100, printFreq=50, POPSIZE=250, TOURNSIZE=3,
-                                  CXPB=0.5, MUTPB=0.4, INDPB=0.075, scoreGoal=0.02)
-    train_cv, test = data.splitData(split)
-
-
-Example output:
-
-    -- Generation 0 -- Time (hrs): 0.0002 -- Min score: -0.1018
-    -- Mean score: 0.0134 -- Unique Valid splits: 12/250 -- Var splits: 0.1609
-
 """
 
 import warnings
-import psutil
 from time import time
 import random
 import pandas as pd
@@ -48,15 +20,13 @@ from deap import base
 from deap import creator
 from deap import tools
 
-safetyFactor = 3.75  # (3.75) Fraction of avaliable RAM to use for distance matrix computation
-sizeBound = int(np.sqrt(psutil.virtual_memory().available / 8)/safetyFactor)
-# sizeBound = 15100
+sizeBound = 15100
 """sizeBound is the Max size of a dataset so that its distance matrix reliably
- fits in user's computer memory."""
+ fits in my computer's memory. -- Brian"""
 
 
 def approx(array):
-    return np.floor(50*array)/51
+    return int(50*array)
 
 
 class ukyDataSet:
@@ -127,8 +97,8 @@ class ukyDataSet:
             decoyActDistances = pairwise_distances_argmin_min(validDecoy, trainActive, metric=self.metric)
             decoyDecoyDistances = pairwise_distances_argmin_min(validDecoy, trainDecoy, metric=self.metric)
             if self.atomwise:
-                activeMeanDistance = np.mean(approx(actDecoyDistances[1]) - approx(actActDistances[1]))
-                decoyMeanDistance = np.mean(approx(decoyActDistances[1]) - approx(decoyDecoyDistances[1]))
+                activeMeanDistance = np.mean(approx(actDecoyDistances[1]) - approx(actActDistances[1]))/51
+                decoyMeanDistance = np.mean(approx(decoyActDistances[1]) - approx(decoyDecoyDistances[1]))/51
             else:
                 activeMeanDistance = np.mean(actDecoyDistances[1] - actActDistances[1])
                 decoyMeanDistance = np.mean(decoyActDistances[1] - decoyDecoyDistances[1])
@@ -144,11 +114,11 @@ class ukyDataSet:
             minNegNegDist = np.amin(
                 self.distanceMatrix[(split == 0) & (self.labels == 0), :][:, (split == 1) & (self.labels == 0)], axis=1)
             if self.atomwise:
-                score = np.mean(approx(minPosNegDist)) + np.mean(approx(minNegPosDist))\
-                        - np.mean(approx(minPosPosDist)) - np.mean(approx(minNegNegDist))
+                score = np.mean(approx(minPosNegDist) - approx(minPosPosDist))/51\
+                        + np.mean(approx(minNegPosDist) - approx(minNegNegDist))/51
             else:
-                score = np.mean(minPosNegDist) + np.mean(minNegPosDist)\
-                        - np.mean(minPosPosDist) - np.mean(minNegNegDist)
+                score = np.mean(minPosNegDist - minPosPosDist)\
+                        + np.mean(minNegPosDist - minNegNegDist)
             return score,
 
     def geneticOptimizer(self, numGens, printFreq=100, POPSIZE=250, TOURNSIZE=3,
@@ -237,10 +207,4 @@ class ukyDataSet:
         scores = [self.computeScore(split) for split in pop]
         return pop[np.argmin(scores)]
 
-    def splitData(self, split):
-        bigFrame = pd.DataFrame(self.features)
-        bigFrame['labels'] = self.labels
-        bigFrame['split'] = split
-        bigFrame['ids'] = self.ids
-        return bigFrame[split == 1].drop('split', axis=1), bigFrame[split == 0].drop('split', axis=1)
 
