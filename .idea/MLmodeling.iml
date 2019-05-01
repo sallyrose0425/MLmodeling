@@ -111,6 +111,9 @@
       <sourceFolder url="file://$MODULE_DIR$/DataSets/DUDE/vgfr2" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/DataSets/DUDE/wee1" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/DataSets/DUDE/xiap" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/AtomWise" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/AtomWise/dekois_out (1)" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/AtomWise/dekois_out(1)" isTestSource="false" />
       <excludeFolder url="file://$MODULE_DIR$/venv" />
     </content>
     <orderEntry type="jdk" jdkName="Python 3.6 (my-rdkit-env)" jdkType="Python SDK" />
