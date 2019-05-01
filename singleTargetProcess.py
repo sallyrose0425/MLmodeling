@@ -14,7 +14,6 @@ ATOMWISE = False  # (False) Use the atomwise approximation
 metric = 'jaccard'  # ('jaccard') Metric for use in determining fingerprint distances
 score_goal = 0.02  # (0.02) Early termination of genetic optimizer if goal is reached
 numGens = 1000  # (1000) Number of generations to run in genetic optimizer
-# popSize = 500
 print_frequency = 50  # (100) How many generations of optimizer before printing update
 targetRatio = 0.8  # (0.8) Target training/validation ratio of the split
 ratioTol = 0.01  # (0.01) tolerance for targetRatio
@@ -37,7 +36,8 @@ def distToNN(probs, nn):
     return max(dist)
 
 
-def main(dataset, target_id, popSize, tournsize, cxpb, mutpb, indpb, one_point):
+def main(dataset, target_id, atomwise, popSize, tournsize, cxpb, mutpb, indpb, one_point):
+    ATOMWISE = (atomwise == 'ATOMWISE=True')
     prefix = os.getcwd() + '/' + dataset + '/'
     if dataset == 'dekois':
         activeFile = prefix + 'ligands/' + target_id + '.sdf.gz'
@@ -53,7 +53,8 @@ def main(dataset, target_id, popSize, tournsize, cxpb, mutpb, indpb, one_point):
         return
     # Create data_set class instance called "data"
     print(f'Creating data set {target_id}')
-    data = ukyScore.data_set(target_id, activeFile, decoyFile, targetRatio, ratioTol, balanceTol, atomwise=ATOMWISE, Metric=metric)
+    data = ukyScore.data_set(target_id, activeFile, decoyFile, targetRatio, ratioTol, balanceTol,
+                             atomwise=ATOMWISE, Metric=metric)
     # Three-fold cross validation stats
     skf = StratifiedKFold(n_splits=3, shuffle=True)
     splits = [(train, test) for train, test in skf.split(data.fingerprints, data.labels)]
@@ -158,11 +159,12 @@ def main(dataset, target_id, popSize, tournsize, cxpb, mutpb, indpb, one_point):
 
 if __name__ == '__main__':
     if len(sys.argv) > 2:
-        main(sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4], sys.argv[5], sys.argv[6], sys.argv[7], sys.argv[8])
+        main(sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4],
+             sys.argv[5], sys.argv[6], sys.argv[7], sys.argv[8], sys.argv[9])
     else:
         print("Specify dataset and target...")
 
-dataset, target_id, popSize, tournsize, cxpb, mutpb, indpb, one_point
+# dataset, target_id, atomwise, popSize, tournsize, cxpb, mutpb, indpb, one_point
 
 
 TOURNSIZE = 3,
