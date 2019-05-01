@@ -5,11 +5,12 @@ import numpy as np
 
 from sklearn.model_selection import StratifiedKFold
 from sklearn.ensemble import RandomForestClassifier
-from sklearn.metrics import roc_auc_score, jaccard_similarity_score
+from sklearn.metrics import roc_auc_score, jaccard_similarity_score, auc, precision_recall_curve
 
 import ukyScore
 
-ATOMWISE = True  # (False) Use the atomwise approximation
+holdout = True  # random holdout for validation after split optimization
+ATOMWISE = False  # (False) Use the atomwise approximation
 metric = 'jaccard'  # ('jaccard') Metric for use in determining fingerprint distances
 score_goal = 0.02  # (0.02) Early termination of genetic optimizer if goal is reached
 numGens = 1000  # (1000) Number of generations to run in genetic optimizer
@@ -71,6 +72,8 @@ def main(dataset, target_id, popSize, tournsize, cxpb, mutpb, indpb, one_point):
             score = np.sqrt(score[0] ** 2 + score[1] ** 2)
         rf.fit(trainingFeatures, trainingLabels)
         rfProbs = rf.predict_proba(data.fingerprints)[:, 1]
+        precision, recall, thresholds = precision_recall_curve(validationLabels, rfProbs[validIndices])
+        rfAUC_PR = auc(recall, precision)
         rfAUC = roc_auc_score(validationLabels, rfProbs[validIndices])
         weights = pd.Series(data.weights(split))  # temporary weighting
         metricFrame = pd.DataFrame([data.labels, split, weights, rfProbs],
@@ -92,9 +95,12 @@ def main(dataset, target_id, popSize, tournsize, cxpb, mutpb, indpb, one_point):
                 return hist[findBin]
 
         weights = np.array([cfd(x) for x in weights])
+        precision, recall, thresholds = precision_recall_curve(validationLabels, rfProbs[split == 0],
+                                                               sample_weight=weights[validIndices])
+        rfAUC_PR_weighted = auc(recall, precision)
         rfAUC_weighted = roc_auc_score(validationLabels, rfProbs[validIndices], sample_weight=weights[validIndices])
-        perf.append((score, rfAUC, rfAUC_weighted, nnDist))
-    meanScore, meanRfAUC, meanRfAUCWeighted, meanNnDist = np.mean(np.array(perf), axis=0)
+        perf.append((score, rfAUC, rfAUC_weighted, nnDist, rfAUC_PR, rfAUC_PR_weighted))
+    meanScore, meanRfAUC, meanRfAUCWeighted, meanNnDist, rfAUC_PR, rfAUC_PR_weighted = np.mean(np.array(perf), axis=0)
     # Run the geneticOptimizer method on data
     splits = data.geneticOptimizer(numGens,
                                    POPSIZE=popSize,
@@ -115,7 +121,12 @@ def main(dataset, target_id, popSize, tournsize, cxpb, mutpb, indpb, one_point):
     rfProbs = rf.predict_proba(data.fingerprints)[:, 1]
     validationLabels = data.labels[split == 0]
     rfAUC = roc_auc_score(validationLabels, rfProbs[split == 0])
+    precision, recall, thresholds = precision_recall_curve(validationLabels, rfProbs[split == 0])
+    rfAUC_PR_Opt = auc(recall, precision)
     weights = pd.Series(data.weights(split))  # temporary weighting
+    precision, recall, thresholds = precision_recall_curve(validationLabels, rfProbs[split == 0],
+                                                           sample_weight=weights[split == 0])
+    rfAUC_PR_Opt_weighted = auc(recall, precision)
     metricFrame = pd.DataFrame([data.labels, split, weights, rfProbs],
                                index=['labels', 'split', 'weights', 'rfProbs']).T
     metricFrame['nn'] = metricFrame.apply(lambda t: nnPredictor(t.loc['weights'], t.loc['labels']), axis=1)
@@ -125,11 +136,24 @@ def main(dataset, target_id, popSize, tournsize, cxpb, mutpb, indpb, one_point):
     data.fingerprints['labels'] = data.labels
     data.fingerprints['split'] = split
     data.fingerprints['weights'] = data.weights(split)
-    pd.to_pickle(data.fingerprints, prefix + target_id + '_dataPackage.pkl')
-    pd.to_pickle(pd.DataFrame(data.optRecord, columns=['time', 'AA-AI', 'II-IA', 'score']),
-                 prefix + target_id + '_optRecord.pkl')
-    statsArray = np.array([meanScore, meanRfAUC, meanRfAUCWeighted, meanNnDist, min(scores), rfAUC, nnDistOpt])
-    pd.to_pickle(statsArray, prefix + target_id + '_perfStats.pkl')
+    if ATOMWISE:
+        pd.to_pickle(data.fingerprints, prefix + target_id + '_dataPackage.pkl')
+        pd.to_pickle(pd.DataFrame(data.optRecord, columns=['time', 'AA-AI', 'II-IA', 'score']),
+                     prefix + target_id + '_optRecord.pkl')
+        statsArray = np.array([meanScore, meanRfAUC, meanRfAUCWeighted, meanNnDist,
+                               rfAUC_PR, rfAUC_PR_weighted,
+                               min(scores), rfAUC, nnDistOpt,
+                               rfAUC_PR_Opt, rfAUC_PR_Opt_weighted])
+        pd.to_pickle(statsArray, prefix + target_id + '_perfStats.pkl')
+    else:
+        pd.to_pickle(data.fingerprints, prefix + target_id + '_dataPackageNew.pkl')
+        pd.to_pickle(pd.DataFrame(data.optRecord, columns=['time', 'AA-AI', 'II-IA', 'score']),
+                     prefix + target_id + '_optRecordNew.pkl')
+        statsArray = np.array([meanScore, meanRfAUC, meanRfAUCWeighted, meanNnDist,
+                               rfAUC_PR, rfAUC_PR_weighted,
+                               min(scores), rfAUC, nnDistOpt,
+                               rfAUC_PR_Opt, rfAUC_PR_Opt_weighted])
+        pd.to_pickle(statsArray, prefix + target_id + '_perfStatsNew.pkl')
 
 
 if __name__ == '__main__':

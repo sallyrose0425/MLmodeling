@@ -31,8 +31,11 @@ sizeBound = int(np.sqrt(mem.available / 8)/safetyFactor)
  fits distance matrix in user's computer's memory."""
 
 
-def approx(array):
-    return np.ceil(50*array)/51
+def approx(scalar):
+    return np.floor(50*scalar)
+
+
+Approx = np.vectorize(approx)
 
 
 def finger(mol):
@@ -138,9 +141,9 @@ class data_set:
             decoyDecoyDistances = pairwise_distances_argmin_min(validDecoy, trainDecoy, metric=self.metric)
             if self.atomwise:
                 """AA - AI"""
-                activeMeanDistance = np.mean(approx(actDecoyDistances[1]) - approx(actActDistances[1]))
+                activeMeanDistance = np.mean(Approx(actDecoyDistances[1]) - Approx(actActDistances[1]))/51
                 """II - IA"""
-                decoyMeanDistance = np.mean(approx(decoyActDistances[1]) - approx(decoyDecoyDistances[1]))
+                decoyMeanDistance = np.mean(Approx(decoyActDistances[1]) - Approx(decoyDecoyDistances[1]))/51
             else:
                 activeMeanDistance = np.mean(actDecoyDistances[1] - actActDistances[1])
                 decoyMeanDistance = np.mean(decoyActDistances[1] - decoyDecoyDistances[1])
@@ -156,8 +159,8 @@ class data_set:
             minNegNegDist = np.amin(
                 self.distanceMatrix[(split == 0) & (self.labels == 0), :][:, (split == 1) & (self.labels == 0)], axis=1)
             if self.atomwise:
-                scores = np.mean(approx(minPosNegDist)) - np.mean(approx(minPosPosDist)),\
-                         np.mean(approx(minNegPosDist)) - np.mean(approx(minNegNegDist))
+                scores = np.mean(Approx(minPosNegDist) - Approx(minPosPosDist))/51,\
+                         np.mean(Approx(minNegPosDist) - Approx(minNegNegDist))/51
             else:
                 scores = np.mean(minPosNegDist) - np.mean(minPosPosDist),\
                          np.mean(minNegPosDist) - np.mean(minNegNegDist)
