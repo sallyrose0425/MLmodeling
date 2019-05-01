@@ -140,12 +140,12 @@ def main(dataset, target_id, atomwise, popSize, tournsize, cxpb, mutpb, indpb, o
     if ATOMWISE:
         pd.to_pickle(data.fingerprints, prefix + target_id + '_dataPackage.pkl')
         pd.to_pickle(pd.DataFrame(data.optRecord, columns=['time', 'AA-AI', 'II-IA', 'score']),
-                     prefix + target_id + '_optRecord.pkl')
-        statsArray = np.array([meanScore, meanRfAUC, meanRfAUCWeighted, meanNnDist,
+                     prefix + target_id + f'_optRecord_{popSize}_{tournsize}_{cxpb}_{cxpb}_{mutpb}_{indpb}_{one_point}.pkl')
+        '''statsArray = np.array([meanScore, meanRfAUC, meanRfAUCWeighted, meanNnDist,
                                rfAUC_PR, rfAUC_PR_weighted,
                                min(scores), rfAUC, nnDistOpt,
                                rfAUC_PR_Opt, rfAUC_PR_Opt_weighted])
-        pd.to_pickle(statsArray, prefix + target_id + '_perfStats.pkl')
+        pd.to_pickle(statsArray, prefix + target_id + '_perfStats.pkl')'''
     else:
         pd.to_pickle(data.fingerprints, prefix + target_id + '_dataPackageNew.pkl')
         pd.to_pickle(pd.DataFrame(data.optRecord, columns=['time', 'AA-AI', 'II-IA', 'score']),
