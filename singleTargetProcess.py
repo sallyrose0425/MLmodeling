@@ -159,8 +159,8 @@ def main(dataset, target_id, atomwise, popSize, tournsize, cxpb, mutpb, indpb, o
 
 if __name__ == '__main__':
     if len(sys.argv) == 10:
-        main(sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4],
-             sys.argv[5], sys.argv[6], sys.argv[7], sys.argv[8], sys.argv[9])
+        main(sys.argv[1], sys.argv[2], sys.argv[3], int(sys.argv[4]),
+             int(sys.argv[5]), float(sys.argv[6]), float(sys.argv[7]), float(sys.argv[8]), eval(sys.argv[9]))
     else:
         print("Specify dataset and target...")
 
