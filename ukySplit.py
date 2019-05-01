@@ -56,7 +56,7 @@ sizeBound = int(np.sqrt(psutil.virtual_memory().available / 8)/safetyFactor)
 
 
 def approx(array):
-    return np.ceil(50*array)/51
+    return np.floor(50*array)/51
 
 
 class ukyDataSet:
@@ -152,7 +152,7 @@ class ukyDataSet:
             return score,
 
     def geneticOptimizer(self, numGens, printFreq=100, POPSIZE=250, TOURNSIZE=3,
-                         CXPB=0.5, MUTPB=0.4, INDPB=0.075, scoreGoal=0.02):
+                         CXPB=0.5, MUTPB=0.4, INDPB=0.075, scoreGoal=0.02, onePoint=True):
         """
         A method for the genetic optimizer.
 
@@ -174,7 +174,10 @@ class ukyDataSet:
             toolbox.register("individual", tools.initRepeat, creator.Individual, toolbox.attr_bool, self.size)
             toolbox.register("population", tools.initRepeat, list, toolbox.individual)
             toolbox.register("evaluate", self.computeScore)
-            toolbox.register("mate", tools.cxOnePoint)
+            if onePoint:
+                toolbox.register("mate", tools.cxOnePoint)
+            else:
+                toolbox.register("mate", tools.cxTwoPoint)
             toolbox.register("mutate", tools.mutFlipBit, indpb=INDPB)
             toolbox.register("select", tools.selTournament, tournsize=TOURNSIZE)
         np.random.seed(42)

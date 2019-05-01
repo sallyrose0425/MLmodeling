@@ -3,9 +3,9 @@ from glob import glob
 
 import pandas as pd
 
-dataset = 'dekois'
+dataset = 'AtomWise'
 
-prefix = os.getcwd() + '/DataSets/' + dataset
+prefix = '/home/math/PycharmProjects/MLmodeling/' + dataset
 files = glob(prefix + '/*.out')
 targets = list(set([f.split('.')[0].split('/')[-1] for f in files]))
 

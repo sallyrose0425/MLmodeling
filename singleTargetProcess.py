@@ -11,9 +11,9 @@ import ukyScore
 
 ATOMWISE = True  # (False) Use the atomwise approximation
 metric = 'jaccard'  # ('jaccard') Metric for use in determining fingerprint distances
-score_goal = 0.01  # (0.02) Early termination of genetic optimizer if goal is reached
-numGens = 500  # (1000) Number of generations to run in genetic optimizer
-popSize = 500
+score_goal = 0.02  # (0.02) Early termination of genetic optimizer if goal is reached
+numGens = 1000  # (1000) Number of generations to run in genetic optimizer
+# popSize = 500
 print_frequency = 50  # (100) How many generations of optimizer before printing update
 targetRatio = 0.8  # (0.8) Target training/validation ratio of the split
 ratioTol = 0.01  # (0.01) tolerance for targetRatio
@@ -36,7 +36,7 @@ def distToNN(probs, nn):
     return max(dist)
 
 
-def main(dataset, target_id):
+def main(dataset, target_id, popSize, tournsize, cxpb, mutpb, indpb, one_point):
     prefix = os.getcwd() + '/' + dataset + '/'
     if dataset == 'dekois':
         activeFile = prefix + 'ligands/' + target_id + '.sdf.gz'
@@ -96,7 +96,15 @@ def main(dataset, target_id):
         perf.append((score, rfAUC, rfAUC_weighted, nnDist))
     meanScore, meanRfAUC, meanRfAUCWeighted, meanNnDist = np.mean(np.array(perf), axis=0)
     # Run the geneticOptimizer method on data
-    splits = data.geneticOptimizer(numGens, POPSIZE=popSize, printFreq=print_frequency, scoreGoal=score_goal)
+    splits = data.geneticOptimizer(numGens,
+                                   POPSIZE=popSize,
+                                   printFreq=print_frequency,
+                                   scoreGoal=score_goal,
+                                   TOURNSIZE=tournsize,
+                                   CXPB=cxpb,
+                                   MUTPB=mutpb,
+                                   INDPB=indpb,
+                                   onePoint=one_point)
     # Grab optimal split from polulation
     scores = [data.objectiveFunction(split)[0] for split in splits]
     split = splits[np.argmin(scores)]
@@ -126,6 +134,12 @@ def main(dataset, target_id):
 
 if __name__ == '__main__':
     if len(sys.argv) > 2:
-        main(sys.argv[1], sys.argv[2])
+        main(sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4], sys.argv[5], sys.argv[6], sys.argv[7], sys.argv[8])
     else:
         print("Specify dataset and target...")
+
+dataset, target_id, popSize, tournsize, cxpb, mutpb, indpb, one_point
+
+
+TOURNSIZE = 3,
+CXPB = 0.5, MUTPB = 0.4, INDPB = 0.075,
