@@ -158,7 +158,7 @@ def main(dataset, target_id, atomwise, popSize, tournsize, cxpb, mutpb, indpb, o
 
 
 if __name__ == '__main__':
-    if len(sys.argv) > 2:
+    if len(sys.argv) == 10:
         main(sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4],
              sys.argv[5], sys.argv[6], sys.argv[7], sys.argv[8], sys.argv[9])
     else:
@@ -166,6 +166,6 @@ if __name__ == '__main__':
 
 # dataset, target_id, atomwise, popSize, tournsize, cxpb, mutpb, indpb, one_point
 
-
+'''
 TOURNSIZE = 3,
-CXPB = 0.5, MUTPB = 0.4, INDPB = 0.075,
+CXPB = 0.5, MUTPB = 0.4, INDPB = 0.075'''
