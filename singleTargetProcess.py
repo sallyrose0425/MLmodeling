@@ -38,7 +38,7 @@ def distToNN(probs, nn):
 
 def main(dataset, target_id, atomwise, popSize, tournsize, cxpb, mutpb, indpb, one_point):
     ATOMWISE = (atomwise == 'ATOMWISE=True')
-    prefix = os.getcwd() + '/' + dataset + '/'
+    prefix = os.getcwd() + '/DataSets/' + dataset + '/'
     if dataset == 'dekois':
         activeFile = prefix + 'ligands/' + target_id + '.sdf.gz'
         decoyFile = prefix + 'decoys/' + target_id + '_Celling-v1.12_decoyset.sdf.gz'
