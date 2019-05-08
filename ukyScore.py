@@ -191,16 +191,16 @@ class data_set:
             sample.append(newScore)
         return sample
 
-    def geneticOptimizer(self, numGens, printFreq=100, POPSIZE=1000, TOURNSIZE=4,
-                         CXPB=0.18, MUTPB=0.39, INDPB=0.005, onePoint=True, scoreGoal=0.01, verbose=False):
+    def geneticOptimizer(self, numGens, printFreq=100, POPSIZE=500, TOURNSIZE=4,
+                         CXPB=0.175, MUTPB=0.4, INDPB=0.005, onePoint=True, scoreGoal=0.02, verbose=False):
         """
         A method for the genetic optimizer.
 
         Parameters:
-            POPSIZE = 1000 #(1000) Number of individuals in a generation
-            INDPB = 0.075 #(0.075) Percent of individual bits randomly flipped
+            POPSIZE = 500 #(500) Number of individuals in a generation
+            INDPB = 0.005 #(0.005) Percent of individual bits randomly flipped
             TOURNSIZE = 4 #(4) Size of selection tournaments
-            CXPB = 0.5 #(0.5) Probability with which two individuals are crossed
+            CXPB = 0.175 #(0.175) Probability with which two individuals are crossed
             MUTPB = 0.4 #(0.4) Probability for mutating an individual
             verbose = False  #(False) Print more statistics
         Taken (with minor changes) from example code:
