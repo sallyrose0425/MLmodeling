@@ -1,0 +1,63 @@
+read 40 actives and 1200 inactives
+calc aa_D_ref
+calc ii_D_ref
+calc ai_D_ref
+done
+calculate objectives for the population
+remove similar sets
+removing 20 similar sets
+dict_keys([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98])
+population size after similarity filter: 20
+select the next generation
+time: 112.091 sec
+iter= 1 fullPopObj= 0.18 topPopObj=  0.18 finalPopObj= 0.09 minObj= 99999
+breed
+calculate objectives for the population
+remove similar sets
+removing 20 similar sets
+dict_keys([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98])
+population size after similarity filter: 20
+select the next generation
+time: 256.003 sec
+iter= 2 fullPopObj= 0.139 topPopObj=  0.139 finalPopObj= 0.106 minObj= 0.09
+breed
+calculate objectives for the population
+remove similar sets
+removing 20 similar sets
+dict_keys([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98])
+population size after similarity filter: 20
+select the next generation
+time: 281.104 sec
+iter= 3 fullPopObj= 0.11 topPopObj=  0.11 finalPopObj= 0.069 minObj= 0.09
+breed
+calculate objectives for the population
+remove similar sets
+removing 20 similar sets
+dict_keys([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98])
+population size after similarity filter: 20
+select the next generation
+time: 301.329 sec
+iter= 4 fullPopObj= 0.078 topPopObj=  0.078 finalPopObj= 0.033 minObj= 0.069
+breed
+calculate objectives for the population
+remove similar sets
+removing 20 similar sets
+dict_keys([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98])
+population size after similarity filter: 20
+select the next generation
+time: 321.219 sec
+iter= 5 fullPopObj= 0.053 topPopObj=  0.053 finalPopObj= 0.014 minObj= 0.033
+breed
+calculate objectives for the population
+remove similar sets
+removing 20 similar sets
+dict_keys([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98])
+population size after similarity filter: 20
+select the next generation
+time: 340.882 sec
+iter= 6 fullPopObj= 0.036 topPopObj=  0.036 finalPopObj= 0.009 minObj= 0.014
+Done. Total running time: 341.105 sec
+
+real	7m47.911s
+user	9m58.877s
+sys	0m8.882s
