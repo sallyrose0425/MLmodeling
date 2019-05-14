@@ -10,10 +10,10 @@ from sklearn.metrics import roc_auc_score, jaccard_similarity_score, auc, precis
 import ukyScore
 
 holdout = True  # random holdout for validation after split optimization
-ATOMWISE = False  # (False) Use the atomwise approximation
+# ATOMWISE = False  # (False) Use the atomwise approximation
 metric = 'jaccard'  # ('jaccard') Metric for use in determining fingerprint distances
 score_goal = 0.02  # (0.02) Early termination of genetic optimizer if goal is reached
-numGens = 1000  # (1000) Number of generations to run in genetic optimizer
+numGens = 2000  # (2000) Number of generations to run in genetic optimizer
 print_frequency = 50  # (100) How many generations of optimizer before printing update
 targetRatio = 0.8  # (0.8) Target training/validation ratio of the split
 ratioTol = 0.01  # (0.01) tolerance for targetRatio
@@ -36,7 +36,7 @@ def distToNN(probs, nn):
     return max(dist)
 
 
-def main(dataset, target_id, atomwise, popSize, tournsize, cxpb, mutpb, indpb, one_point):
+def main(dataset, target_id, atomwise):
     ATOMWISE = (atomwise == 'ATOMWISE=True')
     prefix = os.getcwd() + '/DataSets/' + dataset + '/'
     if dataset == 'dekois':
@@ -103,15 +103,7 @@ def main(dataset, target_id, atomwise, popSize, tournsize, cxpb, mutpb, indpb, o
         perf.append((score, rfAUC, rfAUC_weighted, nnDist, rfAUC_PR, rfAUC_PR_weighted))
     meanScore, meanRfAUC, meanRfAUCWeighted, meanNnDist, rfAUC_PR, rfAUC_PR_weighted = np.mean(np.array(perf), axis=0)
     # Run the geneticOptimizer method on data
-    splits = data.geneticOptimizer(numGens,
-                                   POPSIZE=popSize,
-                                   printFreq=print_frequency,
-                                   scoreGoal=score_goal,
-                                   TOURNSIZE=tournsize,
-                                   CXPB=cxpb,
-                                   MUTPB=mutpb,
-                                   INDPB=indpb,
-                                   onePoint=one_point)
+    splits = data.geneticOptimizer(numGens)
     # Grab optimal split from polulation
     scores = [data.objectiveFunction(split)[0] for split in splits]
     split = splits[np.argmin(scores)]
@@ -138,34 +130,29 @@ def main(dataset, target_id, atomwise, popSize, tournsize, cxpb, mutpb, indpb, o
     data.fingerprints['split'] = split
     data.fingerprints['weights'] = data.weights(split)
     if ATOMWISE:
+        pd.to_pickle(data.fingerprints, prefix + target_id + '_dataPackageAtomwise.pkl')
+        pd.to_pickle(pd.DataFrame(data.optRecord, columns=['time', 'AA-AI', 'II-IA', 'score']),
+                     prefix + target_id + '_optRecordAtomwise.pkl')
+        statsArray = np.array([meanScore, meanRfAUC, meanRfAUCWeighted, meanNnDist,
+                               rfAUC_PR, rfAUC_PR_weighted,
+                               scores, rfAUC, nnDistOpt,
+                               rfAUC_PR_Opt, rfAUC_PR_Opt_weighted])
+        pd.to_pickle(statsArray, prefix + target_id + '_perfStatsAtomwise.pkl')'''
+    else:
         pd.to_pickle(data.fingerprints, prefix + target_id + '_dataPackage.pkl')
         pd.to_pickle(pd.DataFrame(data.optRecord, columns=['time', 'AA-AI', 'II-IA', 'score']),
-                     prefix + target_id + f'_optRecord_{popSize}_{tournsize}_{cxpb}_{cxpb}_{mutpb}_{indpb}_{one_point}.pkl')
-        '''statsArray = np.array([meanScore, meanRfAUC, meanRfAUCWeighted, meanNnDist,
-                               rfAUC_PR, rfAUC_PR_weighted,
-                               min(scores), rfAUC, nnDistOpt,
-                               rfAUC_PR_Opt, rfAUC_PR_Opt_weighted])
-        pd.to_pickle(statsArray, prefix + target_id + '_perfStats.pkl')'''
-    else:
-        pd.to_pickle(data.fingerprints, prefix + target_id + '_dataPackageNew.pkl')
-        pd.to_pickle(pd.DataFrame(data.optRecord, columns=['time', 'AA-AI', 'II-IA', 'score']),
-                     prefix + target_id + '_optRecordNew.pkl')
+                     prefix + target_id + '_optRecord.pkl')
         statsArray = np.array([meanScore, meanRfAUC, meanRfAUCWeighted, meanNnDist,
                                rfAUC_PR, rfAUC_PR_weighted,
                                min(scores), rfAUC, nnDistOpt,
                                rfAUC_PR_Opt, rfAUC_PR_Opt_weighted])
-        pd.to_pickle(statsArray, prefix + target_id + '_perfStatsNew.pkl')
+        pd.to_pickle(statsArray, prefix + target_id + '_perfStats.pkl')
 
 
 if __name__ == '__main__':
-    if len(sys.argv) == 10:
-        main(sys.argv[1], sys.argv[2], sys.argv[3], int(sys.argv[4]),
-             int(sys.argv[5]), float(sys.argv[6]), float(sys.argv[7]), float(sys.argv[8]), eval(sys.argv[9]))
+    if len(sys.argv) == 4:
+        main(sys.argv[1], sys.argv[2], sys.argv[3])
     else:
-        print("Specify dataset and target...")
+        print("Specify dataset, target, and ATOMWISE=True/False...")
 
-# dataset, target_id, atomwise, popSize, tournsize, cxpb, mutpb, indpb, one_point
-
-'''
-TOURNSIZE = 3,
-CXPB = 0.5, MUTPB = 0.4, INDPB = 0.075'''
+# dataset, target_id, ATOMWISE=False
