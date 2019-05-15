@@ -137,7 +137,7 @@ def main(dataset, target_id, atomwise):
                                rfAUC_PR, rfAUC_PR_weighted,
                                scores, rfAUC, nnDistOpt,
                                rfAUC_PR_Opt, rfAUC_PR_Opt_weighted])
-        pd.to_pickle(statsArray, prefix + target_id + '_perfStatsAtomwise.pkl')'''
+        pd.to_pickle(statsArray, prefix + target_id + '_perfStatsAtomwise.pkl')
     else:
         pd.to_pickle(data.fingerprints, prefix + target_id + '_dataPackage.pkl')
         pd.to_pickle(pd.DataFrame(data.optRecord, columns=['time', 'AA-AI', 'II-IA', 'score']),
