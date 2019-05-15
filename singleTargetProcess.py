@@ -1,4 +1,3 @@
-import os
 import sys
 import pandas as pd
 import numpy as np
@@ -38,7 +37,7 @@ def distToNN(probs, nn):
 
 def main(dataset, target_id, atomwise):
     ATOMWISE = (atomwise == 'ATOMWISE=True')
-    prefix = os.getcwd() + '/DataSets/' + dataset + '/'
+    prefix = 'DataSets/' + dataset + '/'
     if dataset == 'dekois':
         activeFile = prefix + 'ligands/' + target_id + '.sdf.gz'
         decoyFile = prefix + 'decoys/' + target_id + '_Celling-v1.12_decoyset.sdf.gz'
